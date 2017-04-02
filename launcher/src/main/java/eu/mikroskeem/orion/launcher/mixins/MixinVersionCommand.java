@@ -25,7 +25,7 @@ public abstract class MixinVersionCommand extends Command {
         if (args.length == 0) {
             sender.sendMessage("This server is running " + Bukkit.getName() + " version " + Bukkit.getVersion() + " (Implementing API version " + Bukkit.getBukkitVersion() + ")");
             sendVersion(sender);
-            sender.sendMessage("§7Server uses §bOrion Launcher §7made with §c\u2665 §7by §c§lmikroskeem");
+            sender.sendMessage("§7Server uses §bOrion Launcher §7made with §c\u2764 §7by §c§lmikroskeem");
         } else {
             StringBuilder name = new StringBuilder();
 
