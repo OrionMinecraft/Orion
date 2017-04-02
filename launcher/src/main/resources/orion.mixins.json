@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.6.8",
+  "package": "eu.mikroskeem.orion.launcher.mixins",
+  "target": "@env(DEFAULT)",
+  "compatibilityLevel": "JAVA_8",
+  "server": [
+    "MixinCommand",
+    "MixinGenericCommandHelpTopic",
+    "MixinPluginsCommand",
+    "MixinSimpleCommandMap",
+    "MixinSimplePluginManager",
+    "MixinVersionCommand"
+  ]
+}

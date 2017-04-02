@@ -9,13 +9,70 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <name>OrionAPI</name>
+    <description>Orion Plugin API</description>
+    <packaging>jar</packaging>
     <artifactId>orion.api</artifactId>
 
+    <properties>
+        <paper.version>${minecraft.version}-R0.1-SNAPSHOT</paper.version>
+    </properties>
+
     <dependencies>
+        <!-- Paper API -->
         <dependency>
-            <groupId>com.typesafe</groupId>
-            <artifactId>config</artifactId>
-            <version>1.3.1</version>
+            <groupId>com.destroystokyo.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>${paper.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- TaskChain -->
+        <dependency>
+            <groupId>co.aikar</groupId>
+            <artifactId>taskchain-bukkit</artifactId>
+            <version>3.4.3</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Semver -->
+        <dependency>
+            <groupId>com.github.zafarkhaja</groupId>
+            <artifactId>java-semver</artifactId>
+            <version>0.9.0</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Configuration API -->
+        <dependency>
+            <groupId>ninja.leaping.configurate</groupId>
+            <artifactId>configurate-hocon</artifactId>
+            <version>3.2</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- SLF4J API -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.25</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Guice -->
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+            <version>4.1.0</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Shuriken instrumentation -->
+        <dependency>
+            <groupId>eu.mikroskeem</groupId>
+            <artifactId>shuriken.instrumentation</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>

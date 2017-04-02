@@ -11,6 +11,7 @@
     <modules>
         <module>api</module>
         <module>core</module>
+        <module>launcher</module>
     </modules>
 
     <properties>
@@ -18,10 +19,42 @@
         <project.java.version>1.8</project.java.version>
         <junit.jupiter.version>5.0.0-M3</junit.jupiter.version>
         <junit.platform.version>1.0.0-M3</junit.platform.version>
+        <minecraft.version>1.11.2</minecraft.version>
     </properties>
 
     <!-- Repositories -->
     <repositories>
+        <!-- Destroystokyo repo -->
+        <repository>
+            <id>destroystokyo-repo</id>
+            <url>https://repo.destroystokyo.com/repository/maven-public//</url>
+        </repository>
+
+        <!-- aikar's repo -->
+        <repository>
+            <id>aikar</id>
+            <url>http://ci.emc.gs/nexus/content/groups/aikar/</url>
+        </repository>
+
+        <!-- Techcable repo -->
+        <repository>
+            <id>techcable-repo</id>
+            <url>https://repo.techcable.net/content/repositories/releases/</url>
+        </repository>
+
+        <!-- Sponge repo -->
+        <repository>
+            <id>sponge-repo</id>
+            <url>https://repo.spongepowered.org/maven</url>
+        </repository>
+
+        <!-- Minecraft repo -->
+        <repository>
+            <id>minecraft</id>
+            <url>https://libraries.minecraft.net/</url>
+        </repository>
+
+        <!-- Own repo -->
         <repository>
             <id>mikroskeem-repo</id>
             <name>mikroskeem Maven Repository</name>

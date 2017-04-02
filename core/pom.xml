@@ -9,13 +9,46 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <packaging>jar</packaging>
+    <name>OrionCore</name>
+    <description>Orion Core</description>
     <artifactId>orion.core</artifactId>
 
+    <properties>
+        <paper.version>${minecraft.version}-R0.1-SNAPSHOT</paper.version>
+    </properties>
+
     <dependencies>
+        <!-- Paper API -->
+        <dependency>
+            <groupId>com.destroystokyo.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>${paper.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Event4j -->
+        <dependency>
+            <groupId>net.techcable</groupId>
+            <artifactId>event4j</artifactId>
+            <version>1.1.0</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- API -->
         <dependency>
             <groupId>eu.mikroskeem</groupId>
             <artifactId>orion.api</artifactId>
             <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Shuriken Classloader -->
+        <dependency>
+            <groupId>eu.mikroskeem</groupId>
+            <artifactId>shuriken.classloader</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>

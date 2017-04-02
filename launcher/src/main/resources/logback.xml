@@ -1,0 +1,17 @@
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%thread [%boldMagenta(%logger{10})] %highlight(%-5level) -> %msg</pattern>
+        </encoder>
+    </appender>
+
+    <!-- By default, trace -->
+    <root level="TRACE">
+        <appender-ref ref="STDOUT" />
+    </root>
+
+    <!-- Silence Netty -->
+    <logger name="io.netty" level="INFO">
+        <appender-ref ref="STDOUT" />
+    </logger>
+</configuration>
