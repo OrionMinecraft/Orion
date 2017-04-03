@@ -5,8 +5,8 @@
         </encoder>
     </appender>
 
-    <!-- By default, trace -->
-    <root level="TRACE">
+    <!-- By default, info -->
+    <root level="INFO">
         <appender-ref ref="STDOUT" />
     </root>
 
