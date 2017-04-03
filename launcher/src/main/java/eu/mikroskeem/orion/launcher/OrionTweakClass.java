@@ -61,6 +61,9 @@ public class OrionTweakClass implements ITweaker {
         /* Load paperclip jar */
         launchClassLoader.addURL(paperclipUrl);
 
+        /* Exclude own libraries/launcher */
+        launchClassLoader.addClassLoaderExclusion("eu.mikroskeem.orion.*");
+
         /* Exclude log4j2 */
         launchClassLoader.addClassLoaderExclusion("org.apache.logging.log4j.*");
 
