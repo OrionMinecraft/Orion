@@ -1,12 +1,14 @@
 package eu.mikroskeem.orion.launcher.mixins;
 
+import com.google.common.collect.ImmutableList;
 import eu.mikroskeem.orion.api.plugin.PluginManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.defaults.PluginsCommand;
 import org.bukkit.plugin.Plugin;
-import org.spongepowered.asm.mixin.*;
+import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,8 +18,12 @@ import java.util.stream.Collectors;
  * @author Mark Vainomaa
  */
 @Mixin(PluginsCommand.class)
-public abstract class MixinPluginsCommand {
+public abstract class MixinPluginsCommand extends Command {
+    public MixinPluginsCommand(){super(null, null, null, ImmutableList.of()); }
+
     public boolean execute(CommandSender sender, String currentAlias, String[] args) {
+        if (!testPermission(sender)) return true;
+
         sender.sendMessage(getPluginList().split("\n"));
         return true;
     }
