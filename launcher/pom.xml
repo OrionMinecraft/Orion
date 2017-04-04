@@ -67,6 +67,10 @@
                             <pattern>org.objectweb.asm</pattern>
                             <shadedPattern>eu.mikroskeem.orion.deps.asm</shadedPattern>
                         </relocation>
+                        <relocation>
+                            <pattern>io.github.lukehutch.fastclasspathscanner</pattern>
+                            <shadedPattern>eu.mikroskeem.orion.deps.fcs</shadedPattern>
+                        </relocation>
                     </relocations>
                 </configuration>
             </plugin>
