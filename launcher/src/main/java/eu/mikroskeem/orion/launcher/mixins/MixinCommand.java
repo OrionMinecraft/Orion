@@ -1,5 +1,6 @@
 package eu.mikroskeem.orion.launcher.mixins;
 
+import eu.mikroskeem.orion.impl.configuration.StaticConfiguration;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,18 +17,16 @@ public abstract class MixinCommand {
     @Shadow(remap = false) public abstract boolean testPermissionSilent(CommandSender target);
 
     public boolean testPermission(CommandSender target) {
-        if (testPermissionSilent(target)) {
-            return true;
+        if (!testPermissionSilent(target)) {
+            String[] messages = (permissionMessage != null? permissionMessage :
+                    StaticConfiguration.COMMAND_PERMISSION_DENIED_MESSAGE)
+                    .replaceAll("<permission>", permission) // Retain legacy placeholder
+                    .replaceAll("%permission%", permission)
+                    .replaceAll("%command%", name)
+                    .split("\n");
+            target.sendMessage(messages);
+            return false;
         }
-
-        if (permissionMessage == null) {
-            target.sendMessage("no command " + name + " for you");
-        } else if (permissionMessage.length() != 0) {
-            for (String line : permissionMessage.replace("<permission>", permission).split("\n")) {
-                target.sendMessage(line);
-            }
-        }
-
-        return false;
+        return true;
     }
 }
