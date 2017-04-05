@@ -7,8 +7,15 @@ import org.bukkit.command.CommandSender;
  * @author Mark Vainomaa
  */
 public class OrionCommand extends Command {
+    /*
+    /orion debug listen shittychattest AsyncPlayerChatEvent player.sendMessage "chat evt: ${event.getMessage()}"
+     */
+
     public OrionCommand(String name) {
         super(name);
+        this.description = "Orion Core commands";
+        this.usageMessage = "/orion [options]";
+        this.setPermission("orion.command.orion");
     }
 
     @Override

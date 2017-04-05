@@ -1,4 +1,4 @@
-package eu.mikroskeem.orion.exceptions;
+package eu.mikroskeem.orion.api.exceptions.plugin;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +8,6 @@ import lombok.RequiredArgsConstructor;
  */
 @RequiredArgsConstructor
 @Getter
-public class InvalidPluginException extends RuntimeException {
+public class PluginInitializationException extends RuntimeException {
     private String message;
 }
