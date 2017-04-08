@@ -1,5 +1,6 @@
 package eu.mikroskeem.orion.launcher;
 
+import eu.mikroskeem.orion.launcher.util.LibraryManager;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.spongepowered.asm.mixin.Mixins;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.jar.JarInputStream;
@@ -42,8 +44,7 @@ public class OrionTweakClass implements ITweaker {
     }
 
     @Override
-    public void acceptOptions(List<String> args, File gameDir, File assetsDir, String profile) {
-        if(gameDir == null) gameDir = new File("");
+    public void acceptOptions(List<String> args) {
         this.launchArguments = args.toArray(new String[0]);
 
         /*
@@ -61,15 +62,38 @@ public class OrionTweakClass implements ITweaker {
         /* Load paperclip jar */
         launchClassLoader.addURL(paperclipUrl);
 
-        /* Exclude own libraries/launcher */
-        launchClassLoader.addClassLoaderExclusion("eu.mikroskeem.orion.*");
+        /* Load dependencies */
+        for (LibraryManager.Library library : Bootstrap.libraryManager.getLibraries()) {
+            try {
+                launchClassLoader.addURL(library.getLocalPath().toUri().toURL());
+            } catch (MalformedURLException e){
+                log.warn("Malformed URL: {}", e);
+            }
+        }
 
-        /* Exclude log4j2 */
-        launchClassLoader.addClassLoaderExclusion("org.apache.logging.log4j.*");
+        /* Classloader exclusions */
+        String[] loadExclusions = new String[] {
+                "com.mojang.util.QueueLogAppender",     /* Mojang's Log4j2 plugin */
+        };
+        for (String exclusion : loadExclusions) launchClassLoader.addClassLoaderExclusion(exclusion);
 
-        /* Fix ze logging */
-        launchClassLoader.addClassLoaderExclusion("net.minecraftforge.server.console.TerminalConsoleAppender");
-        launchClassLoader.addClassLoaderExclusion("com.mojang.util.QueueLogAppender");
+        /* Transformer exclusions */
+        String[] transformExclusions = new String[] {
+                "eu.mikroskeem.orion.",                 /* Orion */
+                "co.aikar.taskchain.",                  /* TaskChain */
+                "org.aopalliance.",                     /* aopallicance */
+                "ch.qos.logback.",                      /* Logback */
+                "org.slf4j.",                           /* SLF4J */
+                "com.github.zafarkhaja.semver.",        /* Semver */
+                "com.google.",                          /* Google libraries */
+                "com.googlecode.",
+                "com.squareup.",                        /* OkHttp + dependencies */
+                "com.typesafe.",                        /* Typesafe configuration */
+                "ninja.leaping.",                       /* Configurate */
+                "org.jetbrains.annotations.",            /* JetBrains annotations */
+                "javax."
+        };
+        for (String exclusion : transformExclusions) launchClassLoader.addTransformerExclusion(exclusion);
 
         /* Set up mixins */
         setupMixins();

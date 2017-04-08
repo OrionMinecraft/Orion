@@ -48,12 +48,6 @@
             <url>https://repo.spongepowered.org/maven</url>
         </repository>
 
-        <!-- Minecraft repo -->
-        <repository>
-            <id>minecraft</id>
-            <url>https://libraries.minecraft.net/</url>
-        </repository>
-
         <!-- Own repo -->
         <repository>
             <id>mikroskeem-repo</id>
@@ -186,6 +180,7 @@
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>15.0</version>
+            <scope>compile</scope>
         </dependency>
 
         <!-- Lombok -->
