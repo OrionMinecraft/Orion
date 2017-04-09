@@ -1,11 +1,14 @@
 package eu.mikroskeem.orion.internal.commands;
 
+import eu.mikroskeem.orion.api.Orion;
 import eu.mikroskeem.orion.api.utils.DateUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.util.List;
@@ -13,6 +16,7 @@ import java.util.List;
 /**
  * @author Mark Vainomaa
  */
+@Slf4j
 public class OrionCommand extends Command {
     /*
     /orion debug listen shittychattest AsyncPlayerChatEvent player.sendMessage "chat evt: ${event.getMessage()}"
@@ -54,6 +58,16 @@ public class OrionCommand extends Command {
                                 sender.sendMessage(String.format("§8[§b§lOrion§8]§7 Unknown subcommand: '§c%s§7'", args[0]));
                                 break;
                         }
+                    }
+                    break;
+                case "reload":
+                    try {
+                        Orion.getServer().getConfiguration().reload();
+                        sender.sendMessage("§8[§b§lOrion§8]§a Configuration reloaded!");
+                    } catch (IOException e){
+                        sender.sendMessage("§8[§b§lOrion§8]§c Failed to reload configuration. Look into console for errors.");
+                        log.error("Failed to reload Orion configuration. See stacktrace below.");
+                        e.printStackTrace();
                     }
                     break;
                 case "help":

@@ -2,22 +2,20 @@ package eu.mikroskeem.orion;
 
 import eu.mikroskeem.orion.api.OrionServer;
 import eu.mikroskeem.orion.api.server.Configuration;
-import eu.mikroskeem.orion.impl.configuration.StaticConfiguration;
+import eu.mikroskeem.orion.impl.configuration.HoconFileConfiguration;
 import lombok.Getter;
-import org.bukkit.Server;
+
+import java.nio.file.Paths;
 
 /**
  * @author Mark Vainomaa
  */
 public class OrionServerCore implements OrionServer {
     @Getter private static OrionServer instance;
+    @Getter private Configuration configuration;
 
-    public OrionServerCore(Server server){
+    public OrionServerCore(){
         instance = this;
-    }
-
-    @Override
-    public Configuration getConfiguration() {
-        return StaticConfiguration.INSTANCE;
+        configuration = new HoconFileConfiguration(Paths.get(".", "orion.cfg"));
     }
 }

@@ -1,6 +1,8 @@
 package eu.mikroskeem.orion.launcher.mixins;
 
+import eu.mikroskeem.orion.api.Orion;
 import eu.mikroskeem.orion.api.plugin.PluginManager;
+import eu.mikroskeem.orion.api.server.Configuration;
 import eu.mikroskeem.orion.internal.debug.DebugListener;
 import eu.mikroskeem.orion.internal.debug.DebugListenerManager;
 import eu.mikroskeem.orion.internal.interfaces.ExposedJavaPluginLoader;
@@ -91,7 +93,8 @@ public abstract class MixinSimplePluginManager implements PluginManager {
     ))
     @SuppressWarnings("unchecked")
     public <T extends eu.mikroskeem.orion.api.events.Event> HandlerList fireEventProxy(Event event){
-        if(true) {
+        Configuration configuration = Orion.getServer().getConfiguration();
+        if(configuration.getDebug().isEventDumpingAllowed()) {
             Collection<DebugListener<?>> debugListeners = DebugListenerManager
                     .getListenersForEvent(((Class<T>) event.getClass()));
             debugListeners.forEach(debugListener -> {
@@ -103,7 +106,8 @@ public abstract class MixinSimplePluginManager implements PluginManager {
 
     @Inject(method = "fireEvent(Lorg/bukkit/event/Event;)V", remap = false, at = @At(value = "HEAD", remap = false))
     public void onFireEvent(Event event, CallbackInfo callbackInfo){
-        if(true) {
+        Configuration configuration = Orion.getServer().getConfiguration();
+        if(configuration.getDebug().isEventDumpingAllowed()) {
             log.info("{}", event.toString());
         }
     }
