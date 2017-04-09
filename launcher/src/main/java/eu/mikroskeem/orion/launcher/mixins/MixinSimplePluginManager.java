@@ -1,11 +1,14 @@
 package eu.mikroskeem.orion.launcher.mixins;
 
+import eu.mikroskeem.orion.OrionServerCore;
 import eu.mikroskeem.orion.api.Orion;
+import eu.mikroskeem.orion.api.OrionServer;
 import eu.mikroskeem.orion.api.plugin.PluginManager;
 import eu.mikroskeem.orion.api.server.Configuration;
 import eu.mikroskeem.orion.internal.debug.DebugListener;
 import eu.mikroskeem.orion.internal.debug.DebugListenerManager;
 import eu.mikroskeem.orion.internal.interfaces.ExposedJavaPluginLoader;
+import eu.mikroskeem.shuriken.common.SneakyThrow;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.bukkit.command.PluginCommand;
@@ -13,6 +16,7 @@ import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.SimplePluginManager;
 import org.bukkit.plugin.java.JavaPluginLoader;
 import org.bukkit.plugin.java.PluginClassLoader;
@@ -94,7 +98,7 @@ public abstract class MixinSimplePluginManager implements PluginManager {
     @SuppressWarnings("unchecked")
     public <T extends eu.mikroskeem.orion.api.events.Event> HandlerList fireEventProxy(Event event){
         Configuration configuration = Orion.getServer().getConfiguration();
-        if(configuration.getDebug().isEventDumpingAllowed()) {
+        if(configuration.getDebug().isScriptEventHandlerAllowed()) {
             Collection<DebugListener<?>> debugListeners = DebugListenerManager
                     .getListenersForEvent(((Class<T>) event.getClass()));
             debugListeners.forEach(debugListener -> {
@@ -109,6 +113,26 @@ public abstract class MixinSimplePluginManager implements PluginManager {
         Configuration configuration = Orion.getServer().getConfiguration();
         if(configuration.getDebug().isEventDumpingAllowed()) {
             log.info("{}", event.toString());
+        }
+    }
+
+    @Redirect(method = "fireEvent(Lorg/bukkit/event/Event;)V", remap = false, at = @At(
+            value = "INVOKE",
+            target = "Lorg/bukkit/plugin/RegisteredListener;callEvent(Lorg/bukkit/event/Event;)V",
+            remap = false
+    ))
+    public void callEventProxy(RegisteredListener registeredListener, Event event) {
+        OrionServer server = Orion.getServer();
+        Configuration configuration = server.getConfiguration();
+        try {
+            registeredListener.callEvent(event);
+        } catch (Throwable e){
+            if(configuration.getDebug().isReportingEventExceptionsToSentryAllowed()) {
+                ((OrionServerCore) server).getSentryReporter()
+                        .reportEventPassException(registeredListener, e,
+                                (eu.mikroskeem.orion.api.events.Event)event);
+            }
+            SneakyThrow.throwException(e);
         }
     }
 }

@@ -66,5 +66,13 @@
             <version>2.4.10</version>
             <scope>compile</scope>
         </dependency>
+
+        <!-- Sentry -->
+        <dependency>
+            <groupId>com.getsentry.raven</groupId>
+            <artifactId>raven</artifactId>
+            <version>8.0.1</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 </project>

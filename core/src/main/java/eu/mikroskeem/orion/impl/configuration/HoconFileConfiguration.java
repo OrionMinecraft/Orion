@@ -29,6 +29,7 @@ public class HoconFileConfiguration implements Configuration {
 
     @Getter private final Messages messages;
     @Getter private final Debug debug;
+    @Getter private final Sentry sentry;
 
     /* Configuration loader/instance */
     private final ConfigurationLoader<CommentedConfigurationNode> loader;
@@ -54,6 +55,7 @@ public class HoconFileConfiguration implements Configuration {
         /* delete these */
         messages = new HoconMessages();
         debug = new HoconDebug();
+        sentry = new HoconSentry();
     }
 
     @Override
@@ -115,6 +117,26 @@ public class HoconFileConfiguration implements Configuration {
         public boolean isScriptEventHandlerAllowed() {
             Ensure.notNull(orionConfiguration, "Configuration is not loaded yet!");
             return orionConfiguration.getDebug().isScriptEventHandlerAllowed();
+        }
+
+        @Override
+        public boolean isReportingEventExceptionsToSentryAllowed() {
+            Ensure.notNull(orionConfiguration, "Configuration is not loaded yet!");
+            return orionConfiguration.getDebug().isReportingEventExceptionsToSentryAllowed();
+        }
+
+        @Override
+        public boolean isReportingCommandExceptionsToSentryAllowed() {
+            Ensure.notNull(orionConfiguration, "Configuration is not loaded yet!");
+            return orionConfiguration.getDebug().isReportingCommandExceptionsToSentryAllowed();
+        }
+    }
+
+    public class HoconSentry implements Sentry {
+        @Override
+        public String getSentryDSN() {
+            Ensure.notNull(orionConfiguration, "Configuration is not loaded yet!");
+            return orionConfiguration.getSentry().getSentryDSN();
         }
     }
 }

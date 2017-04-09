@@ -30,15 +30,26 @@ public interface Configuration {
         throw new UnsupportedOperationException();
     }
 
+    default Sentry getSentry() {
+        throw new UnsupportedOperationException();
+    }
+
     /* Debug subconfiguration */
     interface Debug {
         boolean isEventDumpingAllowed();
         boolean isScriptEventHandlerAllowed();
+        boolean isReportingEventExceptionsToSentryAllowed();
+        boolean isReportingCommandExceptionsToSentryAllowed();
     }
 
     /* Messages subconfiguration */
     interface Messages {
         boolean isOverridingPluginPermissionDeniedMessageEnabled();
         String getCommandPermissionDeniedMessage();
+    }
+
+    /* Sentry subconfiguration */
+    interface Sentry {
+        String getSentryDSN();
     }
 }
