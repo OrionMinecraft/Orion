@@ -92,6 +92,12 @@ public class HoconFileConfiguration implements Configuration {
     /* Subconfiguration implementations */
     public class HoconMessages implements Messages {
         @Override
+        public boolean isOverridingPluginPermissionDeniedMessageEnabled() {
+            Ensure.notNull(orionConfiguration, "Configuration is not loaded yet!");
+            return orionConfiguration.getMessages().isOverridingPluginPermissionDeniedMessageEnabled();
+        }
+
+        @Override
         public String getCommandPermissionDeniedMessage() {
             Ensure.notNull(orionConfiguration, "Configuration is not loaded yet!");
             return orionConfiguration.getMessages().getPermissionDeniedMessage();

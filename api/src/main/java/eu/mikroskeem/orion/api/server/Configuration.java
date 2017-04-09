@@ -38,6 +38,7 @@ public interface Configuration {
 
     /* Messages subconfiguration */
     interface Messages {
+        boolean isOverridingPluginPermissionDeniedMessageEnabled();
         String getCommandPermissionDeniedMessage();
     }
 }
