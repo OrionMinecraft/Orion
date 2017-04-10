@@ -57,22 +57,14 @@ public class Bootstrap {
         log.info("Checking runtime libraries...");
         libraryManager.addAllLibraries(Arrays.asList(
                 /* Server libraries */
-                new Library("com.google.inject", "guice", "4.1.0", null),
-                new Library("javax.inject", "javax.inject", "1", null),
-                new Library("aopalliance", "aopalliance", "1.0", null),
                 new Library("com.typesafe", "config", "1.3.0", null),
                 new Library("ninja.leaping.configurate", "configurate-core", "3.2", null),
                 new Library("ninja.leaping.configurate", "configurate-hocon", "3.2", null),
-                new Library("net.techcable", "event4j", "1.1.0", null),
-                new Library("co.aikar", "taskchain-core", "3.4.3", null),
-                new Library("co.aikar", "taskchain-bukkit", "3.4.3", null),
-                new Library("com.github.zafarkhaja", "java-semver", "0.9.0", null),
                 new Library("org.codehaus.groovy", "groovy-all", "2.4.10", null),
                 new Library("com.fasterxml.jackson.core", "jackson-core", "2.8.7", null),
                 new Library("com.getsentry.raven", "raven", "8.0.1", null),
                 new Library("com.github.ben-manes.caffeine", "caffeine", "2.4.0", null),
-                new RuntimeLibrary("org.meteogroup.jbrotli", "jbrotli", "0.5.0", null),
-                new RuntimeLibrary("org.meteogroup.jbrotli", "jbrotli-native-linux-x86-amd64", "0.5.0", null),
+
                 new RuntimeLibrary("org.apache.commons", "commons-lang3", "3.5", null),
                 new RuntimeLibrary("commons-io", "commons-io", "2.4", null),
                 new RuntimeLibrary("io.github.lukehutch", "fast-classpath-scanner", "2.0.18", null),

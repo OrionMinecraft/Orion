@@ -1,7 +1,7 @@
 package eu.mikroskeem.orion.launcher.mixins;
 
 import com.google.common.collect.ImmutableList;
-import eu.mikroskeem.orion.api.plugin.PluginManager;
+import eu.mikroskeem.orion.internal.interfaces.ExposedPluginManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -30,7 +30,7 @@ public abstract class MixinPluginsCommand extends Command {
 
     private String getPluginList() {
         StringBuilder pluginList = new StringBuilder();
-        PluginManager plm = (PluginManager)Bukkit.getPluginManager();
+        ExposedPluginManager plm = (ExposedPluginManager)Bukkit.getPluginManager();
 
         List<Plugin> ownPlugins = new ArrayList<>();
         List<Plugin> otherPlugins = new ArrayList<>();

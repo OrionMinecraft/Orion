@@ -3,7 +3,7 @@ package eu.mikroskeem.orion.launcher.mixins;
 import eu.mikroskeem.orion.OrionServerCore;
 import eu.mikroskeem.orion.api.Orion;
 import eu.mikroskeem.orion.api.OrionServer;
-import eu.mikroskeem.orion.api.plugin.PluginManager;
+import eu.mikroskeem.orion.internal.interfaces.ExposedPluginManager;
 import eu.mikroskeem.orion.api.server.Configuration;
 import eu.mikroskeem.orion.internal.debug.DebugListener;
 import eu.mikroskeem.orion.internal.debug.DebugListenerManager;
@@ -37,7 +37,7 @@ import java.util.*;
  */
 @Mixin(SimplePluginManager.class)
 @Slf4j
-public abstract class MixinSimplePluginManager implements PluginManager {
+public abstract class MixinSimplePluginManager implements ExposedPluginManager {
     @Shadow(remap = false) @Final private Map<String, Plugin> lookupNames;
     @Shadow(remap = false) @Final private List<Plugin> plugins;
     @Shadow(remap = false) @Final private SimpleCommandMap commandMap;
