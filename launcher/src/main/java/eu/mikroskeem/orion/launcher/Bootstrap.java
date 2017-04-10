@@ -56,21 +56,30 @@ public class Bootstrap {
         /* Set up libraries */
         log.info("Checking runtime libraries...");
         libraryManager.addAllLibraries(Arrays.asList(
-                /* Server libraries */
+                /* Core configuration */
                 new Library("com.typesafe", "config", "1.3.0", null),
                 new Library("ninja.leaping.configurate", "configurate-core", "3.2", null),
                 new Library("ninja.leaping.configurate", "configurate-hocon", "3.2", null),
+
+                /* Debugging and reporting */
                 new Library("org.codehaus.groovy", "groovy-all", "2.4.10", null),
                 new Library("com.fasterxml.jackson.core", "jackson-core", "2.8.7", null),
                 new Library("com.getsentry.raven", "raven", "8.0.1", null),
+
+                /* Caching */
                 new Library("com.github.ben-manes.caffeine", "caffeine", "2.4.0", null),
 
+                /* Class tools */
+                new RuntimeLibrary("io.github.lukehutch", "fast-classpath-scanner", "2.0.18", null),
+                new RuntimeLibrary("org.ow2.asm", "asm-all", "5.2", null),
+
+                /* Common utilities */
                 new RuntimeLibrary("org.apache.commons", "commons-lang3", "3.5", null),
                 new RuntimeLibrary("commons-io", "commons-io", "2.4", null),
-                new RuntimeLibrary("io.github.lukehutch", "fast-classpath-scanner", "2.0.18", null),
                 new RuntimeLibrary("com.google.guava", "guava", "17.0", null),
                 new RuntimeLibrary("com.google.code.gson", "gson", "2.2.4", null),
-                new RuntimeLibrary("org.ow2.asm", "asm-all", "5.2", null),
+
+                /* LegacyLauncher dependencies */
                 new RuntimeLibrary("org.apache.logging.log4j", "log4j-api", "2.0-beta9", null),
                 new RuntimeLibrary("org.apache.logging.log4j", "log4j-core", "2.0-beta9", null),
                 new RuntimeLibrary("net.sf.jopt-simple", "jopt-simple", "4.9", null),
