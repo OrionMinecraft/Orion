@@ -8,7 +8,6 @@
     "MixinBukkit",
     "MixinCommand",
     "MixinEvent",
-    "MixinGenericCommandHelpTopic",
     "MixinJavaPluginLoader",
     "MixinPluginClassLoader",
     "MixinPluginsCommand",
