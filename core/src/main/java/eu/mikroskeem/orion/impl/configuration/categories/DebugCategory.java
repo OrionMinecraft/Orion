@@ -25,4 +25,9 @@ public class DebugCategory extends ConfigurationCategory {
     @Setting(value = "report-command-exceptions-to-sentryio",
             comment = "Whether to report command exceptions to https://sentry.io or not")
     @Getter @Setter private boolean reportingCommandExceptionsToSentryAllowed = false;
+
+    @Setting(value = "hastebin-url",
+            comment = "Hastebin URL where to paste exceptions and such stuff\n" +
+                      "Only Hastebin-based paste services are currently supported")
+    @Getter @Setter private String hastebinUrl = "https://paste.nightsnack.cf";
 }

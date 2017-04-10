@@ -40,6 +40,7 @@ public interface Configuration {
         boolean isScriptEventHandlerAllowed();
         boolean isReportingEventExceptionsToSentryAllowed();
         boolean isReportingCommandExceptionsToSentryAllowed();
+        String getHastebinUrl();
     }
 
     /* Messages subconfiguration */

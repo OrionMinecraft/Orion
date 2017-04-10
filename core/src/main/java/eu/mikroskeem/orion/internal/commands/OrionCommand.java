@@ -6,14 +6,18 @@ import eu.mikroskeem.orion.api.events.Event;
 import eu.mikroskeem.orion.api.utils.DateUtil;
 import eu.mikroskeem.orion.internal.debug.ClassCache;
 import eu.mikroskeem.orion.internal.debug.DebugListenerManager;
+import eu.mikroskeem.orion.internal.debug.PasteUtility;
 import lombok.extern.slf4j.Slf4j;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.util.StringUtil;
+import org.codehaus.groovy.control.CompilationFailedException;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.util.ArrayList;
@@ -79,11 +83,28 @@ public class OrionCommand extends Command {
                                             ));
                                             break;
                                         }
-                                        DebugListenerManager.register(listenerName, eventClazz, code);
-                                        sender.sendMessage(String.format(
-                                                "§8[§b§lOrion§8]§7 Listener '§c%s§7' added",
-                                                listenerName
-                                        ));
+                                        try {
+                                            DebugListenerManager.register(listenerName, eventClazz, code);
+                                            sender.sendMessage(String.format(
+                                                    "§8[§b§lOrion§8]§7 Listener '§c%s§7' added",
+                                                    listenerName
+                                            ));
+                                        } catch (CompilationFailedException e){
+                                            sender.sendMessage(String.format(
+                                                    "§8[§b§lOrion§8]§c Failed to compile Groovy script for listener '§l%s§c'. Pasting error...",
+                                                    listenerName
+                                            ));
+                                            StringWriter sw = new StringWriter();
+                                            PrintWriter pw = new PrintWriter(sw);
+                                            e.printStackTrace(pw);
+                                            PasteUtility.pasteText(sw.toString(), url -> {
+                                                if(url != null) {
+                                                    sender.sendMessage("§8[§b§lOrion§8] §7Stack trace: §n" + url.toString());
+                                                } else {
+                                                    sender.sendMessage("§8[§b§lOrion§8] §cFailed to paste! See console for more information.");
+                                                }
+                                            });
+                                        }
                                     }
                                 } else {
                                     sender.sendMessage("§8[§b§lOrion§8] §cInvalid usage. See §7'§c/orion debug§7'");

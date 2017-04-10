@@ -130,6 +130,12 @@ public class HoconFileConfiguration implements Configuration {
             Ensure.notNull(orionConfiguration, "Configuration is not loaded yet!");
             return orionConfiguration.getDebug().isReportingCommandExceptionsToSentryAllowed();
         }
+
+        @Override
+        public String getHastebinUrl() {
+            Ensure.notNull(orionConfiguration, "Configuration is not loaded yet!");
+            return orionConfiguration.getDebug().getHastebinUrl();
+        }
     }
 
     public class HoconSentry implements Sentry {
