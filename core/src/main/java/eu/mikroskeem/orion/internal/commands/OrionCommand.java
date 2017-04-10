@@ -7,6 +7,7 @@ import eu.mikroskeem.orion.api.utils.DateUtil;
 import eu.mikroskeem.orion.internal.debug.ClassCache;
 import eu.mikroskeem.orion.internal.debug.DebugListenerManager;
 import eu.mikroskeem.orion.internal.debug.PasteUtility;
+import eu.mikroskeem.shuriken.common.Ensure;
 import lombok.extern.slf4j.Slf4j;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -23,7 +24,6 @@ import java.lang.management.RuntimeMXBean;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author Mark Vainomaa
@@ -69,8 +69,9 @@ public class OrionCommand extends Command {
                                     } else {
                                         Class<? extends Event> eventClazz;
                                         try {
-                                            eventClazz = Class.forName(eventClass).asSubclass(Event.class);
-                                        } catch (ClassNotFoundException e){
+                                            eventClazz = Ensure.notNull(ClassCache.getEventClasses()
+                                                    .get(eventClass), "").asSubclass(Event.class);
+                                        } catch (NullPointerException e){
                                             sender.sendMessage(String.format(
                                                     "§8[§b§lOrion§8]§c No such class '§l%s§c'!",
                                                     eventClass
@@ -174,10 +175,7 @@ public class OrionCommand extends Command {
                                     if(args.length == 3){
                                         break;
                                     } else if(args.length == 4) {
-                                        return completeList(sender, args,
-                                                ClassCache.getEventClasses().stream()
-                                                        .map(Class::getName)
-                                                        .collect(Collectors.toList()));
+                                        return completeList(sender, args, new ArrayList<>(ClassCache.getEventClasses().keySet()));
                                     }
                                     break;
                                 case "removelistener":
