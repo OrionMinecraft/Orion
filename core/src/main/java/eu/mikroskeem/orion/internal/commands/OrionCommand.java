@@ -26,10 +26,6 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class OrionCommand extends Command {
-    /*
-    /orion debug listen shittychattest AsyncPlayerChatEvent player.sendMessage "chat evt: ${event.getMessage()}"
-     */
-
     public OrionCommand(String name) {
         super(name);
         this.description = "Orion Core commands";
@@ -148,7 +144,6 @@ public class OrionCommand extends Command {
 
     @Override
     public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
-        System.out.println(args.length);
         if(args.length > 1) {
             switch (args[0]) {
                 case "debug":
