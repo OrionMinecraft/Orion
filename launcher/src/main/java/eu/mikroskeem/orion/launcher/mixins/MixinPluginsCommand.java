@@ -42,10 +42,10 @@ public abstract class MixinPluginsCommand extends Command {
             }
         });
 
-        pluginList.append(String.format("§f=== §6Own plugins §f(§6%s§f) ===\n", ownPlugins.size()));
+        pluginList.append(String.format("§f==== §6Own plugins §f(§6%s§f)\n", ownPlugins.size()));
         pluginList.append(String.join("§f, ", orion$transform(ownPlugins)));
         pluginList.append("\n");
-        pluginList.append(String.format("§f== §bPublic plugins §f(§b%s§f) =\n", otherPlugins.size()));
+        pluginList.append(String.format("§f==== §bPublic plugins §f(§b%s§f)\n", otherPlugins.size()));
         pluginList.append(String.join("§f, ", orion$transform(otherPlugins)));
 
         return pluginList.toString();
