@@ -2,6 +2,7 @@ package eu.mikroskeem.orion.internal.debug;
 
 import eu.mikroskeem.orion.api.events.Event;
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
+import org.bukkit.Bukkit;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +17,9 @@ public class ClassCache {
         if(availableEventClasses.size() == 0) {
             synchronized (ClassCache.class) {
                 List<Class<? extends Event>> found = new ArrayList<>();
-                new FastClasspathScanner("").matchClassesImplementing(Event.class, found::add).scan();
+                new FastClasspathScanner("")
+                        .addClassLoader(Bukkit.class.getClassLoader())
+                        .matchClassesImplementing(Event.class, found::add).scan();
                 availableEventClasses.addAll(found);
             }
         }

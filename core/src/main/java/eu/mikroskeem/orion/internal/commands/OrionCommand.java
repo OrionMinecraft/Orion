@@ -1,17 +1,25 @@
 package eu.mikroskeem.orion.internal.commands;
 
+import com.google.common.collect.ImmutableList;
 import eu.mikroskeem.orion.api.Orion;
+import eu.mikroskeem.orion.api.events.Event;
 import eu.mikroskeem.orion.api.utils.DateUtil;
+import eu.mikroskeem.orion.internal.debug.ClassCache;
+import eu.mikroskeem.orion.internal.debug.DebugListenerManager;
 import lombok.extern.slf4j.Slf4j;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.util.StringUtil;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Mark Vainomaa
@@ -40,7 +48,7 @@ public class OrionCommand extends Command {
                         message = new String[]{
                             "§8[§b§lOrion§8]§7 Server debug utilities:",
                             "§8- §7Show server/VM information: §c/orion debug info",
-                            "§8- §7Create listener: §c/orion debug listen §8[§blistenername§8] [§beventname§8] §8[§bgroovyscript§8]"
+                            "§8- §7Create listener: §c/orion debug addlistener §8[§blistenername§8] [§beventname§8] §8[§bgroovyscript§8]"
                         };
                         sender.sendMessage(message);
                     } else {
@@ -48,11 +56,62 @@ public class OrionCommand extends Command {
                             case "info":
                                 sender.sendMessage(getInfo());
                                 break;
-                            case "listen":
-                                sender.sendMessage("§8[§b§lOrion§8]§7 §oWork in progress...");
+                            case "addlistener":
+                                if(args.length >= 5) {
+                                    String listenerName = args[2];
+                                    String eventClass = args[3];
+                                    String code = String.join(" ", Arrays.copyOfRange(args, 4, args.length));
+                                    if(DebugListenerManager.listenerExists(listenerName)) {
+                                        DebugListenerManager.unregister(listenerName);
+                                        sender.sendMessage(String.format(
+                                                "§8[§b§lOrion§8]§c Listener with name '§l%s§c' is already present!",
+                                                listenerName
+                                        ));
+                                    } else {
+                                        Class<? extends Event> eventClazz;
+                                        try {
+                                            eventClazz = Class.forName(eventClass).asSubclass(Event.class);
+                                        } catch (ClassNotFoundException e){
+                                            sender.sendMessage(String.format(
+                                                    "§8[§b§lOrion§8]§c No such class '§l%s§c'!",
+                                                    eventClass
+                                            ));
+                                            break;
+                                        } catch (ClassCastException e){
+                                            sender.sendMessage(String.format(
+                                                    "§8[§b§lOrion§8]§c Class '§l%s§c' is not Event class!",
+                                                    eventClass
+                                            ));
+                                            break;
+                                        }
+                                        DebugListenerManager.register(listenerName, eventClazz, code);
+                                        sender.sendMessage(String.format(
+                                                "§8[§b§lOrion§8]§7 Listener '§c%s§7' added",
+                                                listenerName
+                                        ));
+                                    }
+                                } else {
+                                    sender.sendMessage("§8[§b§lOrion§8] §cInvalid usage. See §7'§c/orion debug§7'");
+                                }
                                 break;
                             case "removelistener":
-                                sender.sendMessage("§8[§b§lOrion§8]§7 §oWork in progress...");
+                                if(args.length == 3) {
+                                    String listenerName = args[2];
+                                    if(DebugListenerManager.listenerExists(listenerName)) {
+                                        DebugListenerManager.unregister(listenerName);
+                                        sender.sendMessage(String.format(
+                                                "§8[§b§lOrion§8]§7 Listener '§c%s§7' unregistered",
+                                                listenerName
+                                        ));
+                                    } else {
+                                        sender.sendMessage(String.format(
+                                                "§8[§b§lOrion§8]§c Invalid listener '§c%s§7'",
+                                                listenerName
+                                        ));
+                                    }
+                                } else {
+                                    sender.sendMessage("§8[§b§lOrion§8]§7 §cInvalid usage. See §7'§c/orion debug§7'");
+                                }
                                 break;
                             default:
                                 sender.sendMessage(String.format("§8[§b§lOrion§8]§7 Unknown subcommand: '§c%s§7'", args[0]));
@@ -89,7 +148,37 @@ public class OrionCommand extends Command {
 
     @Override
     public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
-        return super.tabComplete(sender, alias, args);
+        System.out.println(args.length);
+        if(args.length > 1) {
+            switch (args[0]) {
+                case "debug":
+                    if(args.length >= 2) {
+                        if(args.length >= 3) {
+                            switch (args[1]){
+                                case "addlistener":
+                                    if(args.length == 3){
+                                        break;
+                                    } else if(args.length == 4) {
+                                        return completeList(sender, args,
+                                                ClassCache.getEventClasses().stream()
+                                                        .map(Class::getName)
+                                                        .collect(Collectors.toList()));
+                                    }
+                                    break;
+                                case "removelistener":
+                                    if(args.length == 3)
+                                        return completeList(sender, args, new ArrayList<>(DebugListenerManager.getListeners().keySet()));
+                            }
+                        } else {
+                            return completeList(sender, args, Arrays.asList("info", "addlistener", "removelistener"));
+                        }
+                    }
+                    break;
+            }
+        } else {
+            return completeList(sender, args, Arrays.asList("debug", "reload"));
+        }
+        return ImmutableList.of();
     }
 
     private String[] getInfo(){
@@ -124,5 +213,9 @@ public class OrionCommand extends Command {
     private static String formatTps(double tps) {
         return ((tps > 18.0)?ChatColor.GREEN:(tps > 16.0)?ChatColor.YELLOW:ChatColor.RED).toString()
                 + ((tps > 20.0)?"*":"")+Math.min(Math.round(tps*100.0)/100.0, 20.0);
+    }
+
+    private static List<String> completeList(CommandSender sender, String[] args, List<String> completions){
+        return StringUtil.copyPartialMatches(args[args.length-1], completions, new ArrayList<>());
     }
 }

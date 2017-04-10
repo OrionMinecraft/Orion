@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import eu.mikroskeem.orion.api.events.Event;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
+import lombok.Getter;
 import org.codehaus.groovy.control.CompilationFailedException;
 
 import java.util.Collection;
@@ -17,9 +18,9 @@ import java.util.stream.Collectors;
  * @author Mark Vainomaa
  */
 public class DebugListenerManager {
-    private static final Map<String, DebugListener<?>> listeners = new HashMap<>();
+    @Getter private static final Map<String, DebugListener<?>> listeners = new HashMap<>();
 
-    public void register(String listenerName, Class<? extends Event> eventClass, String rawScript)
+    public static void register(String listenerName, Class<? extends Event> eventClass, String rawScript)
             throws CompilationFailedException  {
         Script script = new GroovyShell().parse(rawScript);
         DebugListener<?> listener = listeners.computeIfAbsent(listenerName, l -> {
@@ -27,11 +28,11 @@ public class DebugListenerManager {
         });
     }
 
-    public void unregister(String listenerName) {
+    public static void unregister(String listenerName) {
         listeners.computeIfPresent(listenerName, (l,k) -> null);
     }
 
-    public boolean listenerExists(String listenerName) {
+    public static boolean listenerExists(String listenerName) {
         return listeners.containsKey(listenerName);
     }
 
