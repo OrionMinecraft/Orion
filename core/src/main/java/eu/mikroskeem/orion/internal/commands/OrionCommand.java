@@ -58,7 +58,6 @@ public class OrionCommand extends Command {
                                     String eventClass = args[3];
                                     String code = String.join(" ", Arrays.copyOfRange(args, 4, args.length));
                                     if(DebugListenerManager.listenerExists(listenerName)) {
-                                        DebugListenerManager.unregister(listenerName);
                                         sender.sendMessage(String.format(
                                                 "§8[§b§lOrion§8]§c Listener with name '§l%s§c' is already present!",
                                                 listenerName
@@ -101,7 +100,7 @@ public class OrionCommand extends Command {
                                         ));
                                     } else {
                                         sender.sendMessage(String.format(
-                                                "§8[§b§lOrion§8]§c Invalid listener '§c%s§7'",
+                                                "§8[§b§lOrion§8]§c Invalid listener §7'§c%s§7'",
                                                 listenerName
                                         ));
                                     }
