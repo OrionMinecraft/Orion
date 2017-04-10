@@ -70,6 +70,7 @@ public class Bootstrap {
                 new Library("org.codehaus.groovy", "groovy-all", "2.4.10", null),
                 new Library("com.fasterxml.jackson.core", "jackson-core", "2.8.7", null),
                 new Library("com.getsentry.raven", "raven", "8.0.1", null),
+                new Library("com.github.ben-manes.caffeine", "caffeine", "2.4.0", null),
                 new RuntimeLibrary("org.meteogroup.jbrotli", "jbrotli", "0.5.0", null),
                 new RuntimeLibrary("org.meteogroup.jbrotli", "jbrotli-native-linux-x86-amd64", "0.5.0", null),
                 new RuntimeLibrary("org.apache.commons", "commons-lang3", "3.5", null),
