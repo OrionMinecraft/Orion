@@ -3,24 +3,34 @@ package eu.mikroskeem.orion.launcher;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
-import eu.mikroskeem.orion.launcher.util.LibraryManager;
+import eu.mikroskeem.picomaven.Dependency;
+import eu.mikroskeem.picomaven.DownloaderCallbacks;
+import eu.mikroskeem.picomaven.PicoMaven;
 import eu.mikroskeem.shuriken.common.SneakyThrow;
 import eu.mikroskeem.shuriken.reflect.Reflect;
 import eu.mikroskeem.shuriken.reflect.wrappers.ClassWrapper;
 import eu.mikroskeem.shuriken.reflect.wrappers.TypeWrapper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
 import sun.misc.URLClassPath;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
-
-import static eu.mikroskeem.orion.launcher.util.LibraryManager.Library;
-import static eu.mikroskeem.orion.launcher.util.LibraryManager.RuntimeLibrary;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Orion Launcher wrapper for server, based on Minecraft LegacyLauncher
@@ -31,7 +41,7 @@ import static eu.mikroskeem.orion.launcher.util.LibraryManager.RuntimeLibrary;
 @Slf4j
 @SuppressWarnings("unchecked")
 public class Bootstrap {
-    public static LibraryManager libraryManager = new LibraryManager();
+    static List<URL> serverDependenciesList = new ArrayList<>();
 
     @SneakyThrows
     public static void main(String... args) {
@@ -55,58 +65,92 @@ public class Bootstrap {
 
         /* Set up libraries */
         log.info("Checking runtime libraries...");
-        libraryManager.addAllLibraries(Arrays.asList(
+        List<Dependency> serverDependencies = Arrays.asList(
                 /* Core configuration */
-                new Library("com.typesafe", "config", "1.3.0", null),
-                new Library("ninja.leaping.configurate", "configurate-core", "3.2", null),
-                new Library("ninja.leaping.configurate", "configurate-hocon", "3.2", null),
+                new Dependency("com.typesafe", "config", "1.3.0"),
+                new Dependency("ninja.leaping.configurate", "configurate-core", "3.2"),
+                new Dependency("ninja.leaping.configurate", "configurate-hocon", "3.2"),
 
                 /* Debugging and reporting */
-                new Library("org.codehaus.groovy", "groovy-all", "2.4.10", null),
-                new Library("com.fasterxml.jackson.core", "jackson-core", "2.8.7", null),
-                new Library("com.getsentry.raven", "raven", "8.0.1", null),
+                new Dependency("org.codehaus.groovy", "groovy-all", "2.4.10"),
+                new Dependency("com.fasterxml.jackson.core", "jackson-core", "2.8.7"),
+                new Dependency("com.getsentry.raven", "raven", "8.0.1"),
 
                 /* Caching */
-                new Library("com.github.ben-manes.caffeine", "caffeine", "2.4.0", null),
-
+                new Dependency("com.github.ben-manes.caffeine", "caffeine", "2.4.0")
+        );
+        List<Dependency> runtimeDependencies = Arrays.asList(
                 /* Class tools */
-                new RuntimeLibrary("io.github.lukehutch", "fast-classpath-scanner", "2.0.18", null),
-                new RuntimeLibrary("org.ow2.asm", "asm-all", "5.2", null),
+                new Dependency("io.github.lukehutch", "fast-classpath-scanner", "2.0.18"),
+                new Dependency("org.ow2.asm", "asm-all", "5.2"),
 
                 /* Common utilities */
-                new RuntimeLibrary("org.apache.commons", "commons-lang3", "3.5", null),
-                new RuntimeLibrary("commons-io", "commons-io", "2.4", null),
-                new RuntimeLibrary("com.google.guava", "guava", "17.0", null),
-                new RuntimeLibrary("com.google.code.gson", "gson", "2.2.4", null),
+                new Dependency("org.apache.commons", "commons-lang3", "3.5"),
+                new Dependency("commons-io", "commons-io", "2.4"),
+                new Dependency("com.google.guava", "guava", "17.0"),
+                new Dependency("com.google.code.gson", "gson", "2.2.4"),
 
                 /* LegacyLauncher dependencies */
-                new RuntimeLibrary("org.apache.logging.log4j", "log4j-api", "2.0-beta9", null),
-                new RuntimeLibrary("org.apache.logging.log4j", "log4j-core", "2.0-beta9", null),
-                new RuntimeLibrary("net.sf.jopt-simple", "jopt-simple", "4.9", null),
+                new Dependency("org.apache.logging.log4j", "log4j-api", "2.0-beta9"),
+                new Dependency("org.apache.logging.log4j", "log4j-core", "2.0-beta9"),
+                new Dependency("net.sf.jopt-simple", "jopt-simple", "4.9"),
 
-                new RuntimeLibrary("net.minecraft", "launchwrapper", "1.13-mikroskeem", null),
-                new RuntimeLibrary("org.spongepowered", "mixin", "0.6.8-SNAPSHOT", null,
-                        new LibraryManager.MavenExtraData("20170320.130808", 7))
+                new Dependency("net.minecraft", "launchwrapper", "1.13-mikroskeem"),
+                new Dependency("org.spongepowered", "mixin", "0.6.8-SNAPSHOT")
+        );
 
-        ));
-        libraryManager.run();
+        List<URI> repositories = Stream.of(
+                "https://repo.maven.apache.org/maven2",                     /* Central */
+                "https://repo.wut.ee/repository/mikroskeem-repo",           /* Own repository */
+                "http://ci.emc.gs/nexus/content/groups/aikar",              /* aikar's repository */
+                "https://repo.techcable.net/content/repositories/releases", /* Techcable's repository */
+                "https://repo.spongepowered.org/maven",                     /* SpongePowered repository */
+                "http://dl.bintray.com/nitram509/jbrotli"                   /* Brotli library repository */
+        ).map(URI::create).collect(Collectors.toList());
 
-        /* Build libraries URL list */
+        /* Build PicoMaven and download dependencies */
+        ExecutorService executorService = Executors.newCachedThreadPool(new ThreadFactory() {
+            private final AtomicInteger THREAD_COUNTER = new AtomicInteger(0);
+            @Override
+            public Thread newThread(@NotNull Runnable runnable) {
+                Thread thread = new Thread(runnable);
+                thread.setName("Dependency downloader thread " + THREAD_COUNTER.getAndIncrement());
+                return thread;
+            }
+        });
+
+        PicoMaven.Builder picoMavenBase = new PicoMaven.Builder()
+                .withRepositories(repositories)
+                .withExecutorService(executorService)
+                .shouldCloseExecutorService(false)
+                .withDownloadPath(Paths.get("./libraries").toAbsolutePath())
+                .withDownloaderCallbacks(new DownloaderCallbacks() {
+                    @Override
+                    public void onSuccess(Dependency dependency, Path dependencyPath) {
+                        log.info("{} download succeeded!", dependency);
+                    }
+
+                    @Override
+                    public void onFailure(Dependency dependency, IOException exception) {
+                        log.error("{} download failed! {}", dependency, exception.getMessage());
+                    }
+                });
+
         List<URL> libraries = new ArrayList<>();
         libraries.add(Bootstrap.class.getProtectionDomain().getCodeSource().getLocation());
-        libraryManager.getRuntimeLibraries()
-                .stream()
-                .map(Library::getLocalPath)
-                .map(path -> {
-                    try {
-                        return path.toUri().toURL();
-                    } catch (MalformedURLException e){
-                        log.error("Malformed URL: {}", e);
-                        return null;
-                    }
-                })
-                .filter(Objects::nonNull)
-                .forEach(libraries::add);
+        try(PicoMaven runtimeDepsDownloader = picoMavenBase.withDependencies(runtimeDependencies).build()) {
+            List<Path> downloaded = runtimeDepsDownloader.downloadAll();
+            /* Build libraries URL list */
+            libraries.addAll(downloaded.stream().map(Bootstrap::convertPath).collect(Collectors.toList()));
+        }
+
+        try(PicoMaven serverDepsDownloader = picoMavenBase.withDependencies(serverDependencies).build()) {
+            List<Path> downloaded = serverDepsDownloader.downloadAll();
+            serverDependenciesList.addAll(downloaded.stream().map(Bootstrap::convertPath).collect(Collectors.toList()));
+        }
+
+        /* Shut down executor service */
+        executorService.shutdown();
 
         /*
          * Load libraries
@@ -157,5 +201,10 @@ public class Bootstrap {
         } else {
             log.error("Failed to find class 'net.minecraft.launchwrapper.Launch'!");
         }
+    }
+
+    @SneakyThrows(MalformedURLException.class)
+    private static URL convertPath(Path path) {
+        return path.toUri().toURL();
     }
 }

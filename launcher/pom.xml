@@ -65,29 +65,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <minimizeJar>true</minimizeJar>
-                    <artifactSet>
-                        <includes>
-                            <include>eu.mikroskeem:orion.*</include>
-                            <include>eu.mikroskeem:shuriken.*</include>
-
-                            <include>org.jetbrains:annotations</include>
-
-                            <!--<include>net.minecraft:launchwrapper</include>-->
-                            <!--<include>net.sf.jopt-simple:jopt-simple</include>-->
-                            <!--<include>org.spongepowered:mixin</include>-->
-
-                            <include>com.squareup.okhttp3:okhttp</include>
-                            <include>com.squareup.okio:okio</include>
-
-                            <include>ch.qos.logback:logback-classic</include>
-                            <include>ch.qos.logback:logback-core</include>
-                            <include>org.slf4j:slf4j-api</include>
-
-                            <!--<include>com.google.guava:guava</include>
-                            <include>com.google.code.gson:gson</include>-->
-                        </includes>
-                    </artifactSet>
+                    <minimizeJar>false</minimizeJar>
                 </configuration>
             </plugin>
 
@@ -142,7 +120,7 @@
             <groupId>org.spongepowered</groupId>
             <artifactId>mixin</artifactId>
             <version>0.6.8-SNAPSHOT</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
         </dependency>
 
         <!-- LauncherWrapper -->
@@ -150,7 +128,7 @@
             <groupId>net.minecraft</groupId>
             <artifactId>launchwrapper</artifactId>
             <version>1.13-mikroskeem</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Logback -->
@@ -161,10 +139,60 @@
             <scope>compile</scope>
         </dependency>
 
+        <!-- Apache commons -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.5</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Shuriken instrumentation -->
+        <dependency>
+            <groupId>eu.mikroskeem</groupId>
+            <artifactId>shuriken.instrumentation</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.ow2.asm</groupId>
+                    <artifactId>asm-all</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- Orion API -->
+        <dependency>
+            <groupId>eu.mikroskeem</groupId>
+            <artifactId>orion.api</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
         <!-- Orion Core -->
         <dependency>
             <groupId>eu.mikroskeem</groupId>
             <artifactId>orion.core</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- PicoMaven -->
+        <dependency>
+            <groupId>eu.mikroskeem</groupId>
+            <artifactId>picomaven</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>

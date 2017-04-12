@@ -1,6 +1,5 @@
 package eu.mikroskeem.orion.launcher;
 
-import eu.mikroskeem.orion.launcher.util.LibraryManager;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +14,6 @@ import org.spongepowered.asm.mixin.Mixins;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.jar.JarInputStream;
@@ -63,13 +61,7 @@ public class OrionTweakClass implements ITweaker {
         launchClassLoader.addURL(paperclipUrl);
 
         /* Load dependencies */
-        for (LibraryManager.Library library : Bootstrap.libraryManager.getLibraries()) {
-            try {
-                launchClassLoader.addURL(library.getLocalPath().toUri().toURL());
-            } catch (MalformedURLException e){
-                log.warn("Malformed URL: {}", e);
-            }
-        }
+        Bootstrap.serverDependenciesList.forEach(launchClassLoader::addURL);
 
         /* Classloader exclusions */
         String[] loadExclusions = new String[] {
