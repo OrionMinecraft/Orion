@@ -30,6 +30,10 @@ public interface Configuration {
         throw new UnsupportedOperationException();
     }
 
+    default Commands getCommands() {
+        throw new UnsupportedOperationException();
+    }
+
     default Sentry getSentry() {
         throw new UnsupportedOperationException();
     }
@@ -45,8 +49,12 @@ public interface Configuration {
 
     /* Messages subconfiguration */
     interface Messages {
-        boolean isOverridingPluginPermissionDeniedMessageEnabled();
         String getCommandPermissionDeniedMessage();
+    }
+
+    /* Commands subconfiguration */
+    interface Commands {
+        boolean isOverridingPluginPermissionDeniedMessageEnabled();
     }
 
     /* Sentry subconfiguration */

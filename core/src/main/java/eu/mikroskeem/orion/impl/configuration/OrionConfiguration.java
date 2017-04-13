@@ -1,5 +1,6 @@
 package eu.mikroskeem.orion.impl.configuration;
 
+import eu.mikroskeem.orion.impl.configuration.categories.CommandsCategory;
 import eu.mikroskeem.orion.impl.configuration.categories.DebugCategory;
 import eu.mikroskeem.orion.impl.configuration.categories.MessagesCategory;
 import eu.mikroskeem.orion.impl.configuration.categories.SentryCategory;
@@ -15,6 +16,9 @@ public class OrionConfiguration {
 
     @Setting(value = "messages", comment = "Messages")
     @Getter private MessagesCategory messages = new MessagesCategory();
+
+    @Setting(value = "commands", comment = "Commands system configuration")
+    @Getter private CommandsCategory commands = new CommandsCategory();
 
     @Setting(value = "sentry", comment = "Sentry configuration")
     @Getter private SentryCategory sentry = new SentryCategory();

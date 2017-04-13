@@ -1,6 +1,7 @@
 package eu.mikroskeem.orion.impl.configuration;
 
 import eu.mikroskeem.orion.api.server.Configuration;
+import eu.mikroskeem.orion.impl.configuration.categories.CommandsCategory;
 import eu.mikroskeem.orion.impl.configuration.categories.DebugCategory;
 import eu.mikroskeem.orion.impl.configuration.categories.MessagesCategory;
 import eu.mikroskeem.orion.impl.configuration.categories.SentryCategory;
@@ -32,6 +33,7 @@ public class HoconFileConfiguration implements Configuration {
 
     @Getter private final Messages messages;
     @Getter private final Debug debug;
+    @Getter private final Commands commands;
     @Getter private final Sentry sentry;
 
     /* Configuration loader/instance */
@@ -58,6 +60,7 @@ public class HoconFileConfiguration implements Configuration {
         /* delete these */
         messages = new HoconMessages();
         debug = new HoconDebug();
+        commands = new HoconCommands();
         sentry = new HoconSentry();
     }
 
@@ -101,6 +104,10 @@ public class HoconFileConfiguration implements Configuration {
 
     public class HoconDebug implements Debug {
         @Delegate private DebugCategory debugCategory = orionConfiguration.getDebug();
+    }
+
+    public class HoconCommands implements Commands {
+        @Delegate private CommandsCategory commandsCategory = orionConfiguration.getCommands();
     }
 
     public class HoconSentry implements Sentry {
