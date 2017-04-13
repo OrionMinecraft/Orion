@@ -17,5 +17,5 @@ public class MessagesCategory extends ConfigurationCategory {
 
     @Setting(value = "permission-denied-message",
             comment = "Command permission denied message. Defaults to Bukkit's default")
-    @Getter @Setter private String permissionDeniedMessage = Configuration.DEFAULT_COMMAND_PERMISSION_DENIED_MESSAGE;
+    @Getter @Setter private String commandPermissionDeniedMessage = Configuration.DEFAULT_COMMAND_PERMISSION_DENIED_MESSAGE;
 }

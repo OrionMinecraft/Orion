@@ -1,9 +1,12 @@
 package eu.mikroskeem.orion.impl.configuration;
 
 import eu.mikroskeem.orion.api.server.Configuration;
-import eu.mikroskeem.shuriken.common.Ensure;
+import eu.mikroskeem.orion.impl.configuration.categories.DebugCategory;
+import eu.mikroskeem.orion.impl.configuration.categories.MessagesCategory;
+import eu.mikroskeem.orion.impl.configuration.categories.SentryCategory;
 import eu.mikroskeem.shuriken.common.SneakyThrow;
 import lombok.Getter;
+import lombok.experimental.Delegate;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -93,56 +96,14 @@ public class HoconFileConfiguration implements Configuration {
 
     /* Subconfiguration implementations */
     public class HoconMessages implements Messages {
-        @Override
-        public boolean isOverridingPluginPermissionDeniedMessageEnabled() {
-            Ensure.notNull(orionConfiguration, "Configuration is not loaded yet!");
-            return orionConfiguration.getMessages().isOverridingPluginPermissionDeniedMessageEnabled();
-        }
-
-        @Override
-        public String getCommandPermissionDeniedMessage() {
-            Ensure.notNull(orionConfiguration, "Configuration is not loaded yet!");
-            return orionConfiguration.getMessages().getPermissionDeniedMessage();
-        }
+        @Delegate private MessagesCategory messagesCategory = orionConfiguration.getMessages();
     }
 
     public class HoconDebug implements Debug {
-        @Override
-        public boolean isEventDumpingAllowed() {
-            Ensure.notNull(orionConfiguration, "Configuration is not loaded yet!");
-            return orionConfiguration.getDebug().isEventDumpingAllowed();
-        }
-
-        @Override
-        public boolean isScriptEventHandlerAllowed() {
-            Ensure.notNull(orionConfiguration, "Configuration is not loaded yet!");
-            return orionConfiguration.getDebug().isScriptEventHandlerAllowed();
-        }
-
-        @Override
-        public boolean isReportingEventExceptionsToSentryAllowed() {
-            Ensure.notNull(orionConfiguration, "Configuration is not loaded yet!");
-            return orionConfiguration.getDebug().isReportingEventExceptionsToSentryAllowed();
-        }
-
-        @Override
-        public boolean isReportingCommandExceptionsToSentryAllowed() {
-            Ensure.notNull(orionConfiguration, "Configuration is not loaded yet!");
-            return orionConfiguration.getDebug().isReportingCommandExceptionsToSentryAllowed();
-        }
-
-        @Override
-        public String getHastebinUrl() {
-            Ensure.notNull(orionConfiguration, "Configuration is not loaded yet!");
-            return orionConfiguration.getDebug().getHastebinUrl();
-        }
+        @Delegate private DebugCategory debugCategory = orionConfiguration.getDebug();
     }
 
     public class HoconSentry implements Sentry {
-        @Override
-        public String getSentryDSN() {
-            Ensure.notNull(orionConfiguration, "Configuration is not loaded yet!");
-            return orionConfiguration.getSentry().getSentryDSN();
-        }
+        @Delegate private SentryCategory sentryCategory = orionConfiguration.getSentry();
     }
 }
