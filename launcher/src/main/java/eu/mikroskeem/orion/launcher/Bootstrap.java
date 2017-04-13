@@ -95,6 +95,11 @@ public class Bootstrap {
                 new Dependency("org.apache.logging.log4j", "log4j-core", "2.0-beta9"),
                 new Dependency("net.sf.jopt-simple", "jopt-simple", "4.9"),
 
+                /* ShurikenClassLoader dependencies */
+                new Dependency("org.meteogroup.jbrotli", "jbrotli", "0.5.0"),
+                new Dependency("org.meteogroup.jbrotli", "jbrotli-native-linux-x86-amd64", "0.5.0"),
+                new Dependency("eu.mikroskeem", "shuriken.classloader", "0.0.1-SNAPSHOT"),
+
                 new Dependency("net.minecraft", "launchwrapper", "1.13-mikroskeem"),
                 new Dependency("org.spongepowered", "mixin", "0.6.8-SNAPSHOT")
         );

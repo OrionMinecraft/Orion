@@ -1,5 +1,7 @@
 package eu.mikroskeem.orion.launcher;
 
+import eu.mikroskeem.orion.launcher.transformers.AccessLevelTransformer;
+import eu.mikroskeem.orion.launcher.transformers.SuperTransformer;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +17,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 import java.util.jar.JarInputStream;
 
@@ -87,8 +90,9 @@ public class OrionTweakClass implements ITweaker {
         };
         for (String exclusion : transformExclusions) launchClassLoader.addTransformerExclusion(exclusion);
 
-        /* Set up mixins */
+        /* Set up mixins and transformers */
         setupMixins();
+        setupTransformers(launchClassLoader);
     }
 
     private void setupMixins(){
@@ -99,6 +103,18 @@ public class OrionTweakClass implements ITweaker {
 
         /* Mixins */
         Mixins.addConfiguration("orion.mixins.json");
+
+        /* Ready */
+        log.info("Done!");
+    }
+
+    private void setupTransformers(LaunchClassLoader launchClassLoader) {
+        log.info("Setting up transformers...");
+        List<String> transformers = Arrays.asList(
+                AccessLevelTransformer.class.getName(),
+                SuperTransformer.class.getName()
+        );
+        transformers.forEach(launchClassLoader::registerTransformer);
 
         /* Ready */
         log.info("Done!");
