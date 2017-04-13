@@ -53,7 +53,6 @@ public class HoconFileConfiguration implements Configuration {
             SneakyThrow.throwException(e);
         }
 
-        /* delete these */
         messages = new HoconMessages();
         debug = new HoconDebug();
         commands = new HoconCommands();
