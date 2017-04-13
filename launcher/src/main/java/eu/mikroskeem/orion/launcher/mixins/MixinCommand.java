@@ -22,7 +22,7 @@ public abstract class MixinCommand {
             Configuration configuration = Orion.getServer().getConfiguration();
             String globalPermissionDeniedMessage = configuration.getMessages().getCommandPermissionDeniedMessage();
 
-            String[] messages = (configuration.getCommands().isOverridingPluginPermissionDeniedMessageEnabled()?
+            String[] messages = (configuration.getCommands().isOverridingPluginCommandPermissionDeniedMessageEnabled()?
                     (permissionMessage != null? permissionMessage : globalPermissionDeniedMessage):
                     globalPermissionDeniedMessage)
                     .replaceAll("<permission>", permission) // Retain legacy placeholder

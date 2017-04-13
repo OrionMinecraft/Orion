@@ -10,7 +10,7 @@ import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
  */
 @ConfigSerializable
 public class CommandsCategory extends ConfigurationCategory {
-    @Setting(value = "override-plugin-permission-denied-message",
+    @Setting(value = "override-plugin-command-permission-denied-message",
             comment = "Should Orion override plugin's command permission denied message?")
-    @Getter @Setter private boolean overridingPluginPermissionDeniedMessageEnabled = true;
+    @Getter @Setter private boolean overridingPluginCommandPermissionDeniedMessageEnabled = true;
 }

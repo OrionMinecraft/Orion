@@ -54,7 +54,7 @@ public interface Configuration {
 
     /* Commands subconfiguration */
     interface Commands {
-        boolean isOverridingPluginPermissionDeniedMessageEnabled();
+        boolean isOverridingPluginCommandPermissionDeniedMessageEnabled();
     }
 
     /* Sentry subconfiguration */
