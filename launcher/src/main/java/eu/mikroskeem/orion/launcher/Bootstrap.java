@@ -44,7 +44,7 @@ public class Bootstrap {
     static List<URL> serverDependenciesList = new ArrayList<>();
 
     @SneakyThrows
-    public static void main(String... args) {
+    public static <UCPLoader extends Closeable> void main(String... args) {
         /* Set up SLF4J configuration */
         try {
             LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -165,32 +165,48 @@ public class Bootstrap {
          */
         log.info("Loading libraries");
         URLClassLoader loader = (URLClassLoader)ClassLoader.getSystemClassLoader();
+        Class<UCPLoader> ucpLoaderClass = ((ClassWrapper<UCPLoader>) Reflect
+                .getClass("sun.misc.URLClassPath$Loader").get()).getWrappedClass();
         ClassWrapper<URLClassLoader> uclWrapper = Reflect.wrapInstance(loader);
         URLClassPath ucp = uclWrapper.getField("ucp", URLClassPath.class).get().read();
         ClassWrapper<URLClassPath> ucpWrapper = Reflect.wrapInstance(ucp);
 
-        HashMap<String, Closeable> lmap = (HashMap<String, Closeable>) ucpWrapper.getField("lmap", HashMap.class).get().read();
-        ArrayList<Closeable> loaders = (ArrayList<Closeable>) ucpWrapper.getField("loaders", ArrayList.class).get().read();
+        /* Try to get loaders map */
+        Map<String, UCPLoader> lmap = null;
+        try {
+            lmap = (HashMap<String, UCPLoader>) ucpWrapper.getField("lmap", HashMap.class).get().read();
+        } catch (NoSuchFieldException e){
+            try {
+                /* IBM JVM-specific I guess */
+                lmap = (Map<String, UCPLoader>) ucpWrapper.getField("lmap", Map.class).get().read();
+            } catch (NoSuchFieldException e2) {
+                e2.addSuppressed(e);
+                SneakyThrow.throwException(e2);
+            }
+        }
+        ArrayList<UCPLoader> loaders = (ArrayList<UCPLoader>) ucpWrapper.getField("loaders", ArrayList.class).get().read();
 
         /* Add urls */
+        final Map<String, UCPLoader> _lmap = lmap;
         libraries.forEach(url -> {
             try {
                 ucpWrapper.invokeMethod("addURL", void.class, TypeWrapper.of(url));
-                Closeable ldr = (Closeable)ucpWrapper.invokeMethod("getLoader", Object.class, TypeWrapper.of(url));
+                UCPLoader ldr = ucpWrapper.invokeMethod("getLoader", ucpLoaderClass, TypeWrapper.of(url));
                 loaders.add(ldr);
-                lmap.put("file://" + url.getFile(), ldr);
-            }
-            catch (Exception e){
+                _lmap.put("file://" + url.getFile(), ldr);
+            } catch (Exception e){
                 SneakyThrow.throwException(e);
             }
         });
 
-        /* Re-enable lookup cache (the addURL will disable it) */
-        ucpWrapper.getField("lookupCacheEnabled", boolean.class).get().write(true);
+        if(System.getProperties().getProperty("java.vendor").contains("Oracle")) { /* Oracle JVM-specific */
+            /* Re-enable lookup cache (the addURL will disable it) */
+            ucpWrapper.getField("lookupCacheEnabled", boolean.class).get().write(true);
 
-        /* Force cache repopulation */
-        ucpWrapper.getField("lookupCacheURLs", Object.class).get().write(null);
-        ucpWrapper.getField("lookupCacheLoader", ClassLoader.class).get().write(null);
+            /* Force cache repopulation */
+            ucpWrapper.getField("lookupCacheURLs", URL[].class).get().write(null);
+            ucpWrapper.getField("lookupCacheLoader", ClassLoader.class).get().write(null);
+        }
 
         /* Start LegacyLauncer */
         Optional<ClassWrapper<?>> launchClassOpt = Reflect.getClass("net.minecraft.launchwrapper.Launch");
