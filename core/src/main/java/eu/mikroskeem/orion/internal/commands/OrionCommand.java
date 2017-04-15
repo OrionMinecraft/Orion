@@ -209,7 +209,10 @@ public class OrionCommand extends Command {
 
         return new String[]{
                 "§8[§b§lOrion§8]§7 Server and VM info",
-                "§7Java version: §c" + javaVersion,
+                String.format("§7Java version: §c%s §7(§c%s§7)",
+                        javaVersion,
+                        System.getProperties().getProperty("java.runtime.version")),
+                "§7Java vendor: §c" + System.getProperties().getProperty("java.vendor"),
                 "§7Uptime: §c" + DateUtil.formatDateDiff(uptime),
                 "§7TPS: §f" + formatTps(Bukkit.getTPS()),
                 "§7Maximum memory: §c" + Math.round(maxMemory) + "§7MB",
