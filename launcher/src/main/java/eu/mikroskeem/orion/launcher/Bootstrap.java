@@ -81,7 +81,7 @@ public class Bootstrap {
         );
         List<Dependency> runtimeDependencies = Arrays.asList(
                 /* Class tools */
-                new Dependency("io.github.lukehutch", "fast-classpath-scanner", "2.0.18"),
+                new Dependency("io.github.lukehutch", "fast-classpath-scanner", "2.0.19"),
                 new Dependency("org.ow2.asm", "asm-all", "5.2"),
 
                 /* Common utilities */
