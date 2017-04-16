@@ -1,4 +1,4 @@
-package eu.mikroskeem.orion.launcher.mixins;
+package eu.mikroskeem.orion.mod.mixins;
 
 import eu.mikroskeem.orion.api.Orion;
 import eu.mikroskeem.orion.api.server.Configuration;

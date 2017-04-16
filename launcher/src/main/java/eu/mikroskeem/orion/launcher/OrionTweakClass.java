@@ -1,7 +1,7 @@
 package eu.mikroskeem.orion.launcher;
 
-import eu.mikroskeem.orion.launcher.transformers.AccessLevelTransformer;
-import eu.mikroskeem.orion.launcher.transformers.SuperTransformer;
+import eu.mikroskeem.orion.mod.transformers.AccessLevelTransformer;
+import eu.mikroskeem.orion.mod.transformers.SuperTransformer;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;

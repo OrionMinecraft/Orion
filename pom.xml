@@ -12,6 +12,7 @@
         <module>api</module>
         <module>core</module>
         <module>launcher</module>
+        <module>mixins</module>
     </modules>
 
     <properties>

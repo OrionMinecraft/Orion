@@ -1,4 +1,4 @@
-package eu.mikroskeem.orion.launcher.transformers;
+package eu.mikroskeem.orion.mod.transformers;
 
 import net.minecraft.launchwrapper.IClassTransformer;
 import org.objectweb.asm.ClassReader;

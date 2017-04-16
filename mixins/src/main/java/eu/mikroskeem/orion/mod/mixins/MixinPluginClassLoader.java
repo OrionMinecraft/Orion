@@ -1,4 +1,4 @@
-package eu.mikroskeem.orion.launcher.mixins;
+package eu.mikroskeem.orion.mod.mixins;
 
 import eu.mikroskeem.orion.internal.interfaces.ExposedPluginClassLoader;
 import eu.mikroskeem.shuriken.common.SneakyThrow;

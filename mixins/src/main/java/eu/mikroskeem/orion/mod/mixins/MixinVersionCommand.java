@@ -1,4 +1,4 @@
-package eu.mikroskeem.orion.launcher.mixins;
+package eu.mikroskeem.orion.mod.mixins;
 
 import com.google.common.collect.ImmutableList;
 import org.bukkit.command.Command;
