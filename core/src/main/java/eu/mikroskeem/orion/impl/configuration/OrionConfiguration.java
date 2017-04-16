@@ -1,9 +1,6 @@
 package eu.mikroskeem.orion.impl.configuration;
 
-import eu.mikroskeem.orion.impl.configuration.categories.CommandsCategory;
-import eu.mikroskeem.orion.impl.configuration.categories.DebugCategory;
-import eu.mikroskeem.orion.impl.configuration.categories.MessagesCategory;
-import eu.mikroskeem.orion.impl.configuration.categories.SentryCategory;
+import eu.mikroskeem.orion.impl.configuration.categories.*;
 import lombok.Getter;
 import ninja.leaping.configurate.objectmapping.Setting;
 
@@ -22,4 +19,7 @@ public class OrionConfiguration {
 
     @Setting(value = "sentry", comment = "Sentry configuration")
     @Getter private SentryCategory sentry = new SentryCategory();
+
+    @Setting(value = "player", comment = "Player configuration")
+    @Getter private PlayerConfigurationCategory playerConfiguration = new PlayerConfigurationCategory();
 }

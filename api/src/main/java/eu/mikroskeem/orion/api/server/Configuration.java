@@ -38,6 +38,10 @@ public interface Configuration {
         throw new UnsupportedOperationException();
     }
 
+    default PlayerConfiguration getPlayerConfiguration() {
+        throw new UnsupportedOperationException();
+    }
+
     /* Debug subconfiguration */
     interface Debug {
         boolean isEventDumpingAllowed();
@@ -60,5 +64,10 @@ public interface Configuration {
     /* Sentry subconfiguration */
     interface Sentry {
         String getSentryDSN();
+    }
+
+    /* Player subconfiguration */
+    interface PlayerConfiguration {
+        long getMillisecondsUntilToMarkPlayerAway();
     }
 }

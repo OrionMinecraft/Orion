@@ -5,4 +5,5 @@ package eu.mikroskeem.orion.api.entities;
  */
 public interface Player extends org.bukkit.entity.Player {
     long getLastActiveTime();
+    boolean isAway();
 }

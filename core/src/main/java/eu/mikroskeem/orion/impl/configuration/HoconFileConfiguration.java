@@ -31,6 +31,7 @@ public class HoconFileConfiguration implements Configuration {
     @Getter private final Debug debug;
     @Getter private final Commands commands;
     @Getter private final Sentry sentry;
+    @Getter private final PlayerConfiguration playerConfiguration;
 
     /* Configuration loader/instance */
     private final ConfigurationLoader<CommentedConfigurationNode> loader;
@@ -57,6 +58,7 @@ public class HoconFileConfiguration implements Configuration {
         debug = new HoconDebug();
         commands = new HoconCommands();
         sentry = new HoconSentry();
+        playerConfiguration = new HoconPlayerConfiguration();
     }
 
     @Override
@@ -146,6 +148,14 @@ public class HoconFileConfiguration implements Configuration {
         public String getSentryDSN() {
             Ensure.notNull(orionConfiguration, "Configuration is not loaded yet!");
             return orionConfiguration.getSentry().getSentryDSN();
+        }
+    }
+
+    public class HoconPlayerConfiguration implements PlayerConfiguration {
+        @Override
+        public long getMillisecondsUntilToMarkPlayerAway() {
+            Ensure.notNull(orionConfiguration, "Configuration is not loaded yet!");
+            return orionConfiguration.getPlayerConfiguration().getMillisecondsUntilToMarkPlayerAway();
         }
     }
 }
