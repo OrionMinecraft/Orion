@@ -69,5 +69,13 @@
             <version>0.0.1-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
+
+        <!-- NMS -->
+        <dependency>
+            <groupId>com.destroystokyo.paper</groupId>
+            <artifactId>paper</artifactId>
+            <version>${paper.version}</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 </project>
