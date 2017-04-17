@@ -1,7 +1,5 @@
 package eu.mikroskeem.orion.launcher;
 
-import eu.mikroskeem.orion.mod.transformers.AccessLevelTransformer;
-import eu.mikroskeem.orion.mod.transformers.SuperTransformer;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -92,7 +90,7 @@ public class OrionTweakClass implements ITweaker {
 
         /* Set up mixins and transformers */
         setupMixins();
-        setupTransformers(launchClassLoader);
+        //setupTransformers(launchClassLoader);
     }
 
     private void setupMixins(){
@@ -111,8 +109,6 @@ public class OrionTweakClass implements ITweaker {
     private void setupTransformers(LaunchClassLoader launchClassLoader) {
         log.info("Setting up transformers...");
         List<String> transformers = Arrays.asList(
-                AccessLevelTransformer.class.getName(),
-                SuperTransformer.class.getName()
         );
         transformers.forEach(launchClassLoader::registerTransformer);
 

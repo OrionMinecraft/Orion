@@ -35,14 +35,6 @@
             <scope>compile</scope>
         </dependency>
 
-        <!-- Shuriken Classloader -->
-        <dependency>
-            <groupId>eu.mikroskeem</groupId>
-            <artifactId>shuriken.classloader</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-
         <!-- Classpath scanner -->
         <dependency>
             <groupId>io.github.lukehutch</groupId>

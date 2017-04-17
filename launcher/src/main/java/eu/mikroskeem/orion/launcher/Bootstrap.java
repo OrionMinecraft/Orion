@@ -95,11 +95,6 @@ public class Bootstrap {
                 new Dependency("org.apache.logging.log4j", "log4j-core", "2.0-beta9"),
                 new Dependency("net.sf.jopt-simple", "jopt-simple", "4.9"),
 
-                /* ShurikenClassLoader dependencies */
-                new Dependency("org.meteogroup.jbrotli", "jbrotli", "0.5.0"),
-                new Dependency("org.meteogroup.jbrotli", "jbrotli-native-linux-x86-amd64", "0.5.0"),
-                new Dependency("eu.mikroskeem", "shuriken.classloader", "0.0.1-SNAPSHOT"),
-
                 new Dependency("net.minecraft", "launchwrapper", "1.13-mikroskeem"),
                 new Dependency("org.spongepowered", "mixin", "0.6.8-SNAPSHOT")
         );
@@ -108,8 +103,7 @@ public class Bootstrap {
                 "https://repo.maven.apache.org/maven2",                     /* Central */
                 "https://repo.wut.ee/repository/mikroskeem-repo",           /* Own repository */
                 "http://ci.emc.gs/nexus/content/groups/aikar",              /* aikar's repository */
-                "https://repo.spongepowered.org/maven",                     /* SpongePowered repository */
-                "http://dl.bintray.com/nitram509/jbrotli"                   /* Brotli library repository */
+                "https://repo.spongepowered.org/maven"                      /* SpongePowered repository */
         ).map(URI::create).collect(Collectors.toList());
 
         /* Build PicoMaven and download dependencies */
