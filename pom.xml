@@ -46,12 +46,6 @@
             <url>http://ci.emc.gs/nexus/content/groups/aikar/</url>
         </repository>
 
-        <!-- Techcable repo -->
-        <repository>
-            <id>techcable-repo</id>
-            <url>https://repo.techcable.net/content/repositories/releases/</url>
-        </repository>
-
         <!-- Sponge repo -->
         <repository>
             <id>sponge-repo</id>

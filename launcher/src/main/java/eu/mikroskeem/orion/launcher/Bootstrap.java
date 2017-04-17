@@ -108,7 +108,6 @@ public class Bootstrap {
                 "https://repo.maven.apache.org/maven2",                     /* Central */
                 "https://repo.wut.ee/repository/mikroskeem-repo",           /* Own repository */
                 "http://ci.emc.gs/nexus/content/groups/aikar",              /* aikar's repository */
-                "https://repo.techcable.net/content/repositories/releases", /* Techcable's repository */
                 "https://repo.spongepowered.org/maven",                     /* SpongePowered repository */
                 "http://dl.bintray.com/nitram509/jbrotli"                   /* Brotli library repository */
         ).map(URI::create).collect(Collectors.toList());
