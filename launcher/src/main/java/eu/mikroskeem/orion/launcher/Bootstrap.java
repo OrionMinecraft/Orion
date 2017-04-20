@@ -9,12 +9,12 @@ import eu.mikroskeem.picomaven.PicoMaven;
 import eu.mikroskeem.shuriken.common.SneakyThrow;
 import eu.mikroskeem.shuriken.reflect.Reflect;
 import eu.mikroskeem.shuriken.reflect.wrappers.ClassWrapper;
+import eu.mikroskeem.shuriken.reflect.wrappers.FieldWrapper;
 import eu.mikroskeem.shuriken.reflect.wrappers.TypeWrapper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
-import sun.misc.URLClassPath;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -44,7 +44,7 @@ public class Bootstrap {
     static List<URL> serverDependenciesList = new ArrayList<>();
 
     @SneakyThrows
-    public static <UCPLoader extends Closeable> void main(String... args) {
+    public static <UCPLoader extends Closeable, UCP extends Class<?>> void main(String... args) {
         /* Set up SLF4J configuration */
         try {
             LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -158,25 +158,29 @@ public class Bootstrap {
          */
         log.info("Loading libraries");
         URLClassLoader loader = (URLClassLoader)ClassLoader.getSystemClassLoader();
+        Class<UCP> ucpClass = ((ClassWrapper<UCP>) Reflect.getClass("un.misc.URLClassPath").get())
+                .getWrappedClass();
         Class<UCPLoader> ucpLoaderClass = ((ClassWrapper<UCPLoader>) Reflect
                 .getClass("sun.misc.URLClassPath$Loader").get()).getWrappedClass();
         ClassWrapper<URLClassLoader> uclWrapper = Reflect.wrapInstance(loader);
-        URLClassPath ucp = uclWrapper.getField("ucp", URLClassPath.class).get().read();
-        ClassWrapper<URLClassPath> ucpWrapper = Reflect.wrapInstance(ucp);
+        UCP ucp = uclWrapper.getField("ucp", ucpClass).get().read();
+        ClassWrapper<UCP> ucpWrapper = Reflect.wrapInstance(ucp);
 
         /* Try to get loaders map */
         Map<String, UCPLoader> lmap = null;
-        try {
-            lmap = (HashMap<String, UCPLoader>) ucpWrapper.getField("lmap", HashMap.class).get().read();
-        } catch (NoSuchFieldException e){
-            try {
-                /* IBM JVM-specific I guess */
-                lmap = (Map<String, UCPLoader>) ucpWrapper.getField("lmap", Map.class).get().read();
-            } catch (NoSuchFieldException e2) {
-                e2.addSuppressed(e);
-                SneakyThrow.throwException(e2);
+        Optional<FieldWrapper<HashMap>> theLmap = ucpWrapper.getField("lmap", HashMap.class);
+        if(theLmap.isPresent()) {
+            lmap = (HashMap<String, UCPLoader>) theLmap.get();
+        } else {
+            /* IBM JVM-specific I guess */
+            Optional<FieldWrapper<Map>> theLmap2 = ucpWrapper.getField("lmap", Map.class);
+            if(theLmap2.isPresent()) {
+                lmap = (Map<String, UCPLoader>) theLmap2.get().read();
+            } else {
+                SneakyThrow.throwException(new NoSuchFieldException("lmap"));
             }
         }
+
         ArrayList<UCPLoader> loaders = (ArrayList<UCPLoader>) ucpWrapper.getField("loaders", ArrayList.class).get().read();
 
         /* Add urls */
@@ -194,11 +198,11 @@ public class Bootstrap {
 
         if(System.getProperties().getProperty("java.vendor").contains("Oracle")) { /* Oracle JVM-specific */
             /* Re-enable lookup cache (the addURL will disable it) */
-            ucpWrapper.getField("lookupCacheEnabled", boolean.class).get().write(true);
+            ucpWrapper.getField("lookupCacheEnabled", boolean.class).ifPresent(Bootstrap::writeTrue);
 
             /* Force cache repopulation */
-            ucpWrapper.getField("lookupCacheURLs", URL[].class).get().write(null);
-            ucpWrapper.getField("lookupCacheLoader", ClassLoader.class).get().write(null);
+            ucpWrapper.getField("lookupCacheURLs", URL[].class).ifPresent(Bootstrap::writeNull);
+            ucpWrapper.getField("lookupCacheLoader", ClassLoader.class).ifPresent(Bootstrap::writeNull);
         }
 
         /* Start LegacyLauncer */
@@ -220,5 +224,15 @@ public class Bootstrap {
     @SneakyThrows(MalformedURLException.class)
     private static URL convertPath(Path path) {
         return path.toUri().toURL();
+    }
+
+    @SneakyThrows
+    private static void writeTrue(FieldWrapper<Boolean> fieldWrapper) {
+        fieldWrapper.write(true);
+    }
+
+    @SneakyThrows
+    private static void writeNull(FieldWrapper<?> fieldWrapper) {
+        fieldWrapper.write(null);
     }
 }
