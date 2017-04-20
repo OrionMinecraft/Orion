@@ -1,0 +1,10 @@
+rootProject.name = 'orion'
+include ':orion.api'
+include ':orion.core'
+include ':orion.launcher'
+include ':orion.mixins'
+
+project(':orion.api').projectDir = "$rootDir/api" as File
+project(':orion.core').projectDir = "$rootDir/core" as File
+project(':orion.launcher').projectDir = "$rootDir/launcher" as File
+project(':orion.mixins').projectDir = "$rootDir/mixins" as File

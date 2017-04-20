@@ -1,0 +1,45 @@
+description = 'OrionLauncher'
+
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "com.github.jengelman.gradle.plugins:shadow:1.2.4"
+    }
+}
+
+apply plugin: "com.github.johnrengelman.shadow"
+apply plugin: 'application'
+
+shadowJar {
+    dependencies {
+        exclude dependency('com.google.gson:gson')
+        exclude dependency("com.google.guava:guava")
+        exclude dependency("ninja.leaping.configurate:configurate-core")
+        exclude dependency("ninja.leaping.configurate:configurate-hocon")
+        exclude dependency("com.typesafe:config")
+        exclude dependency('org.ow2.asm:asm-all')
+    }
+}
+
+dependencies {
+    compile project(':orion.mixins')
+    compile project(':orion.core')
+    compile project(':orion.api')
+
+    compile group: 'eu.mikroskeem', name: 'picomaven', version:'0.0.1-SNAPSHOT'
+    compile group: 'ch.qos.logback', name: 'logback-classic', version:'1.2.3'
+    compile(group: 'eu.mikroskeem', name: 'shuriken.instrumentation', version:'0.0.1-SNAPSHOT') {
+        exclude(module: 'asm-all')
+    }
+
+    compileOnly group: 'org.spongepowered', name: 'mixin', version:'0.6.8-SNAPSHOT'
+    compileOnly group: 'net.minecraft', name: 'launchwrapper', version:'1.13-mikroskeem'
+}
+
+// Launcher info
+applicationName = "OrionLauncher"
+mainClassName = "eu.mikroskeem.orion.launcher.Bootstrap"

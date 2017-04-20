@@ -1,0 +1,10 @@
+
+description = 'OrionCore'
+dependencies {
+    compile project(':orion.api')
+    compileOnly group: 'io.github.lukehutch', name: 'fast-classpath-scanner', version:'2.0.19'
+    compileOnly group: 'org.codehaus.groovy', name: 'groovy-all', version:'2.4.10'
+    compileOnly group: 'com.getsentry.raven', name: 'raven', version:'8.0.1'
+    compileOnly group: 'com.github.ben-manes.caffeine', name: 'caffeine', version:'2.4.0'
+    compileOnly group: 'com.destroystokyo.paper', name: 'paper-api', version:'1.11.2-R0.1-SNAPSHOT'
+}

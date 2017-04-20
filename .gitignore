@@ -19,3 +19,9 @@ hs_err_pid*
 # Maven
 target/
 dependency-reduced-pom.xml
+
+# Gradle
+!gradle-wrapper.jar
+.gradle/
+build/
+*/build/
