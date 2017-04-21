@@ -44,7 +44,7 @@ public class Bootstrap {
     static List<URL> serverDependenciesList = new ArrayList<>();
 
     @SneakyThrows
-    public static <UCPLoader extends Closeable, UCP extends Class<?>> void main(String... args) {
+    public static <UCPLoader extends Closeable, UCP> void main(String... args) {
         /* Set up SLF4J configuration */
         try {
             LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -158,7 +158,7 @@ public class Bootstrap {
          */
         log.info("Loading libraries");
         URLClassLoader loader = (URLClassLoader)ClassLoader.getSystemClassLoader();
-        Class<UCP> ucpClass = ((ClassWrapper<UCP>) Reflect.getClass("un.misc.URLClassPath").get())
+        Class<UCP> ucpClass = ((ClassWrapper<UCP>) Reflect.getClass("sun.misc.URLClassPath").get())
                 .getWrappedClass();
         Class<UCPLoader> ucpLoaderClass = ((ClassWrapper<UCPLoader>) Reflect
                 .getClass("sun.misc.URLClassPath$Loader").get()).getWrappedClass();
@@ -170,7 +170,7 @@ public class Bootstrap {
         Map<String, UCPLoader> lmap = null;
         Optional<FieldWrapper<HashMap>> theLmap = ucpWrapper.getField("lmap", HashMap.class);
         if(theLmap.isPresent()) {
-            lmap = (HashMap<String, UCPLoader>) theLmap.get();
+            lmap = (HashMap<String, UCPLoader>) theLmap.get().read();
         } else {
             /* IBM JVM-specific I guess */
             Optional<FieldWrapper<Map>> theLmap2 = ucpWrapper.getField("lmap", Map.class);
