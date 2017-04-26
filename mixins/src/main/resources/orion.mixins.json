@@ -11,6 +11,7 @@
     "MixinCraftPlayer",
     "MixinEvent",
     "MixinJavaPluginLoader",
+    "MixinPlayerConnection",
     "MixinPluginClassLoader",
     "MixinPluginsCommand",
     "MixinSimpleCommandMap",
