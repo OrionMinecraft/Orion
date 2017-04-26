@@ -3,6 +3,7 @@ package eu.mikroskeem.orion.launcher;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
+import eu.mikroskeem.orion.mod.OrionTweakClass;
 import eu.mikroskeem.picomaven.Dependency;
 import eu.mikroskeem.picomaven.DownloaderCallbacks;
 import eu.mikroskeem.picomaven.PicoMaven;
@@ -18,10 +19,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -29,6 +32,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.jar.JarInputStream;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -41,7 +45,7 @@ import java.util.stream.Stream;
 @Slf4j
 @SuppressWarnings("unchecked")
 public class Bootstrap {
-    static List<URL> serverDependenciesList = new ArrayList<>();
+    private static String launchTargetClass;
 
     @SneakyThrows
     public static <UCPLoader extends Closeable, UCP> void main(String... args) {
@@ -59,13 +63,24 @@ public class Bootstrap {
         log.info("Orion Launcher by mikroskeem");
         List<String> finalArgs = new ArrayList<>(Arrays.asList(
                 "--tweakClass",
-                "eu.mikroskeem.orion.launcher.OrionTweakClass"
+                "eu.mikroskeem.orion.mod.OrionTweakClass"
         ));
         finalArgs.addAll(Arrays.asList(args));
 
+        /*
+         * Set up Paper jar
+         * TODO: better implementation
+         */
+        Path serverJar = Paths.get("./cache/patched_1.11.2.jar");
+        try(InputStream fs = Files.newInputStream(serverJar); JarInputStream js = new JarInputStream(fs)){
+            launchTargetClass = js.getManifest().getMainAttributes().getValue("Main-Class");
+        } catch (IOException e) {
+            throw new RuntimeException("Error opening " + serverJar, e);
+        }
+
         /* Set up libraries */
         log.info("Checking runtime libraries...");
-        List<Dependency> serverDependencies = Arrays.asList(
+        List<Dependency> dependencies = Arrays.asList(
                 /* Core configuration */
                 new Dependency("com.typesafe", "config", "1.3.0"),
                 new Dependency("ninja.leaping.configurate", "configurate-core", "3.2"),
@@ -77,9 +92,8 @@ public class Bootstrap {
                 new Dependency("com.getsentry.raven", "raven", "8.0.1"),
 
                 /* Caching */
-                new Dependency("com.github.ben-manes.caffeine", "caffeine", "2.4.0")
-        );
-        List<Dependency> runtimeDependencies = Arrays.asList(
+                new Dependency("com.github.ben-manes.caffeine", "caffeine", "2.4.0"),
+
                 /* Class tools */
                 new Dependency("io.github.lukehutch", "fast-classpath-scanner", "2.0.19"),
                 new Dependency("org.ow2.asm", "asm-all", "5.2"),
@@ -117,7 +131,7 @@ public class Bootstrap {
             }
         });
 
-        PicoMaven.Builder picoMavenBase = new PicoMaven.Builder()
+        PicoMaven.Builder picoMaven = new PicoMaven.Builder()
                 .withRepositories(repositories)
                 .withExecutorService(executorService)
                 .shouldCloseExecutorService(false)
@@ -136,15 +150,11 @@ public class Bootstrap {
 
         List<URL> libraries = new ArrayList<>();
         libraries.add(Bootstrap.class.getProtectionDomain().getCodeSource().getLocation());
-        try(PicoMaven runtimeDepsDownloader = picoMavenBase.withDependencies(runtimeDependencies).build()) {
+        libraries.add(serverJar.toUri().toURL());
+        try(PicoMaven runtimeDepsDownloader = picoMaven.withDependencies(dependencies).build()) {
             List<Path> downloaded = runtimeDepsDownloader.downloadAll();
             /* Build libraries URL list */
             libraries.addAll(downloaded.stream().map(Bootstrap::convertPath).collect(Collectors.toList()));
-        }
-
-        try(PicoMaven serverDepsDownloader = picoMavenBase.withDependencies(serverDependencies).build()) {
-            List<Path> downloaded = serverDepsDownloader.downloadAll();
-            serverDependenciesList.addAll(downloaded.stream().map(Bootstrap::convertPath).collect(Collectors.toList()));
         }
 
         /* Shut down executor service */
@@ -210,6 +220,7 @@ public class Bootstrap {
         if(launchClassOpt.isPresent()) {
             ClassWrapper<?> launchClass = launchClassOpt.get();
             try {
+                OrionTweakClass.launchTarget = launchTargetClass;
                 log.info("Starting LegacyLauncher with arguments: {}", finalArgs);
                 launchClass.invokeMethod("main", void.class,
                         TypeWrapper.of(String[].class, finalArgs.toArray(new String[0])));

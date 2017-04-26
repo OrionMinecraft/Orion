@@ -21,15 +21,14 @@ subprojects {
         maven { url "http://ci.emc.gs/nexus/content/groups/aikar/" }
         maven { url "https://repo.spongepowered.org/maven" }
         maven { url "https://repo.wut.ee/repository/mikroskeem-repo/" }
-        maven { url "http://repo.maven.apache.org/maven2" }
     }
 
 
     dependencies {
-        compile group: 'org.jetbrains', name: 'annotations', version:'15.0'
-        compileOnly group: 'org.projectlombok', name: 'lombok', version:'1.16.16'
-        testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version:'5.0.0-M3'
+        compile group: 'org.jetbrains', name: 'annotations', version: '15.0'
+        compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.16.16'
+        testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.0.0-M3'
     }
 }
 
-defaultTasks('shadowJar')
+defaultTasks('build')

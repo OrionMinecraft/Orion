@@ -1,10 +1,10 @@
 package eu.mikroskeem.orion.internal.debug;
 
 import com.google.common.collect.ImmutableList;
-import eu.mikroskeem.orion.api.events.Event;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
 import lombok.Getter;
+import org.bukkit.event.Event;
 import org.codehaus.groovy.control.CompilationFailedException;
 
 import java.util.Collection;

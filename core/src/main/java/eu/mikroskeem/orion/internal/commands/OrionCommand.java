@@ -2,7 +2,6 @@ package eu.mikroskeem.orion.internal.commands;
 
 import com.google.common.collect.ImmutableList;
 import eu.mikroskeem.orion.api.Orion;
-import eu.mikroskeem.orion.api.events.Event;
 import eu.mikroskeem.orion.api.utils.DateUtil;
 import eu.mikroskeem.orion.internal.debug.ClassCache;
 import eu.mikroskeem.orion.internal.debug.DebugListenerManager;
@@ -13,6 +12,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.event.Event;
 import org.bukkit.util.StringUtil;
 import org.codehaus.groovy.control.CompilationFailedException;
 
@@ -70,7 +70,7 @@ public class OrionCommand extends Command {
                                         Class<? extends Event> eventClazz;
                                         try {
                                             eventClazz = Ensure.notNull(ClassCache.getEventClasses()
-                                                    .get(eventClass), "").asSubclass(Event.class);
+                                                    .get(eventClass), "");
                                         } catch (NullPointerException e){
                                             sender.sendMessage(String.format(
                                                     "§8[§b§lOrion§8]§c No such class '§l%s§c'!",

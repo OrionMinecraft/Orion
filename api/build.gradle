@@ -1,13 +1,13 @@
 description = 'OrionAPI'
 dependencies {
-    compile group: 'ninja.leaping.configurate', name: 'configurate-hocon', version:'3.2'
-    compile group: 'com.squareup.okhttp3', name: 'okhttp', version:'3.6.0'
-    compile group: 'eu.mikroskeem', name: 'shuriken.instrumentation', version:'0.0.1-SNAPSHOT'
-    compile group: 'org.slf4j', name: 'slf4j-api', version:'1.7.25'
+    compile group: 'ninja.leaping.configurate', name: 'configurate-hocon', version: '3.2'
+    compile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.6.0'
+    compile group: 'eu.mikroskeem', name: 'shuriken.instrumentation', version: '0.0.1-SNAPSHOT'
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
 
-    compileOnly group: 'co.aikar', name: 'taskchain-bukkit', version:'3.4.3'
-    compileOnly group: 'com.github.zafarkhaja', name: 'java-semver', version:'0.9.0'
-    compileOnly group: 'com.google.inject', name: 'guice', version:'4.1.0'
-    compileOnly group: 'org.apache.commons', name: 'commons-lang3', version:'3.5'
-    compileOnly group: 'com.destroystokyo.paper', name: 'paper-api', version:'1.11.2-R0.1-SNAPSHOT'
+    compileOnly group: 'co.aikar', name: 'taskchain-bukkit', version: '3.4.3'
+    compileOnly group: 'com.github.zafarkhaja', name: 'java-semver', version: '0.9.0'
+    compileOnly group: 'com.google.inject', name: 'guice', version: '4.1.0'
+    compileOnly group: 'org.apache.commons', name: 'commons-lang3', version: '3.5'
+    compileOnly group: 'com.destroystokyo.paper', name: 'paper-api', version: '1.11.2-R0.1-SNAPSHOT'
 }

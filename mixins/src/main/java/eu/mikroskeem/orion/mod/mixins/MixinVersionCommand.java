@@ -13,9 +13,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
  * @author Mark Vainomaa
  */
 @Mixin(VersionCommand.class)
-public abstract class MixinVersionCommand extends Command {
-    public MixinVersionCommand(){super(null, null, null, ImmutableList.of()); }
-
+public abstract class MixinVersionCommand {
     @Shadow(remap = false) protected abstract void sendVersion(CommandSender sender);
 
     @Redirect(remap = false,

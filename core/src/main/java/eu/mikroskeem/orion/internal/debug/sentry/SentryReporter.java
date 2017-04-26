@@ -52,8 +52,7 @@ public class SentryReporter {
     }
 
     /* For event passing exceptions */
-    public void reportEventPassException(RegisteredListener listener, Throwable e,
-                                         eu.mikroskeem.orion.api.events.Event event) {
+    public void reportEventPassException(RegisteredListener listener, Throwable e, org.bukkit.event.Event event) {
         initRaven();
         if(raven != null) {
             EventBuilder eventBuilder = new EventBuilder()

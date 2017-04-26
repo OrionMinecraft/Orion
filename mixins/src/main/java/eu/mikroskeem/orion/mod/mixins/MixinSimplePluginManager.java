@@ -96,11 +96,11 @@ public abstract class MixinSimplePluginManager implements ExposedPluginManager {
             remap = false
     ))
     @SuppressWarnings("unchecked")
-    public <T extends eu.mikroskeem.orion.api.events.Event> HandlerList fireEventProxy(Event event){
+    public <T extends Event> HandlerList fireEventProxy(Event event){
         Configuration configuration = Orion.getServer().getConfiguration();
         if(configuration.getDebug().isScriptEventHandlerAllowed()) {
             Collection<DebugListener<?>> debugListeners = DebugListenerManager
-                    .getListenersForEvent(((Class<T>) event.getClass()));
+                    .getListenersForEvent(event.getClass());
             debugListeners.forEach(debugListener -> {
                 ((DebugListener<T>) debugListener).execute((T)event);
             });
@@ -129,8 +129,7 @@ public abstract class MixinSimplePluginManager implements ExposedPluginManager {
         } catch (Throwable e){
             if(configuration.getDebug().isReportingEventExceptionsToSentryAllowed()) {
                 ((OrionServerCore) server).getSentryReporter()
-                        .reportEventPassException(registeredListener, e,
-                                (eu.mikroskeem.orion.api.events.Event)event);
+                        .reportEventPassException(registeredListener, e, event);
             }
             SneakyThrow.throwException(e);
         }

@@ -3,6 +3,7 @@ package eu.mikroskeem.orion.mod.mixins;
 import eu.mikroskeem.orion.api.Orion;
 import eu.mikroskeem.orion.api.entities.Player;
 import net.minecraft.server.v1_11_R1.EntityPlayer;
+import net.minecraft.server.v1_11_R1.MinecraftServer;
 import org.bukkit.craftbukkit.v1_11_R1.entity.CraftPlayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -24,7 +25,7 @@ public abstract class MixinCraftPlayer implements Player {
         long configuredAwayTime = Orion.getServer().getConfiguration()
                 .getPlayerConfiguration()
                 .getMillisecondsUntilToMarkPlayerAway();
-        long currentTime = System.currentTimeMillis();
+        long currentTime = MinecraftServer.aw();
         return (currentTime - this.getLastActiveTime()) >= configuredAwayTime;
     }
 }

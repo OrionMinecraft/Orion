@@ -2,13 +2,13 @@ description = 'OrionMixins'
 dependencies {
     compile project(':orion.core')
 
-    compileOnly group: 'org.spongepowered', name: 'mixin', version:'0.6.8-SNAPSHOT'
-    compileOnly(group: 'com.destroystokyo.paper', name: 'paper-api', version:'1.11.2-R0.1-SNAPSHOT') {
+    compileOnly group: 'org.spongepowered', name: 'mixin', version: '0.6.8-SNAPSHOT'
+    compileOnly(group: 'com.destroystokyo.paper', name: 'paper-api', version: '1.11.2-R0.1-SNAPSHOT') {
         exclude(module: '*')
     }
-    compileOnly(group: 'net.md-5', name: 'bungeecord-chat', version:'1.10-SNAPSHOT') {
+    compileOnly(group: 'net.md-5', name: 'bungeecord-chat', version: '1.10-SNAPSHOT') {
         exclude(module: '*')
     }
-    compileOnly group: 'org.apache.commons', name: 'commons-lang3', version:'3.5'
-    compileOnly group: 'com.destroystokyo.paper', name: 'paper', version:'1.11.2-R0.1-SNAPSHOT'
+    compileOnly group: 'org.apache.commons', name: 'commons-lang3', version: '3.5'
+    compileOnly group: 'com.destroystokyo.paper', name: 'paper', version: '1.11.2-R0.1-SNAPSHOT'
 }

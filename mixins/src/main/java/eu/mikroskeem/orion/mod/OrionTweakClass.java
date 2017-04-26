@@ -1,6 +1,7 @@
-package eu.mikroskeem.orion.launcher;
+package eu.mikroskeem.orion.mod;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.minecraft.launchwrapper.ITweaker;
@@ -14,7 +15,10 @@ import org.spongepowered.asm.mixin.Mixins;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.jar.JarInputStream;
@@ -26,24 +30,11 @@ import java.util.jar.JarInputStream;
  */
 @Slf4j
 public class OrionTweakClass implements ITweaker {
-    private URL paperclipUrl;
+    public static String launchTarget;
     @Getter private String[] launchArguments;
-    @Getter private String launchTarget;
-
-    @SneakyThrows
-    public OrionTweakClass(){
-        File paperclipJar = new File("cache/patched_1.11.2.jar");
-
-        try(FileInputStream fs = new FileInputStream(paperclipJar); JarInputStream js = new JarInputStream(fs)){
-            launchTarget = js.getManifest().getMainAttributes().getValue("Main-Class");
-        } catch (IOException e) {
-            throw new RuntimeException("Error opening " + paperclipJar, e);
-        }
-        paperclipUrl = paperclipJar.toURI().toURL();
-    }
 
     @Override
-    public void acceptOptions(List<String> args) {
+    public void acceptOptions(List<String> args, File gameDir, File assetsDir, String profile) {
         this.launchArguments = args.toArray(new String[0]);
 
         /*
@@ -57,36 +48,17 @@ public class OrionTweakClass implements ITweaker {
     }
 
     @Override
+    public String getLaunchTarget() {
+        return OrionTweakClass.launchTarget;
+    }
+
+    @Override
     public void injectIntoClassLoader(LaunchClassLoader launchClassLoader) {
-        /* Load paperclip jar */
-        launchClassLoader.addURL(paperclipUrl);
-
-        /* Load dependencies */
-        Bootstrap.serverDependenciesList.forEach(launchClassLoader::addURL);
-
         /* Classloader exclusions */
         String[] loadExclusions = new String[] {
                 "com.mojang.util.QueueLogAppender",     /* Mojang's Log4j2 plugin */
         };
         for (String exclusion : loadExclusions) launchClassLoader.addClassLoaderExclusion(exclusion);
-
-        /* Transformer exclusions */
-        String[] transformExclusions = new String[] {
-                "eu.mikroskeem.orion.",                 /* Orion */
-                "co.aikar.taskchain.",                  /* TaskChain */
-                "org.aopalliance.",                     /* aopallicance */
-                "ch.qos.logback.",                      /* Logback */
-                "org.slf4j.",                           /* SLF4J */
-                "com.github.zafarkhaja.semver.",        /* Semver */
-                "com.google.",                          /* Google libraries */
-                "com.googlecode.",
-                "com.squareup.",                        /* OkHttp + dependencies */
-                "com.typesafe.",                        /* Typesafe configuration */
-                "ninja.leaping.",                       /* Configurate */
-                "org.jetbrains.annotations.",            /* JetBrains annotations */
-                "javax."
-        };
-        for (String exclusion : transformExclusions) launchClassLoader.addTransformerExclusion(exclusion);
 
         /* Set up mixins and transformers */
         setupMixins();

@@ -1,9 +1,9 @@
 package eu.mikroskeem.orion.internal.debug;
 
-import eu.mikroskeem.orion.api.events.Event;
 import groovy.lang.Script;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
 
 /**
