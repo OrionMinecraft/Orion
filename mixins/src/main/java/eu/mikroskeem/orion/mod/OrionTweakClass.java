@@ -73,6 +73,7 @@ public class OrionTweakClass implements ITweaker {
 
         /* Mixins */
         Mixins.addConfiguration("orion.mixins.json");
+        Mixins.addConfiguration("orion.spawnpoint.mixins.json");
 
         /* Ready */
         log.info("Done!");

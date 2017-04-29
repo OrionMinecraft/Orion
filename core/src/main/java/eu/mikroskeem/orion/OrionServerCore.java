@@ -2,13 +2,17 @@ package eu.mikroskeem.orion;
 
 import eu.mikroskeem.orion.api.OrionServer;
 import eu.mikroskeem.orion.api.server.Configuration;
+import eu.mikroskeem.orion.api.world.World;
 import eu.mikroskeem.orion.impl.configuration.HoconFileConfiguration;
 import eu.mikroskeem.orion.internal.debug.sentry.SentryReporter;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.bukkit.Bukkit;
 
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Mark Vainomaa
@@ -30,5 +34,15 @@ public class OrionServerCore implements OrionServer {
         }
 
         sentryReporter = new SentryReporter(this);
+    }
+
+    @Override
+    public World getWorld(String worldName) {
+        return (World)Bukkit.getWorld(worldName);
+    }
+
+    @Override
+    public List<World> getWorlds() {
+        return Bukkit.getWorlds().stream().map(w -> (World)w).collect(Collectors.toList());
     }
 }

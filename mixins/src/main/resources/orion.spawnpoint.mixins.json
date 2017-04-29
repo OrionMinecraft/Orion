@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.6.8",
+  "package": "eu.mikroskeem.orion.mod.mixins.spawnpoint",
+  "target": "@env(DEFAULT)",
+  "compatibilityLevel": "JAVA_8",
+  "server": [
+    "MixinCommandSetWorldSpawn",
+    "MixinCraftWorld",
+    "MixinEntityPlayer",
+    "MixinPlayerList",
+    "MixinWorld",
+    "MixinWorldData"
+  ]
+}

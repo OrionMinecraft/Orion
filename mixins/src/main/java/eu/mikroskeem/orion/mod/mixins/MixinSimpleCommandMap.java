@@ -5,6 +5,7 @@ import eu.mikroskeem.orion.api.Orion;
 import eu.mikroskeem.orion.api.OrionServer;
 import eu.mikroskeem.orion.api.server.Configuration;
 import eu.mikroskeem.orion.internal.commands.OrionCommand;
+import eu.mikroskeem.orion.internal.commands.SetWorldSpawnCommand;
 import eu.mikroskeem.shuriken.common.SneakyThrow;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -26,6 +27,7 @@ public abstract class MixinSimpleCommandMap {
     @Inject(remap = false, method = "setDefaultCommands()V", at = @At(remap = false, value = "HEAD"))
     public void onSetDefaultCommands(CallbackInfo callbackInfo){
         register("orion", new OrionCommand("orion"));
+        register("orion", new SetWorldSpawnCommand("setworldspawn"));
     }
 
     @Redirect(remap = false, method = "dispatch", at = @At(remap = false,
