@@ -32,12 +32,12 @@ public abstract class MixinEntityPlayer extends Entity {
 
     @Redirect(remap = false, method = "spawnIn", at = @At(remap = false,
             value = "INVOKE",
-            target = "Lnet/minecraft/server/v1_11_R1/WorldServer;" +
+            target = "Lnet/minecraft/server/v1_11_R1/World;" +
                     "getSpawn()Lnet/minecraft/server/v1_11_R1/BlockPosition;"
     ))
-    public BlockPosition getSpawnProxy_spawnIn(WorldServer worldServer) {
+    public BlockPosition getSpawnProxy_spawnIn(World world) {
         orion$redirectWorldSpawn = true;
-        return worldServer.getSpawn();
+        return world.getSpawn();
     }
 
     @Redirect(remap = false, method = "spawnIn", at = @At(remap = false,
