@@ -6,7 +6,7 @@ Paper server tweaks using SpongeMixin.
 
 ## Features
 - Scriptable event listeners using Groovy
-- Native way to detect idling player (events & `Player#isIdle())
+- Native way to detect idling player (events & `Player#isIdle()`)
 - Get/set `CanDestroy` and `CanPlaceOn` tags on items (useful for Adventure gamemode) 
 - Unload plugins from plugin manager directly
 - Better `/plugins` command
