@@ -13,4 +13,8 @@ public class PlayerConfigurationCategory extends ConfigurationCategory {
     @Setting(value = "milliseconds-until-to-mark-player-away",
             comment = "Time how long should player be idle to mark one away")
     @Getter @Setter private long millisecondsUntilToMarkPlayerAway = 120 * 1000;
+
+    @Setting(value = "player-data-saving-disabled",
+            comment = "Disables player data saving to disk. Useful for Lobby servers")
+    @Getter @Setter private boolean playerDataSavingDisabled = false;
 }

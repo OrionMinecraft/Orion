@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "minVersion": "0.6.8",
+  "package": "eu.mikroskeem.orion.mod.mixins.player",
+  "target": "@env(DEFAULT)",
+  "compatibilityLevel": "JAVA_8",
+  "server": [
+    "MixinCraftPlayer",
+    "MixinWorldNBTStorage"
+  ]
+}

@@ -1,4 +1,4 @@
-package eu.mikroskeem.orion.mod.mixins;
+package eu.mikroskeem.orion.mod.mixins.player;
 
 import eu.mikroskeem.orion.api.Orion;
 import eu.mikroskeem.orion.api.entities.Player;
