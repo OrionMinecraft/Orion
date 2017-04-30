@@ -6,6 +6,6 @@
   "compatibilityLevel": "JAVA_8",
   "server": [
     "MixinCraftPlayer",
-    "MixinMinecraftServer"
+    "MixinWorldNBTStorage"
   ]
 }
