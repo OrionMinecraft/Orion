@@ -30,7 +30,7 @@ dependencies {
     compile project(':orion.core')
     compile project(':orion.api')
 
-    compile group: 'eu.mikroskeem', name: 'picomaven', version: '0.0.1-SNAPSHOT'
+    compile group: 'eu.mikroskeem', name: 'picomaven', version: '0.0.2-SNAPSHOT'
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
     compile(group: 'eu.mikroskeem', name: 'shuriken.instrumentation', version: '0.0.1-SNAPSHOT') {
         exclude(module: 'asm-all')
