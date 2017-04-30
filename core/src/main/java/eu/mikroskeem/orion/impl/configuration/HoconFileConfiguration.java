@@ -157,5 +157,11 @@ public class HoconFileConfiguration implements Configuration {
             Ensure.notNull(orionConfiguration, "Configuration is not loaded yet!");
             return orionConfiguration.getPlayerConfiguration().getMillisecondsUntilToMarkPlayerAway();
         }
+
+        @Override
+        public boolean isPlayerDataSavingDisabled() {
+            Ensure.notNull(orionConfiguration, "Configuration is not loaded yet!");
+            return orionConfiguration.getPlayerConfiguration().isPlayerDataSavingDisabled();
+        }
     }
 }

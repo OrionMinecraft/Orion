@@ -1,8 +1,6 @@
 package eu.mikroskeem.orion.mod;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.minecraft.launchwrapper.ITweaker;
 import net.minecraft.launchwrapper.LaunchClassLoader;
@@ -13,15 +11,8 @@ import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.Mixins;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
-import java.util.jar.JarInputStream;
 
 /**
  * Orion Tweak class to load Mixins for CraftBukkit-derivatives
@@ -74,6 +65,7 @@ public class OrionTweakClass implements ITweaker {
         /* Mixins */
         Mixins.addConfiguration("orion.mixins.json");
         Mixins.addConfiguration("orion.spawnpoint.mixins.json");
+        Mixins.addConfiguration("orion.player.mixins.json");
 
         /* Ready */
         log.info("Done!");

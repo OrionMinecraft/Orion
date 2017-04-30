@@ -69,5 +69,6 @@ public interface Configuration {
     /* Player subconfiguration */
     interface PlayerConfiguration {
         long getMillisecondsUntilToMarkPlayerAway();
+        boolean isPlayerDataSavingDisabled();
     }
 }
