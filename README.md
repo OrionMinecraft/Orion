@@ -10,6 +10,7 @@ Paper server tweaks using SpongeMixin.
 - Get/set `CanDestroy` and `CanPlaceOn` tags on items (useful for Adventure gamemode) 
 - Unload plugins from plugin manager directly
 - Better `/plugins` command
+- Player data saving disable
 
 ## Complete-ish features:
 - [sentry.io](https://sentry.io) plugin event exception reporting
@@ -17,4 +18,3 @@ Paper server tweaks using SpongeMixin.
 
 ## Work in progress:
 - Custom plugin API
-- Player data saving disable
