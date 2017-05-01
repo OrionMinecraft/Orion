@@ -155,7 +155,7 @@ public class OrionCommand extends Command {
             }
         } else {
             message = new String[]{
-                "§8[§b§lOrion§8]§7 Orion Server Core",
+                "§8[§b§lOrion§8]§7 Orion Server Core (version §c"+Orion.getVersion()+"§7)",
                 "§7See §c/orion help§7 for more information"
             };
             sender.sendMessage(message);

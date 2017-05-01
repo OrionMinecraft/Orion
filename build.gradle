@@ -1,16 +1,33 @@
+buildscript {
+    repositories {
+        maven { url "https://plugins.gradle.org/m2/" }
+        jcenter()
+    }
+
+    dependencies {
+        classpath "com.github.jengelman.gradle.plugins:shadow:1.2.4"
+        classpath 'org.ajoberstar:grgit:1.9.2'
+    }
+}
+
+def repo = org.ajoberstar.grgit.Grgit.open()
+
 allprojects  {
     group = 'eu.mikroskeem'
-    version = '0.0.1-SNAPSHOT'
+    ext.majorVersion = '0.0.1'
+    ext.gitHash = "${repo.head().abbreviatedId}"
+    version = "${ext.majorVersion}-${ext.gitHash}"
 }
 
 subprojects {
     apply plugin: 'java'
+    apply plugin: 'idea'
+
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
     tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
     }
-
 
     repositories {
         mavenLocal()

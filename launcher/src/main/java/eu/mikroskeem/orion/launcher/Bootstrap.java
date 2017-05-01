@@ -46,6 +46,7 @@ import java.util.stream.Stream;
 @SuppressWarnings("unchecked")
 public class Bootstrap {
     private static String launchTargetClass;
+    private final static String orionVersion = Bootstrap.class.getPackage().getImplementationVersion();
 
     @SneakyThrows
     public static <UCPLoader extends Closeable, UCP> void main(String... args) {
@@ -60,7 +61,8 @@ public class Bootstrap {
             e.printStackTrace();
         }
 
-        log.info("Orion Launcher by mikroskeem");
+        System.setProperty("orion.version", orionVersion);
+        log.info("Orion Launcher (version {}) by mikroskeem", orionVersion);
         List<String> finalArgs = new ArrayList<>(Arrays.asList(
                 "--tweakClass",
                 "eu.mikroskeem.orion.mod.OrionTweakClass"

@@ -1,7 +1,6 @@
 package eu.mikroskeem.orion.mod.mixins;
 
-import com.google.common.collect.ImmutableList;
-import org.bukkit.command.Command;
+import eu.mikroskeem.orion.api.Orion;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.defaults.VersionCommand;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,6 +22,7 @@ public abstract class MixinVersionCommand {
     ))
     public void proxySendVersion(VersionCommand versionCommand, CommandSender sender) {
         sendVersion(sender);
-        sender.sendMessage("§7Server uses §bOrion Launcher §7made with §c\u2764 §7by §c§lmikroskeem");
+        sender.sendMessage("§7Server uses §bOrion Launcher §7(version §c"+ Orion.getVersion()+"§7) "+
+                "made with §c\u2764 §7by §c§lmikroskeem");
     }
 }

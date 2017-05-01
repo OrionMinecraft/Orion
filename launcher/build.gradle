@@ -1,20 +1,23 @@
 description = 'OrionLauncher'
 
-buildscript {
-    repositories {
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-    dependencies {
-        classpath "com.github.jengelman.gradle.plugins:shadow:1.2.4"
-    }
-}
-
 apply plugin: "com.github.johnrengelman.shadow"
 apply plugin: 'application'
 
+jar {
+    baseName = "${project.description}"
+    manifest {
+        attributes(
+                'Implementation-Version': version,
+                'Orion-Git-Hash': gitHash
+        )
+    }
+}
+
 shadowJar {
+    baseName = "${project.description}-shaded"
+    manifest {
+        inheritFrom project.tasks.jar.manifest
+    }
     dependencies {
         exclude dependency('com.google.gson:gson')
         exclude dependency("com.google.guava:guava")
@@ -24,6 +27,24 @@ shadowJar {
         exclude dependency('org.ow2.asm:asm-all')
     }
 }
+
+task copyNormal(type: Copy, dependsOn: [jar]) {
+    from jar
+    into "build/libs"
+    rename { String fileName ->
+        fileName.replace(jar.getArchiveName(), "${project.description}.jar")
+    }
+}
+
+task copyShaded(type: Copy, dependsOn: [shadowJar]) {
+    from shadowJar
+    into "build/libs"
+    rename { String fileName ->
+        fileName.replace(shadowJar.getArchiveName(), "${project.description}-shaded.jar")
+    }
+}
+
+task buildOrionLauncher(type: Task, dependsOn: [copyNormal, copyShaded]) {}
 
 dependencies {
     compile project(':orion.mixins')
@@ -39,7 +60,7 @@ dependencies {
     compileOnly group: 'net.minecraft', name: 'launchwrapper', version: '1.13-mikroskeem'
 }
 
-build.dependsOn shadowJar
+build.dependsOn buildOrionLauncher
 
 // Launcher info
 applicationName = "OrionLauncher"
