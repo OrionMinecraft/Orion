@@ -31,6 +31,11 @@ public final class PlayerPluginSendMessageEvent extends PlayerEvent implements C
         return message;
     }
 
+    /**
+     * Set message what player will receive
+     *
+     * @param message Message
+     */
     public void setMessage(String message) {
         this.message = message;
     }
