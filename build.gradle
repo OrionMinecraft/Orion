@@ -32,6 +32,7 @@ subprojects {
     repositories {
         mavenLocal()
         mavenCentral()
+        jcenter()
 
         maven { url "https://repo.destroystokyo.com/repository/maven-public//" }
         maven { url "https://hub.spigotmc.org/nexus/content/repositories/snapshots/" }
