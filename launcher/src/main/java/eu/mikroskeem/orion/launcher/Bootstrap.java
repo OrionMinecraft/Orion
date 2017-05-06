@@ -7,6 +7,7 @@ import eu.mikroskeem.orion.mod.OrionTweakClass;
 import eu.mikroskeem.picomaven.Dependency;
 import eu.mikroskeem.picomaven.DownloaderCallbacks;
 import eu.mikroskeem.picomaven.PicoMaven;
+import eu.mikroskeem.shuriken.common.Ensure;
 import eu.mikroskeem.shuriken.common.SneakyThrow;
 import eu.mikroskeem.shuriken.reflect.Reflect;
 import eu.mikroskeem.shuriken.reflect.wrappers.ClassWrapper;
@@ -88,6 +89,16 @@ public class Bootstrap {
                 new Dependency("ninja.leaping.configurate", "configurate-core", "3.2"),
                 new Dependency("ninja.leaping.configurate", "configurate-hocon", "3.2"),
 
+                /* ACF */
+                new Dependency("co.aikar", "acf-core", "0.4.0-SNAPSHOT"),
+                new Dependency("co.aikar", "minecraft-timings", "1.0.3"),
+
+                /* Kotlin */
+                new Dependency("org.jetbrains.kotlin", "kotlin-stdlib-jre8", "1.1.2-3"),
+                new Dependency("org.jetbrains.kotlin", "kotlin-stdlib-jre7", "1.1.2-3"),
+                new Dependency("org.jetbrains.kotlin", "kotlin-stdlib", "1.1.2-3"),
+                new Dependency("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "0.15"),
+
                 /* Debugging and reporting */
                 new Dependency("org.codehaus.groovy", "groovy-all", "2.4.10"),
                 new Dependency("com.fasterxml.jackson.core", "jackson-core", "2.8.7"),
@@ -119,7 +130,9 @@ public class Bootstrap {
                 "https://repo.maven.apache.org/maven2",                     /* Central */
                 "https://repo.wut.ee/repository/mikroskeem-repo",           /* Own repository */
                 "http://ci.emc.gs/nexus/content/groups/aikar",              /* aikar's repository */
-                "https://repo.spongepowered.org/maven"                      /* SpongePowered repository */
+                "https://repo.spongepowered.org/maven",                     /* SpongePowered repository */
+                "https://oss.sonatype.org/content/groups/public",           /* OSS Sonatype */
+                "http://jcenter.bintray.com"                                /* JCenter */
         ).map(URI::create).collect(Collectors.toList());
 
         /* Build PicoMaven and download dependencies */
@@ -155,6 +168,11 @@ public class Bootstrap {
         libraries.add(serverJar.toUri().toURL());
         try(PicoMaven runtimeDepsDownloader = picoMaven.withDependencies(dependencies).build()) {
             List<Path> downloaded = runtimeDepsDownloader.downloadAll();
+
+            /* Check if all dependencies got downloaded or not */
+            Ensure.ensureCondition(downloaded.size() == dependencies.size(), IllegalStateException.class,
+                    TypeWrapper.of("Failed to download all dependencies!"));
+
             /* Build libraries URL list */
             libraries.addAll(downloaded.stream().map(Bootstrap::convertPath).collect(Collectors.toList()));
         }

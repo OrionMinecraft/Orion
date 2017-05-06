@@ -5,9 +5,9 @@ dependencies {
     compile group: 'eu.mikroskeem', name: 'shuriken.instrumentation', version: '0.0.1-SNAPSHOT'
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
 
-    compileOnly group: 'co.aikar', name: 'taskchain-bukkit', version: '3.4.3'
-    compileOnly group: 'com.github.zafarkhaja', name: 'java-semver', version: '0.9.0'
-    compileOnly group: 'com.google.inject', name: 'guice', version: '4.1.0'
+    compileOnly group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib-jre8', version: '1.1.2-3'
+    compileOnly group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: '0.15'
+    compileOnly group: 'co.aikar', name: 'acf-core', version: '0.4.0-SNAPSHOT'
     compileOnly group: 'org.apache.commons', name: 'commons-lang3', version: '3.5'
     compileOnly group: 'com.destroystokyo.paper', name: 'paper-api', version: '1.11.2-R0.1-SNAPSHOT'
 }
