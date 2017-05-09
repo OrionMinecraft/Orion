@@ -9,7 +9,9 @@ import eu.mikroskeem.picomaven.DownloaderCallbacks;
 import eu.mikroskeem.picomaven.PicoMaven;
 import eu.mikroskeem.shuriken.common.Ensure;
 import eu.mikroskeem.shuriken.common.SneakyThrow;
+import eu.mikroskeem.shuriken.common.ToURL;
 import eu.mikroskeem.shuriken.reflect.Reflect;
+import eu.mikroskeem.shuriken.reflect.utils.FunctionalField;
 import eu.mikroskeem.shuriken.reflect.wrappers.ClassWrapper;
 import eu.mikroskeem.shuriken.reflect.wrappers.FieldWrapper;
 import eu.mikroskeem.shuriken.reflect.wrappers.TypeWrapper;
@@ -21,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -117,6 +118,12 @@ public class Bootstrap {
                 new Dependency("com.google.guava", "guava", "17.0"),
                 new Dependency("com.google.code.gson", "gson", "2.2.4"),
 
+                /* Mod loader dependencies */
+                new Dependency("com.github.zafarkhaja", "java-semver", "0.9.0"),
+                new Dependency("com.google.inject", "guice", "4.1.0"),
+                new Dependency("aopalliance", "aopalliance", "1.0"),
+                new Dependency("javax.inject", "javax.inject", "1"),
+
                 /* LegacyLauncher dependencies */
                 new Dependency("org.apache.logging.log4j", "log4j-api", "2.0-beta9"),
                 new Dependency("org.apache.logging.log4j", "log4j-core", "2.0-beta9"),
@@ -174,7 +181,7 @@ public class Bootstrap {
                     TypeWrapper.of("Failed to download all dependencies!"));
 
             /* Build libraries URL list */
-            libraries.addAll(downloaded.stream().map(Bootstrap::convertPath).collect(Collectors.toList()));
+            libraries.addAll(downloaded.stream().map(ToURL::to).collect(Collectors.toList()));
         }
 
         /* Shut down executor service */
@@ -228,11 +235,11 @@ public class Bootstrap {
 
         if(System.getProperties().getProperty("java.vendor").contains("Oracle")) { /* Oracle JVM-specific */
             /* Re-enable lookup cache (the addURL will disable it) */
-            ucpWrapper.getField("lookupCacheEnabled", boolean.class).ifPresent(Bootstrap::writeTrue);
+            ucpWrapper.getField("lookupCacheEnabled", boolean.class).ifPresent(FunctionalField::writeTrue);
 
             /* Force cache repopulation */
-            ucpWrapper.getField("lookupCacheURLs", URL[].class).ifPresent(Bootstrap::writeNull);
-            ucpWrapper.getField("lookupCacheLoader", ClassLoader.class).ifPresent(Bootstrap::writeNull);
+            ucpWrapper.getField("lookupCacheURLs", URL[].class).ifPresent(FunctionalField::writeNull);
+            ucpWrapper.getField("lookupCacheLoader", ClassLoader.class).ifPresent(FunctionalField::writeNull);
         }
 
         /* Start LegacyLauncer */
@@ -250,20 +257,5 @@ public class Bootstrap {
         } else {
             log.error("Failed to find class 'net.minecraft.launchwrapper.Launch'!");
         }
-    }
-
-    @SneakyThrows(MalformedURLException.class)
-    private static URL convertPath(Path path) {
-        return path.toUri().toURL();
-    }
-
-    @SneakyThrows
-    private static void writeTrue(FieldWrapper<Boolean> fieldWrapper) {
-        fieldWrapper.write(true);
-    }
-
-    @SneakyThrows
-    private static void writeNull(FieldWrapper<?> fieldWrapper) {
-        fieldWrapper.write(null);
     }
 }

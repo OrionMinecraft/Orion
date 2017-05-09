@@ -3,9 +3,9 @@ description = 'OrionCore'
 dependencies {
     compile project(':orion.api')
     compile group: 'eu.mikroskeem', name: 'picomaven', version: '0.0.2-SNAPSHOT'
-    compileOnly group: 'io.github.lukehutch', name: 'fast-classpath-scanner', version: '2.0.19'
-    compileOnly group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.10'
-    compileOnly group: 'com.getsentry.raven', name: 'raven', version: '8.0.1'
-    compileOnly group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '2.4.0'
-    compileOnly group: 'com.destroystokyo.paper', name: 'paper-api', version: '1.11.2-R0.1-SNAPSHOT'
+    compile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.6.0'
+    compile group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '2.4.0'
+    compile group: 'io.github.lukehutch', name: 'fast-classpath-scanner', version: '2.0.19'
+    compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.10'
+    compile group: 'com.getsentry.raven', name: 'raven', version: '8.0.1'
 }

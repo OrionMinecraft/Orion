@@ -9,6 +9,5 @@ dependencies {
     compileOnly(group: 'net.md-5', name: 'bungeecord-chat', version: '1.10-SNAPSHOT') {
         exclude(module: '*')
     }
-    compileOnly group: 'org.apache.commons', name: 'commons-lang3', version: '3.5'
     compileOnly group: 'com.destroystokyo.paper', name: 'paper', version: '1.11.2-R0.1-SNAPSHOT'
 }

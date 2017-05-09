@@ -19,12 +19,27 @@ shadowJar {
         inheritFrom project.tasks.jar.manifest
     }
     dependencies {
-        exclude dependency('com.google.gson:gson')
-        exclude dependency("com.google.guava:guava")
-        exclude dependency("ninja.leaping.configurate:configurate-core")
-        exclude dependency("ninja.leaping.configurate:configurate-hocon")
-        exclude dependency("com.typesafe:config")
-        exclude dependency('org.ow2.asm:asm-all')
+        // Tools
+        include dependency('eu.mikroskeem:shuriken.common')
+        include dependency('eu.mikroskeem:shuriken.instrumentation')
+        include dependency('eu.mikroskeem:shuriken.reflect')
+
+        // Dependency downloader
+        include dependency('eu.mikroskeem:picomaven')
+        include dependency('com.squareup.okhttp3:okhttp')
+        include dependency('com.squareup.okio:okio')
+        include dependency('org.apache.maven:maven-repository-metadata')
+        include dependency('org.codehaus.plexus:plexus-utils')
+
+        // Logging
+        include dependency('org.slf4j:slf4j-api')
+        include dependency('ch.qos.logback:logback-classic')
+        include dependency('ch.qos.logback:logback-core')
+
+        // Orion
+        include project(':orion.mixins')
+        include project(':orion.core')
+        include project(':orion.api')
     }
 }
 
