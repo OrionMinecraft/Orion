@@ -21,7 +21,7 @@ public interface ItemStack extends BukkitItemStack {
      *
      * @return Set of materials
      */
-    Collection<Material> getCanDestoy();
+    Collection<Material> getCanDestroy();
 
     /**
      * Set materials what given {@link org.bukkit.inventory.ItemStack} can be placed on

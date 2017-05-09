@@ -1,11 +1,14 @@
 package eu.mikroskeem.orion.mod.mixins;
 
 import eu.mikroskeem.orion.api.items.ItemStack;
-import eu.mikroskeem.shuriken.common.Ensure;
 import lombok.NonNull;
-import net.minecraft.server.v1_11_R1.*;
+import net.minecraft.server.v1_11_R1.Block;
+import net.minecraft.server.v1_11_R1.NBTTagCompound;
+import net.minecraft.server.v1_11_R1.NBTTagList;
+import net.minecraft.server.v1_11_R1.NBTTagString;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_11_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_11_R1.util.CraftMagicNumbers;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -13,8 +16,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.stream.Collectors;
-
-import static org.bukkit.craftbukkit.v1_11_R1.inventory.CraftItemStack.asNMSCopy;
 
 /**
  * @author Mark Vainomaa
@@ -42,7 +43,7 @@ public abstract class MixinCraftItemStack implements ItemStack {
     }
 
     @Override
-    public Collection<Material> getCanDestoy() {
+    public Collection<Material> getCanDestroy() {
         /* Get tag */
         NBTTagCompound tag;
         if((tag = handle.getTag()) == null) tag = new NBTTagCompound();
@@ -53,9 +54,7 @@ public abstract class MixinCraftItemStack implements ItemStack {
             return canDestroy.list.stream()
                     .map(nbtBase -> (NBTTagString)nbtBase)
                     .map(NBTTagString::c_)
-                    .map(Item::b)
-                    .map(CraftItemStack::asNewCraftStack)
-                    .map(org.bukkit.inventory.ItemStack::getType)
+                    .map(CraftMagicNumbers.INSTANCE::getMaterialFromInternalName)
                     .collect(Collectors.toSet());
         }
 
@@ -93,9 +92,7 @@ public abstract class MixinCraftItemStack implements ItemStack {
             return canDestroy.list.stream()
                     .map(nbtBase -> (NBTTagString)nbtBase)
                     .map(NBTTagString::c_)
-                    .map(Item::b)
-                    .map(CraftItemStack::asNewCraftStack)
-                    .map(org.bukkit.inventory.ItemStack::getType)
+                    .map(CraftMagicNumbers.INSTANCE::getMaterialFromInternalName)
                     .collect(Collectors.toSet());
         }
 
@@ -105,8 +102,6 @@ public abstract class MixinCraftItemStack implements ItemStack {
 
     /* Material.DIAMOND_ORE -> minecraft:diamond_ore */
     private String orion$getItemId(Material material) {
-        net.minecraft.server.v1_11_R1.ItemStack breakableItemStack = asNMSCopy(new org.bukkit.inventory.ItemStack(material, 1));
-        MinecraftKey minecraftKey = Ensure.notNull(Item.REGISTRY.b(breakableItemStack.getItem()), "");
-        return minecraftKey.toString();
+        return Block.REGISTRY.b(CraftMagicNumbers.getBlock(material)).toString();
     }
 }
