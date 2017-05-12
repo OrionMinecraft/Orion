@@ -90,6 +90,10 @@ public class Bootstrap {
                 new Dependency("ninja.leaping.configurate", "configurate-core", "3.2"),
                 new Dependency("ninja.leaping.configurate", "configurate-hocon", "3.2"),
 
+                /* Database */
+                new Dependency("com.zaxxer", "HikariCP", "2.6.1"),
+                new Dependency("com.h2database", "h2", "1.4.195"),
+
                 /* ACF */
                 new Dependency("co.aikar", "acf-core", "0.4.0-SNAPSHOT"),
                 new Dependency("co.aikar", "minecraft-timings", "1.0.3"),
