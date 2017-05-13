@@ -12,14 +12,13 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 /**
  * @author Mark Vainomaa
  */
-@Mixin(PlayerList.class)
+@Mixin(value = PlayerList.class, remap = false)
 public abstract class MixinPlayerList {
     private final static String MOVE_TO_WORLD = "moveToWorld(Lnet/minecraft/server/v1_11_R1/EntityPlayer;IZ" +
             "Lorg/bukkit/Location;Z)Lnet/minecraft/server/v1_11_R1/EntityPlayer;";
 
-    @Redirect(remap = false, method = MOVE_TO_WORLD,
-            at = @At(remap = false,
-            value = "NEW",
+    @Redirect(method = MOVE_TO_WORLD,
+            at = @At(value = "NEW",
             target = "(Lorg/bukkit/World;DDD)Lorg/bukkit/Location;",
             ordinal = 1,
             args = "class=org/bukkit/Location"

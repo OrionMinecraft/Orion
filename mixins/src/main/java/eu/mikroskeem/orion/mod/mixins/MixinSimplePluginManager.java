@@ -35,12 +35,12 @@ import java.util.*;
 /**
  * @author Mark Vainomaa
  */
-@Mixin(SimplePluginManager.class)
+@Mixin(value = SimplePluginManager.class, remap = false)
 @Slf4j
 public abstract class MixinSimplePluginManager implements ExposedPluginManager {
-    @Shadow(remap = false) @Final private Map<String, Plugin> lookupNames;
-    @Shadow(remap = false) @Final private List<Plugin> plugins;
-    @Shadow(remap = false) @Final private SimpleCommandMap commandMap;
+    @Shadow @Final private Map<String, Plugin> lookupNames;
+    @Shadow @Final private List<Plugin> plugins;
+    @Shadow @Final private SimpleCommandMap commandMap;
 
     @Override
     public Map<String, Plugin> getLookupNames(){
@@ -90,10 +90,9 @@ public abstract class MixinSimplePluginManager implements ExposedPluginManager {
         System.gc();
     }
 
-    @Redirect(method = "fireEvent(Lorg/bukkit/event/Event;)V", remap = false, at = @At(
+    @Redirect(method = "fireEvent(Lorg/bukkit/event/Event;)V", at = @At(
             value = "INVOKE",
-            target = "Lorg/bukkit/event/Event;getHandlers()Lorg/bukkit/event/HandlerList;",
-            remap = false
+            target = "Lorg/bukkit/event/Event;getHandlers()Lorg/bukkit/event/HandlerList;"
     ))
     @SuppressWarnings("unchecked")
     public <T extends Event> HandlerList fireEventProxy(Event event){
@@ -108,7 +107,7 @@ public abstract class MixinSimplePluginManager implements ExposedPluginManager {
         return event.getHandlers();
     }
 
-    @Inject(method = "fireEvent(Lorg/bukkit/event/Event;)V", remap = false, at = @At(value = "HEAD", remap = false))
+    @Inject(method = "fireEvent(Lorg/bukkit/event/Event;)V", at = @At("HEAD"))
     public void onFireEvent(Event event, CallbackInfo callbackInfo){
         Configuration configuration = Orion.getServer().getConfiguration();
         if(configuration.getDebug().isEventDumpingAllowed()) {
@@ -116,10 +115,9 @@ public abstract class MixinSimplePluginManager implements ExposedPluginManager {
         }
     }
 
-    @Redirect(method = "fireEvent(Lorg/bukkit/event/Event;)V", remap = false, at = @At(
+    @Redirect(method = "fireEvent(Lorg/bukkit/event/Event;)V", at = @At(
             value = "INVOKE",
-            target = "Lorg/bukkit/plugin/RegisteredListener;callEvent(Lorg/bukkit/event/Event;)V",
-            remap = false
+            target = "Lorg/bukkit/plugin/RegisteredListener;callEvent(Lorg/bukkit/event/Event;)V"
     ))
     public void callEventProxy(RegisteredListener registeredListener, Event event) {
         OrionServer server = Orion.getServer();

@@ -15,13 +15,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * @author Mark Vainomaa
  */
-@Mixin(PlayerConnection.class)
+@Mixin(value = PlayerConnection.class, remap = false)
 public abstract class MixinPlayerConnection {
-    @Shadow(remap = false) public abstract CraftPlayer getPlayer();
+    @Shadow public abstract CraftPlayer getPlayer();
 
     private int orion$awayTicks = 0;
 
-    @Inject(remap = false, method = "F_", at = @At(remap = false, value = "TAIL"))
+    @Inject(method = "F_", at = @At("TAIL"))
     public void onUpdate(CallbackInfo cb) {
         Player player = (Player) getPlayer();
         if(player.isAway()) {

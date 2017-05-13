@@ -11,13 +11,12 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 /**
  * @author Mark Vainomaa
  */
-@Mixin(VersionCommand.class)
+@Mixin(value = VersionCommand.class, remap = false)
 public abstract class MixinVersionCommand {
-    @Shadow(remap = false) protected abstract void sendVersion(CommandSender sender);
+    @Shadow protected abstract void sendVersion(CommandSender sender);
 
-    @Redirect(remap = false,
-            method = "execute(Lorg/bukkit/command/CommandSender;Ljava/lang/String;[Ljava/lang/String;)Z",
-            at = @At(remap = false, value = "INVOKE",
+    @Redirect(method = "execute(Lorg/bukkit/command/CommandSender;Ljava/lang/String;[Ljava/lang/String;)Z",
+            at = @At(value = "INVOKE",
             target = "Lorg/bukkit/command/defaults/VersionCommand;sendVersion(Lorg/bukkit/command/CommandSender;)V"
     ))
     public void proxySendVersion(VersionCommand versionCommand, CommandSender sender) {

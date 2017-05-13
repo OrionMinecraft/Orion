@@ -12,11 +12,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * @author Mark Vainomaa
  */
-@Mixin(World.class)
+@Mixin(value = World.class, remap = false)
 public abstract class MixinWorld {
-    @Shadow(remap = false) public WorldData worldData;
+    @Shadow public WorldData worldData;
 
-    @Inject(remap = false, method = "A", cancellable = true, at = @At(remap = false, value = "HEAD"))
+    @Inject(method = "A", cancellable = true, at = @At("HEAD"))
     public void onSetSpawn(BlockPosition blockposition, CallbackInfo cb) {
         new Throwable("World -> setSpawn(). Please report this to @mikroskeem").printStackTrace();
         cb.cancel();

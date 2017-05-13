@@ -10,12 +10,12 @@ import org.spongepowered.asm.mixin.Shadow;
 /**
  * @author Mark Vainomaa
  */
-@Mixin(Command.class)
+@Mixin(value = Command.class, remap = false)
 public abstract class MixinCommand {
-    @Shadow(remap = false) private String permission;
-    @Shadow(remap = false) private String name;
-    @Shadow(remap = false) private String permissionMessage;
-    @Shadow(remap = false) public abstract boolean testPermissionSilent(CommandSender target);
+    @Shadow private String permission;
+    @Shadow private String name;
+    @Shadow private String permissionMessage;
+    @Shadow public abstract boolean testPermissionSilent(CommandSender target);
 
     public boolean testPermission(CommandSender target) {
         if (!testPermissionSilent(target)) {

@@ -14,15 +14,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * @author Mark Vainomaa
  */
-@Mixin(WorldData.class)
+@Mixin(value = WorldData.class, remap = false)
 public abstract class MixinWorldData implements OrionWorldData {
-    @Shadow(remap = false) public WorldServer world;
-    @Shadow(remap = false) public abstract int b();
-    @Shadow(remap = false) public abstract int c();
-    @Shadow(remap = false) public abstract int d();
-    @Shadow(remap = false) private int h;
-    @Shadow(remap = false) private int j;
-    @Shadow(remap = false) private int i;
+    @Shadow public WorldServer world;
+    @Shadow public abstract int b();
+    @Shadow public abstract int c();
+    @Shadow public abstract int d();
+    @Shadow private int h;
+    @Shadow private int j;
+    @Shadow private int i;
 
     @Getter @Setter private double spawnpointX;
     @Getter @Setter private double spawnpointY;
@@ -57,10 +57,8 @@ public abstract class MixinWorldData implements OrionWorldData {
     }
 
     /* updateTagCompound - in MCP */
-    @Inject(remap = false, method = "a(Lnet/minecraft/server/v1_11_R1/NBTTagCompound;" +
-            "Lnet/minecraft/server/v1_11_R1/NBTTagCompound;)V", at = @At(remap = false,
-            value = "HEAD"
-    ))
+    @Inject(method = "a(Lnet/minecraft/server/v1_11_R1/NBTTagCompound;" +
+            "Lnet/minecraft/server/v1_11_R1/NBTTagCompound;)V", at = @At("HEAD"))
     public void onUpdateTagCompound(NBTTagCompound nbt, NBTTagCompound playerNbt, CallbackInfo cb) {
         NBTTagCompound orionSpawn = new NBTTagCompound();
         orionSpawn.setDouble("x", spawnpointX);
@@ -71,9 +69,7 @@ public abstract class MixinWorldData implements OrionWorldData {
         nbt.set("orion.spawnpoint", orionSpawn);
     }
 
-    @Inject(remap = false, method = "<init>(Lnet/minecraft/server/v1_11_R1/NBTTagCompound;)V", at = @At(remap = false,
-            value = "RETURN"
-    ))
+    @Inject(method = "<init>(Lnet/minecraft/server/v1_11_R1/NBTTagCompound;)V", at = @At("RETURN"))
     public void onConstructUsingNBT(NBTTagCompound nbt, CallbackInfo cb) {
         this.spawnpointX = this.b();
         this.spawnpointY = this.c();
@@ -90,9 +86,7 @@ public abstract class MixinWorldData implements OrionWorldData {
         }
     }
 
-    @Inject(remap = false, method = "<init>(Lnet/minecraft/server/v1_11_R1/WorldData;)V", at = @At(remap = false,
-            value = "RETURN"
-    ))
+    @Inject(method = "<init>(Lnet/minecraft/server/v1_11_R1/WorldData;)V", at = @At("RETURN"))
     public void onConstructUsingOtherWorldData(WorldData worldData, CallbackInfo cb) {
         OrionWorldData orionWorldData = ((OrionWorldData) worldData);
         this.spawnpointX = orionWorldData.getSpawnpointX();
@@ -103,7 +97,7 @@ public abstract class MixinWorldData implements OrionWorldData {
     }
 
     /* Cancel spawn setting from internal NMS code */
-    @Inject(remap = false, method = "setSpawn", cancellable = true, at = @At(remap = false, value = "HEAD"))
+    @Inject(method = "setSpawn", cancellable = true, at = @At("HEAD"))
     public void onSetSpawn(BlockPosition blockPosition, CallbackInfo cb) {
         new Throwable("WorldData -> setSpawn(). Please report this to @mikroskeem").printStackTrace();
         cb.cancel();

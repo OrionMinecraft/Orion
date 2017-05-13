@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.Mixin;
 /**
  * @author Mark Vainomaa
  */
-@Mixin(Event.class)
+@Mixin(value = Event.class, remap = false)
 public abstract class MixinEvent {
     @Override
     public String toString(){

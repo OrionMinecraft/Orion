@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * @author Mark Vainomaa
  */
-@Mixin(PluginsCommand.class)
+@Mixin(value = PluginsCommand.class, remap = false)
 public abstract class MixinPluginsCommand extends Command {
     public MixinPluginsCommand(){super(null, null, null, ImmutableList.of()); }
 

@@ -21,11 +21,11 @@ import java.util.zip.ZipFile;
 /**
  * @author Mark Vainomaa
  */
-@Mixin(PluginClassLoader.class)
+@Mixin(value = PluginClassLoader.class, remap = false)
 public abstract class MixinPluginClassLoader extends URLClassLoader implements ExposedPluginClassLoader {
     public MixinPluginClassLoader(URL[] urls) {super(urls);}
 
-    @Shadow(remap = false) @Final private Map<String, Class<?>> classes;
+    @Shadow @Final private Map<String, Class<?>> classes;
     private final Map<String, Package> orion$generatedPackages = new HashMap<>();
 
     @Override

@@ -12,9 +12,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * @author Mark Vainomaa
  */
-@Mixin(Bukkit.class)
+@Mixin(value = Bukkit.class, remap = false)
 public abstract class MixinBukkit {
-    @Inject(remap = false, method = "setServer(Lorg/bukkit/Server;)V", at = @At(value = "HEAD", remap = false))
+    @Inject(method = "setServer(Lorg/bukkit/Server;)V", at = @At("HEAD"))
     private static void onSetServer(Server server, CallbackInfo callbackInfo){
         Orion.setServer(new OrionServerCore());
         Orion.setVersion(System.getProperty("orion.version"));

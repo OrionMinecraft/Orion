@@ -11,9 +11,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /**
  * @author Mark Vainomaa
  */
-@Mixin(DedicatedServer.class)
+@Mixin(value = DedicatedServer.class, remap = false)
 public abstract class MixinDedicatedServer {
-    @Inject(remap = false, method = "init", at = @At(remap = false, value = "TAIL"))
+    @Inject(method = "init", at = @At("TAIL"))
     public void onDone(CallbackInfoReturnable<Boolean> cb) {
         Bukkit.getPluginManager().callEvent(new ServerStartedEvent());
     }

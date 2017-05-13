@@ -12,9 +12,9 @@ import java.util.List;
 /**
  * @author Mark Vainomaa
  */
-@Mixin(JavaPluginLoader.class)
+@Mixin(value = JavaPluginLoader.class, remap = false)
 public class MixinJavaPluginLoader implements ExposedJavaPluginLoader {
-    @Shadow(remap = false) @Final private List<PluginClassLoader> loaders;
+    @Shadow @Final private List<PluginClassLoader> loaders;
 
     @Override
     public List<PluginClassLoader> getLoaders(){

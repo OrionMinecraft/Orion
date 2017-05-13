@@ -20,18 +20,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * @author Mark Vainomaa
  */
-@Mixin(SimpleCommandMap.class)
+@Mixin(value = SimpleCommandMap.class, remap = false)
 public abstract class MixinSimpleCommandMap {
-    @Shadow(remap = false) public abstract boolean register(String fallbackPrefix, Command command);
+    @Shadow public abstract boolean register(String fallbackPrefix, Command command);
 
-    @Inject(remap = false, method = "setDefaultCommands()V", at = @At(remap = false, value = "HEAD"))
+    @Inject(method = "setDefaultCommands()V", at = @At("HEAD"))
     public void onSetDefaultCommands(CallbackInfo callbackInfo){
         register("orion", new OrionCommand("orion"));
         register("orion", new SetWorldSpawnCommand("setworldspawn"));
     }
 
-    @Redirect(remap = false, method = "dispatch", at = @At(remap = false,
-            value = "INVOKE",
+    @Redirect(method = "dispatch", at = @At(value = "INVOKE",
             target = "Lorg/bukkit/command/Command;execute(Lorg/bukkit/command/CommandSender;" +
                     "Ljava/lang/String;[Ljava/lang/String;)Z"
     ))

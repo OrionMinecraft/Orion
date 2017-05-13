@@ -12,9 +12,9 @@ import org.spongepowered.asm.mixin.Shadow;
 /**
  * @author Mark Vainomaa
  */
-@Mixin(CraftWorld.class)
+@Mixin(value = CraftWorld.class, remap = false)
 public abstract class MixinCraftWorld implements World {
-    @Shadow(remap = false) @Final private WorldServer world;
+    @Shadow @Final private WorldServer world;
 
     @Override
     public Location getSpawnLocation() {

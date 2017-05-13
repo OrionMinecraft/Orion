@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.Mixin;
 /**
  * @author Mark Vainomaa
  */
-@Mixin(CommandSetWorldSpawn.class)
+@Mixin(value = CommandSetWorldSpawn.class, remap = false)
 public abstract class MixinCommandSetWorldSpawn {
     /* TODO: Better solution */
     public void execute(MinecraftServer server, ICommandListener sender, String[] args) throws CommandException {

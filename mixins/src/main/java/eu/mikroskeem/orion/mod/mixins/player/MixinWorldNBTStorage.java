@@ -14,19 +14,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /**
  * @author Mark Vainomaa
  */
-@Mixin(WorldNBTStorage.class)
+@Mixin(value = WorldNBTStorage.class, remap = false)
 @Implements(@Interface(iface = IPlayerFileData.class, prefix = "pfd$"))
 public abstract class MixinWorldNBTStorage {
-    @Shadow(remap = false) public abstract String[] getSeenPlayers();
+    @Shadow public abstract String[] getSeenPlayers();
 
-    @Inject(remap = false, method = "save", cancellable = true, at = @At(remap = false, value = "HEAD"))
+    @Inject(method = "save", cancellable = true, at = @At("HEAD"))
     public void onSave(EntityHuman e, CallbackInfo cb) {
         if(Orion.getServer().getConfiguration().getPlayerConfiguration().isPlayerDataSavingDisabled()) {
             cb.cancel();
         }
     }
 
-    @Inject(remap = false, method = "load", cancellable = true, at = @At(remap = false, value = "HEAD"))
+    @Inject(method = "load", cancellable = true, at = @At("HEAD"))
     public void load(EntityHuman e, CallbackInfoReturnable<NBTTagCompound> cb) {
         if(Orion.getServer().getConfiguration().getPlayerConfiguration().isPlayerDataSavingDisabled()) {
             cb.setReturnValue(null);

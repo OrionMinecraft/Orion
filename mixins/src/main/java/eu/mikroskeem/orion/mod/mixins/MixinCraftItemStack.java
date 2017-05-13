@@ -20,9 +20,9 @@ import java.util.stream.Collectors;
 /**
  * @author Mark Vainomaa
  */
-@Mixin(CraftItemStack.class)
+@Mixin(value = CraftItemStack.class, remap = false)
 public abstract class MixinCraftItemStack implements ItemStack {
-    @Shadow(remap = false) net.minecraft.server.v1_11_R1.ItemStack handle;
+    @Shadow net.minecraft.server.v1_11_R1.ItemStack handle;
 
     @Override
     public void setCanDestroy(@NonNull Collection<Material> materials) {
