@@ -134,7 +134,7 @@ public class Bootstrap {
                 new Dependency("net.sf.jopt-simple", "jopt-simple", "4.9"),
 
                 new Dependency("net.minecraft", "launchwrapper", "1.13-mikroskeem"),
-                new Dependency("org.spongepowered", "mixin", "0.6.8-SNAPSHOT")
+                new Dependency("org.spongepowered", "mixin", "0.6.9-SNAPSHOT")
         );
 
         List<URI> repositories = Stream.of(

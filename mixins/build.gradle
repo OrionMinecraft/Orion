@@ -2,7 +2,7 @@ description = 'OrionMixins'
 dependencies {
     compile project(':orion.core')
 
-    compileOnly group: 'org.spongepowered', name: 'mixin', version: '0.6.8-SNAPSHOT'
+    compileOnly group: 'org.spongepowered', name: 'mixin', version: '0.6.9-SNAPSHOT'
     compileOnly(group: 'com.destroystokyo.paper', name: 'paper-api', version: '1.11.2-R0.1-SNAPSHOT') {
         exclude(module: '*')
     }
