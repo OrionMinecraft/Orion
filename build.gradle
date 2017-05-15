@@ -33,6 +33,7 @@ subprojects {
         mavenLocal()
         mavenCentral()
         jcenter()
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
 
         maven { url "https://repo.destroystokyo.com/repository/maven-public//" }
         maven { url "https://hub.spigotmc.org/nexus/content/repositories/snapshots/" }
