@@ -23,7 +23,7 @@ public @interface OrionMod {
     String[] authors() default {};
 
     /**
-     * Mixin configuration names. <br/>
+     * Mixin configuration names. <br>
      * Leave empty to not configure mixins (though that is the key feature of
      * Orion mods currently).
      * Mixin configurations must use <pre>mixins.PLUGINNAME.MIXINNAME.json</pre> scheme, otherwise
