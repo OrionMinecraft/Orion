@@ -13,9 +13,7 @@ public interface World extends org.bukkit.World {
      */
     @Override
     @Deprecated
-    default boolean setSpawnLocation(int x, int y, int z) {
-        return setSpawnLocation(new Location(null, x, y, z, 0, 0));
-    }
+    boolean setSpawnLocation(int x, int y, int z);
 
     /**
      * Set world spawn location

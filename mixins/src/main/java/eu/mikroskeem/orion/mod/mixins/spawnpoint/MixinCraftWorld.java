@@ -30,6 +30,11 @@ public abstract class MixinCraftWorld implements World {
     }
 
     @Override
+    public boolean setSpawnLocation(int x, int y, int z) {
+        return setSpawnLocation(new Location(null, x, y, z, 0, 0));
+    }
+
+    @Override
     public String toString() {
         return "OrionWorld{name=" + this.getName() + '}';
     }
