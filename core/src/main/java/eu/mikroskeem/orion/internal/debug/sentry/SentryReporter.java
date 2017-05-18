@@ -19,7 +19,7 @@ import java.util.Arrays;
  */
 @RequiredArgsConstructor
 @Slf4j
-public class SentryReporter {
+public class SentryReporter implements eu.mikroskeem.orion.api.server.SentryReporter {
     private final OrionServerCore core;
     private Raven raven;
 
