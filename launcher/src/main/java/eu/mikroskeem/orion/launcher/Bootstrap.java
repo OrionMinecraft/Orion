@@ -257,7 +257,7 @@ public class Bootstrap {
                 launchClass.invokeMethod("main", void.class,
                         TypeWrapper.of(String[].class, finalArgs.toArray(new String[0])));
             } catch (Exception e) {
-                log.error("Failed to start LegacyLauncher! {}", e);
+                log.error("Failed to start LegacyLauncher!", e);
             }
         } else {
             log.error("Failed to find class 'net.minecraft.launchwrapper.Launch'!");
