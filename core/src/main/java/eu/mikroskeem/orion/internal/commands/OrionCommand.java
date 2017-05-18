@@ -5,7 +5,7 @@ import eu.mikroskeem.orion.api.Orion;
 import eu.mikroskeem.orion.api.utils.DateUtil;
 import eu.mikroskeem.orion.internal.debug.ClassCache;
 import eu.mikroskeem.orion.internal.debug.DebugListenerManager;
-import eu.mikroskeem.orion.internal.debug.PasteUtility;
+import eu.mikroskeem.orion.api.utils.PasteUtil;
 import eu.mikroskeem.shuriken.common.Ensure;
 import lombok.extern.slf4j.Slf4j;
 import org.bukkit.Bukkit;
@@ -98,7 +98,7 @@ public class OrionCommand extends Command {
                                             StringWriter sw = new StringWriter();
                                             PrintWriter pw = new PrintWriter(sw);
                                             e.printStackTrace(pw);
-                                            PasteUtility.pasteText(sw.toString(), url -> {
+                                            PasteUtil.pasteText(sw.toString(), url -> {
                                                 if(url != null) {
                                                     sender.sendMessage("§8[§b§lOrion§8] §7Stack trace: §n" + url.toString());
                                                 } else {

@@ -24,6 +24,7 @@ dependencies {
     compile group: 'com.google.inject', name: 'guice', version: '4.1.0'
     compile group: 'com.zaxxer', name: 'HikariCP', version: '2.6.1'
     compile group: 'com.h2database', name: 'h2', version: '1.4.195'
+    compile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.6.0'
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {

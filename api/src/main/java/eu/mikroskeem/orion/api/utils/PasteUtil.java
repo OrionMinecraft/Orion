@@ -1,4 +1,4 @@
-package eu.mikroskeem.orion.internal.debug;
+package eu.mikroskeem.orion.api.utils;
 
 import com.google.gson.JsonParser;
 import eu.mikroskeem.orion.api.Orion;
@@ -17,10 +17,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 /**
+ * Hastebin wrapper utility
+ *
  * @author Mark Vainomaa
  */
 @Slf4j
-public class PasteUtility {
+public class PasteUtil {
     private final static AtomicInteger THREAD_COUNTER = new AtomicInteger(0);
 
     private static OkHttpClient httpClient = null;
@@ -43,6 +45,12 @@ public class PasteUtility {
         }
     }
 
+    /**
+     * Paste text to hastebin
+     *
+     * @param content Paste content
+     * @param resultConsumer Lambda to get URL (null if exception)
+     */
     public static void pasteText(@NotNull String content, Consumer<URL> resultConsumer) {
         init();
         String hastebinUrl = Orion.getServer().getConfiguration().getDebug().getHastebinUrl();

@@ -3,7 +3,6 @@ description = 'OrionCore'
 dependencies {
     compile project(':orion.api')
     compile group: 'eu.mikroskeem', name: 'picomaven', version: '0.0.2-SNAPSHOT'
-    compile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.6.0'
     compile group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '2.4.0'
     compile group: 'io.github.lukehutch', name: 'fast-classpath-scanner', version: '2.0.19'
     compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.10'
