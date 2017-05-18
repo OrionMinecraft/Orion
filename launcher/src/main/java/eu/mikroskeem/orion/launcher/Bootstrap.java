@@ -15,26 +15,33 @@ import eu.mikroskeem.shuriken.reflect.utils.FunctionalField;
 import eu.mikroskeem.shuriken.reflect.wrappers.ClassWrapper;
 import eu.mikroskeem.shuriken.reflect.wrappers.FieldWrapper;
 import eu.mikroskeem.shuriken.reflect.wrappers.TypeWrapper;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.Permission;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.jar.JarInputStream;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -49,6 +56,8 @@ import java.util.stream.Stream;
 public class Bootstrap {
     private static String launchTargetClass;
     private final static String orionVersion = Bootstrap.class.getPackage().getImplementationVersion();
+    private final static String paperclipUrl = System.getProperty("orion.paperclipurl",
+            "https://ci.destroystokyo.com/job/PaperSpigot/lastSuccessfulBuild/artifact/paperclip.jar");
 
     @SneakyThrows
     @SuppressWarnings("ConstantConditions")
@@ -74,9 +83,68 @@ public class Bootstrap {
 
         /*
          * Set up Paper jar
-         * TODO: better implementation
          */
         Path serverJar = Paths.get("./cache/patched_1.11.2.jar");
+        if(!Files.exists(serverJar)) {
+            Path paperclipJar = Paths.get("./paperclip.jar");
+            if(!Files.exists(paperclipJar)) {
+                log.info("Downloading Paperclip...");
+                OkHttpClient client = new OkHttpClient();
+                Request request = new Request.Builder()
+                        .url(paperclipUrl)
+                        .get()
+                        .build();
+                try(Response response = client.newCall(request).execute()) {
+                    if(response.code() != 200) {
+                        log.error("HTTP request to {} returned {}!", paperclipUrl, response.code());
+                        return;
+                    }
+                    Files.copy(response.body().byteStream(), paperclipJar);
+                }
+                log.info("Done!");
+            }
+
+            /* This is dirty hack, but it's my fault that I didn't think about using `return` when I submitted PR... */
+            log.info("Executing Paperclip... please wait");
+            SecurityManager oldManager = System.getSecurityManager();
+            @RequiredArgsConstructor class PaperclipExitException extends SecurityException { private final int exitCode; }
+            try(InputStream fs = Files.newInputStream(paperclipJar); JarInputStream js = new JarInputStream(fs)) {
+                System.setSecurityManager(new SecurityManager() {
+                    @Override
+                    public void checkPermission(Permission perm) {
+                        if(perm.getName().startsWith("exitVM")) {
+                            throw new PaperclipExitException(Integer.parseInt(
+                                    perm.getName().split(Pattern.quote("."))[1]
+                            ));
+                        }
+                    }
+                });
+                URLClassLoader ucl = URLClassLoader.newInstance(new URL[]{paperclipJar.toUri().toURL()});
+                String paperclipTargetClass = js.getManifest().getMainAttributes().getValue("Main-Class");
+
+                System.setProperty("paperclip.patchonly", "true");
+                Reflect.getClass(paperclipTargetClass, ucl).get()
+                        .invokeMethod("main", void.class, TypeWrapper.of(new String[0]));
+            } catch (Throwable e) {
+                if(e instanceof InvocationTargetException) {
+                    Throwable target = ((InvocationTargetException) e).getTargetException();
+                    if(target != null && target instanceof PaperclipExitException) {
+                        int exitCode = ((PaperclipExitException) target).exitCode;
+                        if(exitCode != 0) {
+                            log.error("Paperclip exited with code {}!", exitCode);
+                            return;
+                        }
+                    } else {
+                        throw e;
+                    }
+                } else {
+                    throw e;
+                }
+            }
+            System.setSecurityManager(oldManager);
+        }
+
+        /* Get target jar main class */
         try(InputStream fs = Files.newInputStream(serverJar); JarInputStream js = new JarInputStream(fs)){
             launchTargetClass = js.getManifest().getMainAttributes().getValue("Main-Class");
         } catch (IOException e) {
