@@ -112,11 +112,10 @@ public class Bootstrap {
                 System.setSecurityManager(new SecurityManager() {
                     @Override
                     public void checkPermission(Permission perm) {
-                        if(perm.getName().startsWith("exitVM")) {
-                            throw new PaperclipExitException(Integer.parseInt(
-                                    perm.getName().split(Pattern.quote("."))[1]
-                            ));
+                        if(!perm.getName().startsWith("exitVM")) {
+                            return;
                         }
+                        throw new PaperclipExitException(Integer.parseInt(perm.getName().split(Pattern.quote("."))[1]));
                     }
                 });
                 URLClassLoader ucl = URLClassLoader.newInstance(new URL[]{paperclipJar.toUri().toURL()});
@@ -126,19 +125,19 @@ public class Bootstrap {
                 Reflect.getClass(paperclipTargetClass, ucl).get()
                         .invokeMethod("main", void.class, TypeWrapper.of(new String[0]));
             } catch (Throwable e) {
-                if(e instanceof InvocationTargetException) {
-                    Throwable target = ((InvocationTargetException) e).getTargetException();
-                    if(target != null && target instanceof PaperclipExitException) {
-                        int exitCode = ((PaperclipExitException) target).exitCode;
-                        if(exitCode != 0) {
-                            log.error("Paperclip exited with code {}!", exitCode);
-                            return;
-                        }
-                    } else {
-                        throw e;
-                    }
-                } else {
+                if(!(e instanceof InvocationTargetException)) {
                     throw e;
+                }
+
+                Throwable target = ((InvocationTargetException) e).getTargetException();
+                if(target == null || !(target instanceof PaperclipExitException)) {
+                    throw e;
+                }
+
+                int exitCode = ((PaperclipExitException) target).exitCode;
+                if(exitCode != 0) {
+                    log.error("Paperclip exited with code {}!", exitCode);
+                    return;
                 }
             }
             System.setSecurityManager(oldManager);
