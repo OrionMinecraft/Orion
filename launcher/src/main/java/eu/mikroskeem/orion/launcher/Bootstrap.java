@@ -51,6 +51,7 @@ public class Bootstrap {
     private final static String orionVersion = Bootstrap.class.getPackage().getImplementationVersion();
 
     @SneakyThrows
+    @SuppressWarnings("ConstantConditions")
     public static <UCPLoader extends Closeable, UCP> void main(String... args) {
         /* Set up SLF4J configuration */
         try {
