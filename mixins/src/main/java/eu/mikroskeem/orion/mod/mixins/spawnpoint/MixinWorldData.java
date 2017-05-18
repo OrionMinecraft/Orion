@@ -17,12 +17,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(value = WorldData.class, remap = false)
 public abstract class MixinWorldData implements OrionWorldData {
     @Shadow public WorldServer world;
-    @Shadow public abstract int b();
-    @Shadow public abstract int c();
-    @Shadow public abstract int d();
-    @Shadow private int h;
-    @Shadow private int j;
-    @Shadow private int i;
+    @Shadow public abstract int b(); // MCP - getSpawnX
+    @Shadow public abstract int c(); // MCP - getSpawnY
+    @Shadow public abstract int d(); // MCP - getSpawnZ
+    @Shadow private int h;  // MCP - spawnX
+    @Shadow private int j;  // MCP - spawnY
+    @Shadow private int i;  // MCP - spawnZ
 
     @Getter @Setter private double spawnpointX;
     @Getter @Setter private double spawnpointY;
