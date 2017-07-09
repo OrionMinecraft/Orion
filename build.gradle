@@ -1,0 +1,81 @@
+// Buildscript configuration
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+
+        maven {
+            name = 'gradle-plugins'
+            url = 'https://plugins.gradle.org/m2'
+        }
+    }
+
+    dependencies {
+        classpath group: 'gradle.plugin.net.minecrell', name: 'licenser', version: minecrell_licenser_version
+        classpath group: 'com.github.jengelman.gradle.plugins', name: 'shadow', version: shadow_version
+    }
+}
+
+// Gradle plugins
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+apply plugin: 'net.minecrell.licenser'
+
+// Repositories
+repositories {
+    mavenLocal()
+    mavenCentral()
+
+    maven {
+        name = 'mikroskeem-repo'
+        url = 'https://repo.wut.ee/repository/mikroskeem-repo'
+    }
+
+    maven {
+        name = 'destroystokyo-repo'
+        url = 'https://repo.destroystokyo.com/repository/maven-public'
+    }
+
+    maven {
+        name = 'spongepowered-repo'
+        url = 'https://repo.spongepowered.org/maven'
+    }
+}
+
+// Licenser task
+license {
+    include "**/*.java"
+}
+
+// Subproject configurations
+allprojects {
+    // Project information
+    group = 'eu.mikroskeem'
+    version = properties.version
+    description = properties.description
+    url = properties.url
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'com.github.johnrengelman.shadow'
+
+    // Configurations
+    configurations {
+        downloadDep
+
+        compile.extendsFrom downloadDep
+    }
+
+    // Java compiler options
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
+
+// Wrapper task
+task wrapper(type: Wrapper) {
+    gradleVersion = gradle_version
+    distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
+}
+
+defaultTasks 'build'

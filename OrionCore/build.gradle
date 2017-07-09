@@ -1,0 +1,5 @@
+dependencies {
+    compile project(':OrionAPI')
+
+    downloadDep group: 'ninja.leaping.configurate', name: 'configurate-hocon', version: '3.3'
+}

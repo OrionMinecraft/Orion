@@ -1,0 +1,5 @@
+dependencies {
+    compile project(':OrionCore')
+
+    compile group: 'eu.mikroskeem', name: 'picomaven', version: '0.0.3-SNAPSHOT'
+}
