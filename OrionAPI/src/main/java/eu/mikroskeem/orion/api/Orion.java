@@ -26,6 +26,7 @@
 package eu.mikroskeem.orion.api;
 
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.net.URL;
 import java.util.List;
@@ -60,6 +61,7 @@ public interface Orion {
      *
      * @return {@link List} of Maven repository {@link URL}s
      */
+    @NotNull
     List<URL> getRegisteredMavenRepositories();
 
     /**
@@ -68,6 +70,7 @@ public interface Orion {
      * @param url Maven repository url
      * @see Orion#registerLibrary(String)
      */
+    @Contract("null -> fail")
     void registerMavenRepository(URL url);
 
     /**
@@ -76,6 +79,7 @@ public interface Orion {
      * @return {@link List} of mod libraries
      * @see Orion#registerLibrary(String)
      */
+    @NotNull
     List<String> getRegisteredLibraries();
 
     /**

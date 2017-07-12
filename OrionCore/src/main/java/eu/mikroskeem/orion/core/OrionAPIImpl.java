@@ -31,6 +31,7 @@ import eu.mikroskeem.shuriken.common.Ensure;
 import eu.mikroskeem.shuriken.common.SneakyThrow;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixins;
 
 import java.net.MalformedURLException;
@@ -38,6 +39,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 
@@ -48,6 +50,7 @@ import java.util.stream.Collectors;
  */
 final class OrionAPIImpl implements Orion {
     private static final Logger logger = LogManager.getLogger("OrionAPI");
+    private static final Pattern MIXIN_NAME_PATTERN = Pattern.compile("mixins\\.(.*\\.)?.*\\.json");
     private final OrionCore orionCore;
 
     OrionAPIImpl(OrionCore orionCore) {
@@ -61,7 +64,9 @@ final class OrionAPIImpl implements Orion {
 
     @Override
     public void registerMixinConfig(String mixinConfigName) {
-        /* TODO: Enforce mixin name formatting */
+        Ensure.ensureCondition(MIXIN_NAME_PATTERN.matcher(mixinConfigName).matches(),
+                "Mixin configuration name '" + mixinConfigName + "' does not match pattern '" +
+                        MIXIN_NAME_PATTERN + "'");
 
         /* Check if mixin configuration with same name already exists, as people like to do dumb stuff... */
         Ensure.ensureCondition(!orionCore.mixinConfigurations.contains(mixinConfigName),
@@ -71,6 +76,7 @@ final class OrionAPIImpl implements Orion {
         Mixins.addConfiguration(mixinConfigName);
     }
 
+    @NotNull
     @Override
     public List<URL> getRegisteredMavenRepositories() {
         return Collections.unmodifiableList(orionCore.modMavenRepositories.stream()
@@ -88,6 +94,7 @@ final class OrionAPIImpl implements Orion {
 
     @Override
     public void registerMavenRepository(URL url) {
+        Ensure.notNull(url, "Repository URL should not be null");
         try {
             orionCore.modMavenRepositories.add(url.toURI());
         } catch (URISyntaxException e) {
@@ -100,6 +107,7 @@ final class OrionAPIImpl implements Orion {
         orionCore.modLibraries.add(Dependency.fromGradle(dependencyString));
     }
 
+    @NotNull
     @Override
     public List<String> getRegisteredLibraries() {
         return Collections.unmodifiableList(orionCore.modLibraries.stream()
