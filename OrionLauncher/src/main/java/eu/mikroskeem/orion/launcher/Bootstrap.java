@@ -82,7 +82,6 @@ public final class Bootstrap {
 
                 /* Dependency injection */
                 "javax.inject:javax.inject:1",
-                "eu.mikroskeem:shuriken.injector:0.0.1-SNAPSHOT",
 
                 /* Configurate */
                 "ninja.leaping.configurate:configurate-core:3.3",

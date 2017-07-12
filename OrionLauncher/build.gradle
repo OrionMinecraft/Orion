@@ -12,19 +12,11 @@ jar {
 
 shadowJar {
     dependencies {
-        /*include dependency('net.minecraft:launchwrapper')
-        include dependency('org.spongepowered:mixin')
-        include dependency('eu.mikroskeem:orion.at')
-        include dependency('eu.mikroskeem:shuriken.injector')
-        include dependency('javax.inject:javax.inject')
-        include dependency('ninja.leaping.configurate:configurate-hocon')
-        include dependency('ninja.leaping.configurate:configurate-core')
-        include dependency('com.typesafe:config')*/
-
         // Tools
         include dependency('org.ow2.asm:asm-all')
         include dependency('eu.mikroskeem:shuriken.common')
         include dependency('eu.mikroskeem:shuriken.instrumentation')
+        include dependency('eu.mikroskeem:shuriken.injector')
         include dependency('eu.mikroskeem:shuriken.reflect')
 
         // Dependency downloader
