@@ -26,6 +26,9 @@
 package eu.mikroskeem.orion.core;
 
 import com.google.common.eventbus.EventBus;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.TypeLiteral;
 import eu.mikroskeem.orion.api.CBVersion;
 import eu.mikroskeem.orion.api.Orion;
 import eu.mikroskeem.orion.api.OrionAPI;
@@ -43,11 +46,7 @@ import eu.mikroskeem.shuriken.common.SneakyThrow;
 import eu.mikroskeem.shuriken.common.ToURL;
 import eu.mikroskeem.shuriken.common.data.Pair;
 import eu.mikroskeem.shuriken.common.streams.ByteArrays;
-import eu.mikroskeem.shuriken.injector.Binder;
-import eu.mikroskeem.shuriken.injector.Injector;
-import eu.mikroskeem.shuriken.injector.ShurikenInjector;
 import eu.mikroskeem.shuriken.reflect.ClassWrapper;
-import eu.mikroskeem.shuriken.reflect.FieldWrapper;
 import eu.mikroskeem.shuriken.reflect.Reflect;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -79,10 +78,18 @@ import java.util.zip.ZipFile;
  * @author Mark Vainomaa
  */
 public final class OrionCore {
+    /* Constants */
+    private static final TypeLiteral<ConfigurationLoader<CommentedConfigurationNode>> COMMENTED_CONFIGURATION_NODE_LOADER =
+            new TypeLiteral<ConfigurationLoader<CommentedConfigurationNode>>() {};
+
+    /* Logger */
     private static final Logger logger = LogManager.getLogger("OrionCore");
+
+    /** Static instance */
     public static OrionCore INSTANCE = new OrionCore();
 
     private final CBVersion cbVersion;
+    private Injector baseInjector;
 
     final List<ModContainer<?>> mods = new ArrayList<>();
     final List<String> mixinConfigurations = new ArrayList<>();
@@ -164,6 +171,7 @@ public final class OrionCore {
         launchClassLoader.addClassLoaderExclusion("it.unimi.dsi.fastutil");
         launchClassLoader.addClassLoaderExclusion("org.apache.logging.log4j");
         launchClassLoader.addClassLoaderExclusion("org.yaml.snakeyaml");
+        launchClassLoader.addClassLoaderExclusion("com.google.inject");
         launchClassLoader.addClassLoaderExclusion("com.google.common");
         launchClassLoader.addClassLoaderExclusion("com.google.gson");
         launchClassLoader.addClassLoaderExclusion("javax.annotation");
@@ -176,14 +184,20 @@ public final class OrionCore {
         launchClassLoader.addClassLoaderExclusion("org.jline");
 
         logger.debug("Setting up OrionAPI singleton");
-        OrionAPI.setInstance(new OrionAPIImpl(this));
+        OrionAPIImpl orionAPI = new OrionAPIImpl(this);
+        OrionAPI.setInstance(orionAPI);
 
         /* Add Maven Central to repository list */
         try {
-            OrionAPI.getInstance().registerMavenRepository(new URL("https://repo.maven.apache.org/maven2"));
+            orionAPI.registerMavenRepository(new URL("https://repo.maven.apache.org/maven2"));
         } catch (Exception e) {
             SneakyThrow.throwException(e);
         }
+
+        logger.debug("Setting up dependency injector...");
+        baseInjector = Guice.createInjector(b -> {
+            b.bind(Orion.class).toInstance(orionAPI);
+        });
     }
 
     /**
@@ -341,18 +355,12 @@ public final class OrionCore {
         }
 
         /* Set up dependency injector */
-        Injector injector = ShurikenInjector.createInjector(b -> {
+        Injector injector = baseInjector.createChildInjector(b -> {
             b.bind(ModInfo.class).toInstance(modInfo);
             b.bind(EventBus.class).toInstance(modEventBus);
             b.bind(Logger.class).toInstance(LogManager.getLogger(modInfo.getId()));
-            b.bind(ConfigurationLoader.class).toInstance(configurationLoader);
-            b.bind(Orion.class).toInstance(OrionAPI.getInstance());
+            b.bind(COMMENTED_CONFIGURATION_NODE_LOADER).toInstance(configurationLoader);
         });
-
-        /* TODO: make Shuriken's injector inject itself as well by default */
-        Reflect.wrapInstance(injector).getField("binder", Binder.class)
-                .map(FieldWrapper::read)
-                .ifPresent(b -> b.bind(Injector.class).toInstance(injector));
 
         return new ModContainer<>(modClass, modInfo, injector, modEventBus);
     }

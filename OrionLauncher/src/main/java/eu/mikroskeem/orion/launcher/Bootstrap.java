@@ -83,6 +83,8 @@ public final class Bootstrap {
                 "eu.mikroskeem:orion.at:0.0.1-SNAPSHOT",
 
                 /* Dependency injection */
+                "aopalliance:aopalliance:1.0",
+                "com.google.inject:guice:4.1.0",
                 "javax.inject:javax.inject:1",
 
                 /* Configurate */
