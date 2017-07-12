@@ -301,7 +301,7 @@ public final class OrionCore {
 
         /* Process mod requested libraries */
         if(modLibraries.size() > 0) {
-            logger.info("Downloading {} extra libraries requested by installed mods...", modLibraries.size());
+            logger.info("Setting up {} extra libraries requested by installed mods...", modLibraries.size());
             PicoMaven.Builder picoMavenBuilder = new PicoMaven.Builder()
                     .withExecutorService(Executors.newWorkStealingPool())
                     .shouldCloseExecutorService(true)
