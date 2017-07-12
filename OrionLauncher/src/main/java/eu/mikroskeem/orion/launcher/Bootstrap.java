@@ -107,7 +107,7 @@ public final class Bootstrap {
                     }
                 });
 
-        System.out.println("Downloading Orion dependencies...");
+        System.out.println("Setting up Orion dependencies...");
         try(PicoMaven picoMaven = picoMavenBuilder.build()) {
             List<Path> downloadedLibraries = picoMaven.downloadAll();
             Ensure.ensureCondition(downloadedLibraries.size() == dependencies.size(),
