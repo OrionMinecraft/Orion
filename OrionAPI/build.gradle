@@ -2,6 +2,9 @@ dependencies {
     // Instrumetnation tools will be bundled
     compile group: 'eu.mikroskeem', name: 'shuriken.instrumentation', version: '0.0.1-SNAPSHOT'
 
+    // Dependencies what are present on runtime
+    runtime group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.8.1'
+
     // Dependencies which will be downloaded
     downloadDep group: 'javax.inject', name: 'javax.inject', version: '1'
     downloadDep group: 'ninja.leaping.configurate', name: 'configurate-hocon', version: '3.3'
