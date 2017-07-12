@@ -26,8 +26,12 @@
 package eu.mikroskeem.orion.core;
 
 import com.google.common.eventbus.EventBus;
+import eu.mikroskeem.orion.api.CBVersion;
+import eu.mikroskeem.orion.api.Orion;
 import eu.mikroskeem.orion.api.OrionAPI;
 import eu.mikroskeem.orion.api.events.ModLoadEvent;
+import eu.mikroskeem.orion.core.extensions.OrionMixinErrorHandler;
+import eu.mikroskeem.orion.core.extensions.OrionTokenProvider;
 import eu.mikroskeem.orion.core.mod.ModClassVisitor;
 import eu.mikroskeem.orion.core.mod.ModContainer;
 import eu.mikroskeem.orion.core.mod.ModInfo;
@@ -35,6 +39,7 @@ import eu.mikroskeem.picomaven.Dependency;
 import eu.mikroskeem.picomaven.DownloaderCallbacks;
 import eu.mikroskeem.picomaven.PicoMaven;
 import eu.mikroskeem.shuriken.common.Ensure;
+import eu.mikroskeem.shuriken.common.SneakyThrow;
 import eu.mikroskeem.shuriken.common.ToURL;
 import eu.mikroskeem.shuriken.common.data.Pair;
 import eu.mikroskeem.shuriken.common.streams.ByteArrays;
@@ -51,6 +56,7 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.launch.MixinBootstrap;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.Mixins;
@@ -62,7 +68,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -77,6 +82,7 @@ public final class OrionCore {
     private static final Logger logger = LogManager.getLogger("OrionCore");
     public static OrionCore INSTANCE = new OrionCore();
 
+    private final CBVersion cbVersion;
 
     final List<ModContainer<?>> mods = new ArrayList<>();
     final List<String> mixinConfigurations = new ArrayList<>();
@@ -87,6 +93,11 @@ public final class OrionCore {
      * Private constructor to set up Mixin loader
      */
     private OrionCore() {
+        logger.debug("Detecting CraftBukkit version...");
+        Ensure.ensureCondition((this.cbVersion = detectCBVersion()) != null,
+                "Failed to detect CraftBukkit version.");
+        logger.debug("Detected CraftBukkit version {} (id {})", cbVersion.getName(), cbVersion.getId());
+
         logger.debug("Setting up SpongeMixin library...");
         MixinBootstrap.init();
 
@@ -96,6 +107,9 @@ public final class OrionCore {
         logger.debug("Setting up Mixin error handler");
         Mixins.registerErrorHandlerClass(OrionMixinErrorHandler.class.getName());
 
+        logger.debug("Setting up Mixin token provider");
+        MixinEnvironment.getDefaultEnvironment().registerTokenProviderClass(OrionTokenProvider.class.getName());
+
         logger.debug("Mixin library initialization finished!");
     }
 
@@ -104,8 +118,21 @@ public final class OrionCore {
      *
      * @return Loaded list
      */
+    @NotNull
+    @Contract(pure = true)
     public List<ModContainer<?>> getMods() {
         return mods;
+    }
+
+    /**
+     * Gets detected CraftBukkit version
+     *
+     * @return Detected {@link CBVersion}
+     */
+    @NotNull
+    @Contract(pure = true)
+    public CBVersion getCBVersion() {
+        return cbVersion;
     }
 
     /**
@@ -128,13 +155,35 @@ public final class OrionCore {
     void setupCore(LaunchClassLoader launchClassLoader) {
         logger.debug("Adding class load exclusions");
         launchClassLoader.addClassLoaderExclusion("ninja.leaping.configurate");
-        launchClassLoader.addClassLoaderExclusion("org.apache.logging.log4j");
         launchClassLoader.addClassLoaderExclusion("eu.mikroskeem.orion.api");
-        launchClassLoader.addClassLoaderExclusion("com.google.common");
         launchClassLoader.addClassLoaderExclusion("javax.inject");
+
+        /* Library packages */
+        launchClassLoader.addClassLoaderExclusion("joptsimple");
+        launchClassLoader.addClassLoaderExclusion("gnu.trove");
+        launchClassLoader.addClassLoaderExclusion("it.unimi.dsi.fastutil");
+        launchClassLoader.addClassLoaderExclusion("org.apache.logging.log4j");
+        launchClassLoader.addClassLoaderExclusion("org.yaml.snakeyaml");
+        launchClassLoader.addClassLoaderExclusion("com.google.common");
+        launchClassLoader.addClassLoaderExclusion("com.google.gson");
+        launchClassLoader.addClassLoaderExclusion("javax.annotation");
+        launchClassLoader.addClassLoaderExclusion("org.apache.commons");
+        launchClassLoader.addClassLoaderExclusion("com.mojang.authlib");
+
+        /* Note: magical lines to fix logging */
+        launchClassLoader.addClassLoaderExclusion("net.minecrell.terminalconsole");
+        launchClassLoader.addClassLoaderExclusion("com.sun.jna");
+        launchClassLoader.addClassLoaderExclusion("org.jline");
 
         logger.debug("Setting up OrionAPI singleton");
         OrionAPI.setInstance(new OrionAPIImpl(this));
+
+        /* Add Maven Central to repository list */
+        try {
+            OrionAPI.getInstance().registerMavenRepository(new URL("https://repo.maven.apache.org/maven2"));
+        } catch (Exception e) {
+            SneakyThrow.throwException(e);
+        }
     }
 
     /**
@@ -239,10 +288,9 @@ public final class OrionCore {
         /* Process mod requested libraries */
         if(modLibraries.size() > 0) {
             logger.info("Downloading {} extra libraries requested by installed mods...", modLibraries.size());
-            ExecutorService downloaderPool = Executors.newWorkStealingPool();
             PicoMaven.Builder picoMavenBuilder = new PicoMaven.Builder()
-                    .withExecutorService(downloaderPool)
-                    .shouldCloseExecutorService(false)
+                    .withExecutorService(Executors.newWorkStealingPool())
+                    .shouldCloseExecutorService(true)
                     .withDownloadPath(OrionTweakClass.OrionTweakerData.librariesPath)
                     .withRepositories(modMavenRepositories)
                     .withDependencies(modLibraries)
@@ -298,6 +346,7 @@ public final class OrionCore {
             b.bind(EventBus.class).toInstance(modEventBus);
             b.bind(Logger.class).toInstance(LogManager.getLogger(modInfo.getId()));
             b.bind(ConfigurationLoader.class).toInstance(configurationLoader);
+            b.bind(Orion.class).toInstance(OrionAPI.getInstance());
         });
 
         /* TODO: make Shuriken's injector inject itself as well by default */
@@ -306,5 +355,18 @@ public final class OrionCore {
                 .ifPresent(b -> b.bind(Injector.class).toInstance(injector));
 
         return new ModContainer<>(modClass, modInfo, injector, modEventBus);
+    }
+
+    /**
+     * Detects CBVersion
+     *
+     * @return Value from {@link CBVersion} enum
+     */
+    private CBVersion detectCBVersion() {
+        for (CBVersion version : CBVersion.values()) {
+            if(Reflect.getClass("net.minecraft.server." + version.getName() + ".DedicatedServer").isPresent())
+                return version;
+        }
+        return null;
     }
 }

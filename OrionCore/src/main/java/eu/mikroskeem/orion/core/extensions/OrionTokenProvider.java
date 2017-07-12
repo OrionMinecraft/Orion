@@ -23,28 +23,31 @@
  * THE SOFTWARE.
  */
 
-package eu.mikroskeem.orion.core;
+package eu.mikroskeem.orion.core.extensions;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.spongepowered.asm.mixin.extensibility.IMixinConfig;
-import org.spongepowered.asm.mixin.extensibility.IMixinErrorHandler;
-import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
+import eu.mikroskeem.orion.core.OrionCore;
+import org.spongepowered.asm.mixin.MixinEnvironment;
+import org.spongepowered.asm.mixin.extensibility.IEnvironmentTokenProvider;
 
 
 /**
+ * Provides <pre>CB_VERSION</pre> token for {@link org.spongepowered.asm.mixin.Overwrite} constraint
+ *
+ * See <a href="https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---Overwriting-Methods#3-constraints">constraints</a>
+ *
  * @author Mark Vainomaa
  */
-public final class OrionMixinErrorHandler implements IMixinErrorHandler {
-    private static final Logger logger = LogManager.getLogger("Orion Mixin Error Handler");
-
+public final class OrionTokenProvider implements IEnvironmentTokenProvider {
     @Override
-    public ErrorAction onPrepareError(IMixinConfig config, Throwable th, IMixinInfo mixin, ErrorAction action) {
-        return ErrorAction.ERROR;
+    public int getPriority() {
+        return 0;
     }
 
     @Override
-    public ErrorAction onApplyError(String targetClassName, Throwable th, IMixinInfo mixin, ErrorAction action) {
-        return ErrorAction.ERROR;
+    public Integer getToken(String token, MixinEnvironment env) {
+        if(token.equals("CB_VERSION"))
+            return OrionCore.INSTANCE.getCBVersion().getId();
+
+        return null;
     }
 }
