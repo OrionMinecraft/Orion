@@ -12,6 +12,7 @@ buildscript {
 
     dependencies {
         classpath group: 'gradle.plugin.net.minecrell', name: 'licenser', version: minecrell_licenser_version
+        //classpath group: 'org.junit.platform', name: 'junit-platform-gradle-plugin', version: junit_gradle_version
         classpath group: 'com.github.jengelman.gradle.plugins', name: 'shadow', version: shadow_version
     }
 }
@@ -19,33 +20,6 @@ buildscript {
 // Gradle plugins
 apply plugin: 'idea'
 apply plugin: 'eclipse'
-apply plugin: 'net.minecrell.licenser'
-
-// Repositories
-repositories {
-    mavenLocal()
-    mavenCentral()
-
-    maven {
-        name = 'mikroskeem-repo'
-        url = 'https://repo.wut.ee/repository/mikroskeem-repo'
-    }
-
-    maven {
-        name = 'destroystokyo-repo'
-        url = 'https://repo.destroystokyo.com/repository/maven-public'
-    }
-
-    maven {
-        name = 'spongepowered-repo'
-        url = 'https://repo.spongepowered.org/maven'
-    }
-}
-
-// Licenser task
-license {
-    include "**/*.java"
-}
 
 // Subproject configurations
 allprojects {
@@ -54,11 +28,34 @@ allprojects {
     version = properties.version
     description = properties.description
     url = properties.url
+
+    // Repositories
+    repositories {
+        mavenLocal()
+        mavenCentral()
+
+        maven {
+            name = 'mikroskeem-repo'
+            url = 'https://repo.wut.ee/repository/mikroskeem-repo'
+        }
+
+        maven {
+            name = 'destroystokyo-repo'
+            url = 'https://repo.destroystokyo.com/repository/maven-public'
+        }
+
+        maven {
+            name = 'spongepowered-repo'
+            url = 'https://repo.spongepowered.org/maven'
+        }
+    }
 }
 
 subprojects {
-    apply plugin: 'java'
+    //apply plugin: 'org.junit.platform.gradle.plugin'
     apply plugin: 'com.github.johnrengelman.shadow'
+    apply plugin: 'net.minecrell.licenser'
+    apply plugin: 'java'
 
     // Configurations
     configurations {
@@ -70,6 +67,19 @@ subprojects {
     // Java compiler options
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
+
+    // Licenser task
+    license {
+        header = rootProject.file('etc/HEADER')
+        ignoreFailures = false
+        include "**/*.java"
+    }
+
+    // Global dependencies
+    dependencies {
+        //testCompile group:'org.junit.jupiter', name: 'junit-jupiter-api', version: junit_version
+        //testRuntime group:'org.junit.jupiter', name: 'junit-jupiter-engine', version: junit_version
+    }
 }
 
 // Wrapper task

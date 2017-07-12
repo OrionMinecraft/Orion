@@ -1,4 +1,4 @@
-rootProject.name = 'orion'
+rootProject.name = 'Orion'
 include 'OrionAPI'
 include 'OrionCore'
 include 'OrionLauncher'

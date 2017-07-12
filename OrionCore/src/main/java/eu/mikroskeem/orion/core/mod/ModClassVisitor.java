@@ -1,0 +1,146 @@
+/*
+ * This file is part of project Orion, licensed under the MIT License (MIT).
+ *
+ * Copyright (c) 2017 Mark Vainomaa <mikroskeem@mikroskeem.eu>
+ * Copyright (c) Contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+package eu.mikroskeem.orion.core.mod;
+
+import eu.mikroskeem.orion.api.annotations.OrionMod;
+import eu.mikroskeem.shuriken.common.Ensure;
+import org.jetbrains.annotations.Nullable;
+import org.objectweb.asm.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+
+/**
+ * Orion mod class visitor. Reads {@link OrionMod} annotation directly from bytecode.
+ *
+ * Based off from a code in Sponge mod loader
+ *
+ * @author Mark Vainomaa
+ */
+public final class ModClassVisitor extends ClassVisitor {
+    private final static Type ORIONMOD_ANNOTATION = Type.getType(OrionMod.class);
+
+    private ModClassVisitor() {
+        super(Opcodes.ASM5);
+    }
+
+    /** Mod annotation visitor instance */
+    @Nullable private ModAnnotationVisitor modAnnotationVisitor;
+
+    /** Visitable class name */
+    @Nullable private String className;
+
+    /**
+     * Gets mod info from class bytes
+     *
+     * @param classData Class bytes
+     * @return Instance of {@link ModInfo}, or null if not present
+     */
+    @Nullable
+    public static ModInfo getModInfo(byte[] classData) {
+        ClassReader classReader = new ClassReader(classData);
+        ModClassVisitor modClassVisitor = new ModClassVisitor();
+        classReader.accept(modClassVisitor, ClassReader.SKIP_CODE | ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
+        return modClassVisitor.modAnnotationVisitor != null &&  modClassVisitor.modAnnotationVisitor.gotId ?
+                modClassVisitor.modAnnotationVisitor.modInfo : null;
+    }
+
+    @Override
+    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+        this.className = name;
+    }
+
+    @Override
+    public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+        return (visible && desc.equals(ORIONMOD_ANNOTATION.getDescriptor())) ?
+                modAnnotationVisitor = new ModAnnotationVisitor(className) : super.visitAnnotation(desc, visible);
+    }
+
+    static class ModAnnotationVisitor extends AnnotationVisitor {
+        private final List<String> dependencies = new ArrayList<>();
+        private State currentState = State.DEFAULT;
+        private TheModInfo modInfo;
+        private boolean gotId = false;
+
+        private enum State {
+            DEFAULT, DEPENDENCIES
+        }
+
+        ModAnnotationVisitor(String className) {
+            super(Opcodes.ASM5);
+            modInfo = new TheModInfo();
+            modInfo.setDependencies(dependencies);
+            modInfo.setClassName(className.replace('/', '.'));
+        }
+
+        private void check(State state) {
+            Ensure.ensureCondition(currentState == state,
+                    String.format("Expected state %s, but is %s", state, currentState));
+        }
+
+        @Override
+        public void visit(String name, Object value) {
+            if(currentState == State.DEPENDENCIES) {
+                dependencies.add((String)value);
+                return;
+            }
+
+            check(State.DEFAULT);
+            Ensure.notNull(name, "Name is null");
+            switch (name) {
+                case "id":
+                    gotId = true;
+                    modInfo.setId((String)value);
+                    break;
+                default:
+                    super.visit(name, value);
+            }
+        }
+
+        @Override
+        public AnnotationVisitor visitArray(String name) {
+            Ensure.notNull(name, "Name is null");
+            switch (name) {
+                case "dependencies":
+                    this.currentState = State.DEPENDENCIES;
+                    return this;
+                default:
+                    return super.visitArray(name);
+            }
+        }
+
+        @Override
+        public void visitEnd() {
+            if(this.currentState != State.DEFAULT) {
+                this.currentState = State.DEFAULT;
+                return;
+            }
+
+            Ensure.ensureCondition(gotId, "Mod annotation doesn't have required element 'id'");
+        }
+    }
+}

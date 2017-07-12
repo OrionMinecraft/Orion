@@ -1,5 +1,10 @@
 dependencies {
     compile project(':OrionAPI')
 
-    downloadDep group: 'ninja.leaping.configurate', name: 'configurate-hocon', version: '3.3'
+    compile group: 'eu.mikroskeem', name: 'picomaven', version: '0.0.3-SNAPSHOT'
+
+    downloadDep group: 'eu.mikroskeem', name: 'shuriken.injector', version: '0.0.1-SNAPSHOT'
+    downloadDep group: 'eu.mikroskeem', name: 'orion.at', version: '0.0.1-SNAPSHOT'
+    downloadDep group: 'org.spongepowered', name: 'mixin', version: '0.6.15-SNAPSHOT'
+    downloadDep group: 'net.minecraft', name: 'launchwrapper', version: '1.13-mikroskeem'
 }

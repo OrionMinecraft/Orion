@@ -1,5 +1,62 @@
 dependencies {
     compile project(':OrionCore')
-
-    compile group: 'eu.mikroskeem', name: 'picomaven', version: '0.0.3-SNAPSHOT'
 }
+
+jar {
+    manifest {
+        attributes(
+                "Main-Class": "eu.mikroskeem.orion.launcher.Bootstrap"
+        )
+    }
+}
+
+shadowJar {
+    dependencies {
+        /*include dependency('net.minecraft:launchwrapper')
+        include dependency('org.spongepowered:mixin')
+        include dependency('eu.mikroskeem:orion.at')
+        include dependency('eu.mikroskeem:shuriken.injector')
+        include dependency('javax.inject:javax.inject')
+        include dependency('ninja.leaping.configurate:configurate-hocon')
+        include dependency('ninja.leaping.configurate:configurate-core')
+        include dependency('com.typesafe:config')*/
+
+        // Tools
+        include dependency('org.ow2.asm:asm-all')
+        include dependency('eu.mikroskeem:shuriken.common')
+        include dependency('eu.mikroskeem:shuriken.instrumentation')
+        include dependency('eu.mikroskeem:shuriken.reflect')
+
+        // Dependency downloader
+        include dependency('eu.mikroskeem:picomaven')
+        include dependency('com.squareup.okhttp3:okhttp')
+        include dependency('com.squareup.okio:okio')
+        include dependency('org.apache.maven:maven-repository-metadata')
+        include dependency('org.codehaus.plexus:plexus-utils')
+
+        // Orion
+        include project(':OrionAPI')
+        include project(':OrionCore')
+    }
+
+    // Shuriken
+    relocate 'eu.mikroskeem.shuriken', 'eu.mikroskeem.orion.internal.shuriken'
+
+    // PicoMaven & its dependencies
+    relocate 'eu.mikroskeem.picomaven', 'eu.mikroskeem.orion.internal.picomaven'
+    relocate 'org.codehaus.plexus.util', 'eu.mikroskeem.orion.internal.picomaven.plexusutil'
+    relocate 'org.apache.maven.artifact.repository.metadata', 'eu.mikroskeem.orion.internal.picomaven.mavenmetadata'
+    relocate 'okhttp3', 'eu.mikroskeem.orion.internal.picomaven.okhttp3'
+    relocate 'okio', 'eu.mikroskeem.orion.internal.picomaven.okio'
+
+    // Let's reuse libraries
+    relocate 'org.spongepowered.asm.lib', 'eu.mikroskeem.orion.internal.asm'
+    relocate 'org.objectweb.asm', 'eu.mikroskeem.orion.internal.asm'
+
+    // Exclude unneeded files
+    exclude 'licenses/**'
+    exclude 'publicsuffixes.gz'
+    exclude 'META-INF/maven/**'
+}
+
+build.dependsOn shadowJar
