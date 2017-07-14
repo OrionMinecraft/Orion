@@ -87,5 +87,6 @@ public interface Orion {
      *
      * @param dependencyString Dependency string, like <pre>groupId:artifactId:version</pre>
      */
+    @Contract("null -> fail")
     void registerLibrary(String dependencyString);
 }
