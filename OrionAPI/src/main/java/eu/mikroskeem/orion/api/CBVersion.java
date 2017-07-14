@@ -35,7 +35,7 @@ import org.jetbrains.annotations.Contract;
  */
 public enum CBVersion {
     /** Minecraft 1.12 */
-    v1_12R1(0, "v1_12_R1");
+    v1_12_R1(0, "v1_12_R1");
 
     private final int id;
     private final String name;
