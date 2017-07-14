@@ -34,9 +34,6 @@ shadowJar {
         include project(':OrionCore')
     }
 
-    // Shuriken
-    relocate 'eu.mikroskeem.shuriken', 'eu.mikroskeem.orion.internal.shuriken'
-
     // PicoMaven & its dependencies
     relocate 'eu.mikroskeem.picomaven', 'eu.mikroskeem.orion.internal.picomaven'
     relocate 'org.codehaus.plexus.util', 'eu.mikroskeem.orion.internal.picomaven.plexusutil'

@@ -29,6 +29,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.TypeLiteral;
+import com.google.inject.name.Names;
 import eu.mikroskeem.orion.api.CBVersion;
 import eu.mikroskeem.orion.api.Orion;
 import eu.mikroskeem.orion.api.OrionAPI;
@@ -343,9 +344,10 @@ public final class OrionCore {
         EventBus modEventBus = new EventBus();
 
         /* Set up configuration loader */
+        Path configurationPath;
         ConfigurationLoader<CommentedConfigurationNode> configurationLoader;
         try {
-            Path configurationPath = Paths.get("./modconfigs", modInfo.getId() + ".cfg");
+            configurationPath = Paths.get("./modconfigs", modInfo.getId() + ".cfg");
             if(Files.notExists(configurationPath.getParent())) Files.createDirectories(configurationPath.getParent());
             configurationLoader = HoconConfigurationLoader.builder()
                     .setPath(configurationPath)
@@ -360,6 +362,8 @@ public final class OrionCore {
             b.bind(EventBus.class).toInstance(modEventBus);
             b.bind(Logger.class).toInstance(LogManager.getLogger(modInfo.getId()));
             b.bind(COMMENTED_CONFIGURATION_NODE_LOADER).toInstance(configurationLoader);
+            b.bind(Path.class).annotatedWith(Names.named("configurationPath"))
+                    .toInstance(configurationPath);
         });
 
         return new ModContainer<>(modClass, modInfo, injector, modEventBus);
