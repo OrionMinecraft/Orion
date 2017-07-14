@@ -1,5 +1,8 @@
 dependencies {
-    compile project(':OrionCore')
+    compile(project(':OrionCore')) {
+        // Do not run Mixin AP here
+        exclude module: 'mixin'
+    }
 }
 
 jar {
