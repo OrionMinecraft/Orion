@@ -3,9 +3,124 @@ dependencies {
     compile group: 'eu.mikroskeem', name: 'shuriken.instrumentation', version: '0.0.1-SNAPSHOT'
 
     // Dependencies what are present on runtime
-    runtime group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.8.1'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.8.1'
 
     // Dependencies which will be downloaded
     downloadDep group: 'javax.inject', name: 'javax.inject', version: '1'
     downloadDep group: 'ninja.leaping.configurate', name: 'configurate-hocon', version: '3.3'
+    downloadDep(group: 'org.spongepowered', name: 'mixin', version: '0.6.15-SNAPSHOT') {
+        exclude module: 'commons-io'
+        exclude module: 'guava'
+        exclude module: 'launchwrapper'
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+if(project.hasProperty('repoUsername') && project.hasProperty('repoPassword')) {
+    apply plugin: 'maven-publish'
+
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                artifactId 'orion.api'
+
+                artifact sourcesJar
+                artifact javadocJar
+                from components.java
+
+                // Customize POM
+                pom.withXml {
+                    def root = asNode()
+                    root.appendNode 'description', project.description
+                    root.appendNode 'name', 'OrionAPI'
+                    root.appendNode 'url', 'https://github.com/OrionMinecraft/Orion'
+
+                    // Change dependency scopes
+                    root.dependencies.'*'.findAll() {
+                        it.scope.text() == 'compile' && project.configurations.compile.allDependencies.find { dep ->
+                            dep.name == it.artifactId.text()
+                        }
+                    }.each() {
+                        it.scope*.value = 'provided'
+                    }
+
+                    // <repositories>
+                    def repositories = root.appendNode 'repositories'
+                    // * <repository>
+                    def repository0 = repositories.appendNode 'repository'
+                    repository0.appendNode 'id', 'sponge-repo'
+                    repository0.appendNode 'url', 'https://repo.spongepowered.org/maven'
+                    // * </repository>
+                    // * <repository>
+                    def repository1 = repositories.appendNode 'repository'
+                    repository1.appendNode 'id', 'mikroskeem-repo'
+                    repository1.appendNode 'url', 'https://repo.wut.ee/repository/mikroskeem-repo'
+                    // * </repository>
+                    // </repositories>
+
+                    // <issueManagement>
+                    def issueManagement = root.appendNode 'issueManagement'
+                    issueManagement.appendNode 'system', 'GitHub Issues'
+                    issueManagement.appendNode 'url', 'https://github.com/OrionMinecraft/Orion/issues'
+                    // </issueManagement>
+
+                    // <licenses>
+                    def licenses = root.appendNode 'licenses'
+                    // * <license>
+                    def license0 = licenses.appendNode 'license'
+                    license0.appendNode 'name', 'MIT License'
+                    license0.appendNode 'url', 'https://opensource.org/licenses/MIT'
+                    // * </license>
+                    // </licenses>
+
+                    // <developers>
+                    def developers = root.appendNode 'developers'
+                    // * <developer>
+                    def developer0 = developers.appendNode 'developer'
+                    developer0.appendNode 'id', 'mikroskeem'
+                    developer0.appendNode 'name', 'Mark Vainomaa'
+                    developer0.appendNode 'email', 'mikroskeem@mikroskeem.eu'
+                    // * </developer>
+                    // </developers>
+
+                    // <scm>
+                    def scm = root.appendNode 'scm'
+                    scm.appendNode 'connection', 'scm:git@github.com:OrionMinecraft/Orion.git'
+                    scm.appendNode 'developerConnection', 'scm:git@github.com:OrionMinecraft/Orion.git'
+                    scm.appendNode 'url', 'https://github.com/OrionMinecraft/Orion'
+                    // </scm>
+
+                    new XmlNodePrinter(preserveWhitespace: true).print root
+                }
+            }
+        }
+
+        repositories {
+            mavenLocal()
+
+            maven {
+                credentials {
+                    username repoUsername
+                    password repoPassword
+                }
+
+                name = 'mikroskeem-repo'
+                url = 'https://repo.wut.ee/repository/mikroskeem-repo'
+            }
+        }
+    }
 }
