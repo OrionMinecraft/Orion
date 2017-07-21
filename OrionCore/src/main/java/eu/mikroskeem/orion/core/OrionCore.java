@@ -36,6 +36,7 @@ import eu.mikroskeem.orion.api.OrionAPI;
 import eu.mikroskeem.orion.api.events.ModLoadEvent;
 import eu.mikroskeem.orion.core.extensions.OrionMixinErrorHandler;
 import eu.mikroskeem.orion.core.extensions.OrionTokenProvider;
+import eu.mikroskeem.orion.core.lcl.LaunchClassLoaderAccessor;
 import eu.mikroskeem.orion.core.mod.ModClassVisitor;
 import eu.mikroskeem.orion.core.mod.ModContainer;
 import eu.mikroskeem.orion.core.mod.ModInfo;
@@ -165,6 +166,10 @@ public final class OrionCore {
         launchClassLoader.addClassLoaderExclusion("ninja.leaping.configurate");
         launchClassLoader.addClassLoaderExclusion("eu.mikroskeem.orion.api");
         launchClassLoader.addClassLoaderExclusion("javax.inject");
+
+        /* Remove invalid exclusion */
+        LaunchClassLoaderAccessor.WrappedInstances.getAccessor(launchClassLoader)
+                .getClassLoaderExceptions().remove("org.apache.logging.");
 
         /* Library packages */
         launchClassLoader.addClassLoaderExclusion("joptsimple");
