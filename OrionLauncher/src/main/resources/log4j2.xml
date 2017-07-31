@@ -14,6 +14,12 @@
         </RollingRandomAccessFile>
     </Appenders>
     <Loggers>
+        <!-- Show only warning level HikariCP messages -->
+        <Logger name="com.zaxxer.hikari" level="info" additivity="false">
+            <AppenderRef ref="Console" level="warn"/>
+            <AppenderRef ref="File"/>
+        </Logger>
+
         <Root level="info">
             <filters>
                 <MarkerFilter marker="NETWORK_PACKETS" onMatch="DENY" onMismatch="NEUTRAL" />
