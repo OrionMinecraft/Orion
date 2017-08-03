@@ -56,7 +56,7 @@ import java.util.stream.Collectors;
  */
 public final class Bootstrap {
     final static String LIBRARIES_PATH = "./libraries";
-    final static String PAPER_SERVER_JAR = "./cache/patched_1.12.jar";
+    final static String PAPER_SERVER_JAR = "./cache/patched_1.12.1.jar";
     final static String PAPERCLIP_JAR = "./paperclip.jar";
     final static String PAPERCLIP_URL = "https://ci.destroystokyo.com/job/PaperSpigot/lastSuccessfulBuild/artifact/" +
             "paperclip.jar";
