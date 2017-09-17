@@ -62,9 +62,9 @@ public final class Bootstrap {
             "paperclip.jar";
 
     public static void main(String... args) throws Exception {
-        /* Note: This breaks on Java 9 */
+        ClassLoader cl = ClassLoader.getSystemClassLoader();
         ClassLoaderTools.URLClassLoaderTools uclTool = new ClassLoaderTools.URLClassLoaderTools(
-                (URLClassLoader) ClassLoader.getSystemClassLoader()
+                cl instanceof URLClassLoader ? (URLClassLoader) cl : cl
         );
 
         /* Maven repositories */

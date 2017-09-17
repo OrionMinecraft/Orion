@@ -37,7 +37,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import static eu.mikroskeem.orion.core.OrionTweakClass.OrionTweakerData.*;
+import static eu.mikroskeem.orion.core.OrionTweakClass.OrionTweakerData.launchTarget;
+import static eu.mikroskeem.orion.core.OrionTweakClass.OrionTweakerData.originalArguments;
+import static eu.mikroskeem.orion.core.OrionTweakClass.OrionTweakerData.serverJar;
 
 
 /**

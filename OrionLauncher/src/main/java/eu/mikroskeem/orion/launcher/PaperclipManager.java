@@ -78,8 +78,10 @@ final class PaperclipManager {
         OrionTweakerData.launchTarget = Utils.getMainClassFromJar(serverPath);
 
         /* Load server jar to system classloader */
-        ClassLoaderTools.URLClassLoaderTools uclTools =
-                new ClassLoaderTools.URLClassLoaderTools((URLClassLoader) ClassLoader.getSystemClassLoader());
+        ClassLoader cl = ClassLoader.getSystemClassLoader();
+        ClassLoaderTools.URLClassLoaderTools uclTools = new ClassLoaderTools.URLClassLoaderTools(
+                cl instanceof URLClassLoader ? (URLClassLoader) cl : cl
+        );
         uclTools.addURL(ToURL.to(serverPath));
         uclTools.resetCache();
     }
