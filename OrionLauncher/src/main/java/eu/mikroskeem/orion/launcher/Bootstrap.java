@@ -55,11 +55,11 @@ import java.util.stream.Collectors;
  * @author Mark Vainomaa
  */
 public final class Bootstrap {
-    final static String LIBRARIES_PATH = "./libraries";
-    final static String PAPER_SERVER_JAR = "./cache/patched_1.12.2.jar";
-    final static String PAPERCLIP_JAR = "./paperclip.jar";
-    final static String PAPERCLIP_URL = "https://ci.destroystokyo.com/job/PaperSpigot/lastSuccessfulBuild/artifact/" +
-            "paperclip.jar";
+    final static String LIBRARIES_PATH = System.getProperty("orion.librariesPath", "./libraries");
+    final static String PAPER_SERVER_JAR = System.getProperty("orion.patchedJarPath", "./cache/patched_1.12.2.jar");
+    final static String PAPERCLIP_JAR = System.getProperty("orion.paperclipJarPath", "./paperclip.jar");
+    final static String PAPERCLIP_URL = System.getProperty("orion.paperclipDownloadUrl",
+            "https://ci.destroystokyo.com/job/PaperSpigot/lastSuccessfulBuild/artifact/paperclip.jar");
 
     public static void main(String... args) throws Exception {
         ClassLoader cl = ClassLoader.getSystemClassLoader();
