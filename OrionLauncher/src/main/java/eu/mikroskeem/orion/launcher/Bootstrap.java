@@ -63,9 +63,11 @@ public final class Bootstrap {
 
     public static void main(String... args) throws Exception {
         ClassLoader cl = ClassLoader.getSystemClassLoader();
-        ClassLoaderTools.URLClassLoaderTools uclTool = new ClassLoaderTools.URLClassLoaderTools(
-                cl instanceof URLClassLoader ? (URLClassLoader) cl : cl
-        );
+        ClassLoaderTools.URLClassLoaderTools uclTool;
+        if(cl instanceof URLClassLoader)
+            uclTool = new ClassLoaderTools.URLClassLoaderTools((URLClassLoader) cl);
+        else
+            uclTool = new ClassLoaderTools.URLClassLoaderTools(cl);
 
         /* Maven repositories */
         List<URI> repositories = Arrays.asList(

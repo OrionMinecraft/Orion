@@ -79,9 +79,11 @@ final class PaperclipManager {
 
         /* Load server jar to system classloader */
         ClassLoader cl = ClassLoader.getSystemClassLoader();
-        ClassLoaderTools.URLClassLoaderTools uclTools = new ClassLoaderTools.URLClassLoaderTools(
-                cl instanceof URLClassLoader ? (URLClassLoader) cl : cl
-        );
+        ClassLoaderTools.URLClassLoaderTools uclTools;
+        if(cl instanceof URLClassLoader)
+            uclTools = new ClassLoaderTools.URLClassLoaderTools((URLClassLoader) cl);
+        else
+            uclTools = new ClassLoaderTools.URLClassLoaderTools(cl);
         uclTools.addURL(ToURL.to(serverPath));
         uclTools.resetCache();
     }
