@@ -5,5 +5,5 @@ dependencies {
 
     downloadDep group: 'com.google.inject', name: 'guice', version: '4.1.0'
     downloadDep group: 'eu.mikroskeem', name: 'orion.at', version: '0.0.1-SNAPSHOT'
-    downloadDep group: 'net.minecraft', name: 'launchwrapper', version: '1.13-mikroskeem'
+    downloadDep group: 'net.minecraft', name: 'launchwrapper', version: '1.14-mikroskeem'
 }

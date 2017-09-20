@@ -80,7 +80,7 @@ public final class Bootstrap {
 
         /* Download dependencies, TODO: do not hardcode */
         List<String> dependencies = Arrays.asList(
-                "net.minecraft:launchwrapper:1.13-mikroskeem",
+                "net.minecraft:launchwrapper:1.14-mikroskeem",
                 "org.spongepowered:mixin:0.7.2-SNAPSHOT",
                 "eu.mikroskeem:orion.at:0.0.1-SNAPSHOT",
 
