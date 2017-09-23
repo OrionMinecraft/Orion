@@ -8,7 +8,7 @@ dependencies {
     // Dependencies which will be downloaded
     downloadDep group: 'javax.inject', name: 'javax.inject', version: '1'
     downloadDep group: 'ninja.leaping.configurate', name: 'configurate-hocon', version: '3.3'
-    downloadDep(group: 'org.spongepowered', name: 'mixin', version: '0.7.2-SNAPSHOT') {
+    downloadDep(group: 'org.spongepowered', name: 'mixin', version: '0.7.3-SNAPSHOT') {
         exclude module: 'commons-io'
         exclude module: 'guava'
         exclude module: 'launchwrapper'
