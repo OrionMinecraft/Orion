@@ -7,6 +7,7 @@ dependencies {
 
     // Dependencies which will be downloaded
     downloadDep group: 'javax.inject', name: 'javax.inject', version: '1'
+    downloadDep group: 'net.minecraft', name: 'launchwrapper', version: '1.14-mikroskeem'
     downloadDep group: 'ninja.leaping.configurate', name: 'configurate-hocon', version: '3.3'
     downloadDep(group: 'org.spongepowered', name: 'mixin', version: '0.7.3-SNAPSHOT') {
         exclude module: 'commons-io'
