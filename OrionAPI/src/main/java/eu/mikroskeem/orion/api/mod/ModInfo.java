@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-package eu.mikroskeem.orion.core.mod;
+package eu.mikroskeem.orion.api.mod;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -57,6 +57,5 @@ public interface ModInfo {
      *
      * @return Mod dependency list
      */
-    @NotNull
-    List<String> getDependencies();
+    @NotNull List<String> getDependencies();
 }

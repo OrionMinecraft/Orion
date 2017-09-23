@@ -34,12 +34,11 @@ import eu.mikroskeem.orion.api.CBVersion;
 import eu.mikroskeem.orion.api.Orion;
 import eu.mikroskeem.orion.api.OrionAPI;
 import eu.mikroskeem.orion.api.events.ModLoadEvent;
+import eu.mikroskeem.orion.api.mod.ModInfo;
 import eu.mikroskeem.orion.core.extensions.OrionMixinErrorHandler;
 import eu.mikroskeem.orion.core.extensions.OrionTokenProvider;
-import eu.mikroskeem.orion.core.lcl.LaunchClassLoaderAccessor;
 import eu.mikroskeem.orion.core.mod.ModClassVisitor;
 import eu.mikroskeem.orion.core.mod.ModContainer;
-import eu.mikroskeem.orion.core.mod.ModInfo;
 import eu.mikroskeem.picomaven.Dependency;
 import eu.mikroskeem.picomaven.DownloaderCallbacks;
 import eu.mikroskeem.picomaven.PicoMaven;
@@ -68,7 +67,13 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -123,17 +128,6 @@ public final class OrionCore {
     }
 
     /**
-     * Gets mods list
-     *
-     * @return Loaded list
-     */
-    @NotNull
-    @Contract(pure = true)
-    public List<ModContainer<?>> getMods() {
-        return mods;
-    }
-
-    /**
      * Gets detected CraftBukkit version
      *
      * @return Detected {@link CBVersion}
@@ -163,31 +157,30 @@ public final class OrionCore {
     @Contract("null -> fail")
     void setupCore(LaunchClassLoader launchClassLoader) {
         logger.debug("Adding class load exclusions");
-        launchClassLoader.addClassLoaderExclusion("ninja.leaping.configurate");
-        launchClassLoader.addClassLoaderExclusion("eu.mikroskeem.orion.api");
-        launchClassLoader.addClassLoaderExclusion("javax.inject");
+        launchClassLoader.getClassLoaderExclusions().add("ninja.leaping.configurate");
+        launchClassLoader.getClassLoaderExclusions().add("eu.mikroskeem.orion.api");
+        launchClassLoader.getClassLoaderExclusions().add("javax.inject");
 
         /* Remove invalid exclusion */
-        LaunchClassLoaderAccessor.WrappedInstances.getAccessor(launchClassLoader)
-                .getClassLoaderExceptions().remove("org.apache.logging.");
+        launchClassLoader.getClassLoaderExclusions().remove("org.apache.logging.");
 
         /* Library packages */
-        launchClassLoader.addClassLoaderExclusion("joptsimple");
-        launchClassLoader.addClassLoaderExclusion("gnu.trove");
-        launchClassLoader.addClassLoaderExclusion("it.unimi.dsi.fastutil");
-        launchClassLoader.addClassLoaderExclusion("org.apache.logging.log4j");
-        launchClassLoader.addClassLoaderExclusion("org.yaml.snakeyaml");
-        launchClassLoader.addClassLoaderExclusion("com.google.inject");
-        launchClassLoader.addClassLoaderExclusion("com.google.common");
-        launchClassLoader.addClassLoaderExclusion("com.google.gson");
-        launchClassLoader.addClassLoaderExclusion("javax.annotation");
-        launchClassLoader.addClassLoaderExclusion("org.apache.commons");
-        launchClassLoader.addClassLoaderExclusion("com.mojang.authlib");
+        launchClassLoader.getClassLoaderExclusions().add("joptsimple");
+        launchClassLoader.getClassLoaderExclusions().add("gnu.trove");
+        launchClassLoader.getClassLoaderExclusions().add("it.unimi.dsi.fastutil");
+        launchClassLoader.getClassLoaderExclusions().add("org.apache.logging.log4j");
+        launchClassLoader.getClassLoaderExclusions().add("org.yaml.snakeyaml");
+        launchClassLoader.getClassLoaderExclusions().add("com.google.inject");
+        launchClassLoader.getClassLoaderExclusions().add("com.google.common");
+        launchClassLoader.getClassLoaderExclusions().add("com.google.gson");
+        launchClassLoader.getClassLoaderExclusions().add("javax.annotation");
+        launchClassLoader.getClassLoaderExclusions().add("org.apache.commons");
+        launchClassLoader.getClassLoaderExclusions().add("com.mojang.authlib");
 
         /* Note: magical lines to fix logging */
-        launchClassLoader.addClassLoaderExclusion("net.minecrell.terminalconsole");
-        launchClassLoader.addClassLoaderExclusion("com.sun.jna");
-        launchClassLoader.addClassLoaderExclusion("org.jline");
+        launchClassLoader.getClassLoaderExclusions().add("net.minecrell.terminalconsole");
+        launchClassLoader.getClassLoaderExclusions().add("com.sun.jna");
+        launchClassLoader.getClassLoaderExclusions().add("org.jline");
 
         logger.debug("Setting up OrionAPI singleton");
         OrionAPIImpl orionAPI = new OrionAPIImpl(this);
@@ -201,9 +194,7 @@ public final class OrionCore {
         }
 
         logger.debug("Setting up dependency injector...");
-        baseInjector = Guice.createInjector(b -> {
-            b.bind(Orion.class).toInstance(orionAPI);
-        });
+        baseInjector = Guice.createInjector(b -> b.bind(Orion.class).toInstance(orionAPI));
     }
 
     /**

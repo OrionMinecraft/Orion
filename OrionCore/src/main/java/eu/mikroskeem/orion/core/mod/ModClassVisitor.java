@@ -26,9 +26,14 @@
 package eu.mikroskeem.orion.core.mod;
 
 import eu.mikroskeem.orion.api.annotations.OrionMod;
+import eu.mikroskeem.orion.api.mod.ModInfo;
 import eu.mikroskeem.shuriken.common.Ensure;
 import org.jetbrains.annotations.Nullable;
-import org.objectweb.asm.*;
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,7 +88,7 @@ public final class ModClassVisitor extends ClassVisitor {
     static class ModAnnotationVisitor extends AnnotationVisitor {
         private final List<String> dependencies = new ArrayList<>();
         private State currentState = State.DEFAULT;
-        private TheModInfo modInfo;
+        private OrionModInfo modInfo;
         private boolean gotId = false;
 
         private enum State {
@@ -92,7 +97,7 @@ public final class ModClassVisitor extends ClassVisitor {
 
         ModAnnotationVisitor(String className) {
             super(Opcodes.ASM5);
-            modInfo = new TheModInfo();
+            modInfo = new OrionModInfo();
             modInfo.setDependencies(dependencies);
             modInfo.setClassName(className.replace('/', '.'));
         }

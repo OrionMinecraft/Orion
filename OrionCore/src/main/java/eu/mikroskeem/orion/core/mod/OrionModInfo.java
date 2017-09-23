@@ -25,6 +25,7 @@
 
 package eu.mikroskeem.orion.core.mod;
 
+import eu.mikroskeem.orion.api.mod.ModInfo;
 import eu.mikroskeem.shuriken.common.Ensure;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -37,7 +38,7 @@ import java.util.List;
  *
  * @author Mark Vainomaa
  */
-final class TheModInfo implements ModInfo {
+final class OrionModInfo implements ModInfo {
     private String id;
     private String className;
     private List<String> dependencies;

@@ -25,6 +25,7 @@
 
 package eu.mikroskeem.orion.api;
 
+import eu.mikroskeem.orion.api.mod.ModInfo;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -89,4 +90,20 @@ public interface Orion {
      */
     @Contract("null -> fail")
     void registerLibrary(String dependencyString);
+
+    /**
+     * Gets unmodifiable list of loaded mods
+     *
+     * @return Unmodifiable list of loaded mods
+     */
+    @NotNull
+    List<ModInfo> getMods();
+
+    /**
+     * Gets unmodifiable list of registered Mixin configurations
+     *
+     * @return Unmodifiable list of registered Mixin configurations
+     */
+    @NotNull
+    List<String> getMixinConfigurations();
 }

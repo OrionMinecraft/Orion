@@ -26,6 +26,8 @@
 package eu.mikroskeem.orion.core;
 
 import eu.mikroskeem.orion.api.Orion;
+import eu.mikroskeem.orion.api.mod.ModInfo;
+import eu.mikroskeem.orion.core.mod.ModContainer;
 import eu.mikroskeem.picomaven.Dependency;
 import eu.mikroskeem.shuriken.common.Ensure;
 import eu.mikroskeem.shuriken.common.SneakyThrow;
@@ -113,5 +115,17 @@ final class OrionAPIImpl implements Orion {
         return Collections.unmodifiableList(orionCore.modLibraries.stream()
                 .map(d -> d.getGroupId() + ':' + d.getArtifactId() + ':' + d.getVersion())
                 .collect(Collectors.toList()));
+    }
+
+    @Override
+    @NotNull
+    public List<ModInfo> getMods() {
+        return orionCore.mods.stream().map(ModContainer::getModInfo).collect(Collectors.toList());
+    }
+
+    @Override
+    @NotNull
+    public List<String> getMixinConfigurations() {
+        return Collections.unmodifiableList(orionCore.mixinConfigurations);
     }
 }

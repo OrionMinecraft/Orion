@@ -28,6 +28,7 @@ package eu.mikroskeem.orion.core.mod;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Injector;
 import eu.mikroskeem.orion.api.events.ModConstructEvent;
+import eu.mikroskeem.orion.api.mod.ModInfo;
 import eu.mikroskeem.shuriken.common.Ensure;
 import eu.mikroskeem.shuriken.reflect.ClassWrapper;
 import org.jetbrains.annotations.Contract;
