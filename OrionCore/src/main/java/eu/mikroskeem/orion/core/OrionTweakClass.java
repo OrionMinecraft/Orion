@@ -25,7 +25,6 @@
 
 package eu.mikroskeem.orion.core;
 
-import eu.mikroskeem.shuriken.common.ToURL;
 import net.minecraft.launchwrapper.ITweaker;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import org.apache.logging.log4j.LogManager;
@@ -39,7 +38,6 @@ import java.util.List;
 
 import static eu.mikroskeem.orion.core.OrionTweakClass.OrionTweakerData.launchTarget;
 import static eu.mikroskeem.orion.core.OrionTweakClass.OrionTweakerData.originalArguments;
-import static eu.mikroskeem.orion.core.OrionTweakClass.OrionTweakerData.serverJar;
 
 
 /**
@@ -49,13 +47,9 @@ import static eu.mikroskeem.orion.core.OrionTweakClass.OrionTweakerData.serverJa
  */
 public final class OrionTweakClass implements ITweaker {
     private static final Logger logger = LogManager.getLogger("OrionTweakClass");
-    private OrionCore orionCore;
 
     @Override
     public void injectIntoClassLoader(LaunchClassLoader classLoader) {
-        /* Add server jar to classloader */
-        classLoader.addURL(ToURL.to(serverJar));
-
         /* Set up Orion core */
         OrionCore.INSTANCE.setupCore(classLoader);
 
@@ -87,7 +81,6 @@ public final class OrionTweakClass implements ITweaker {
     public static class OrionTweakerData {
         public final static List<String> originalArguments = new ArrayList<>();
         public static String launchTarget;
-        public static Path serverJar;
         public static Path librariesPath;
     }
 }

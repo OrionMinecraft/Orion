@@ -69,6 +69,18 @@ public final class Bootstrap {
         else
             uclTool = new ClassLoaderTools.URLClassLoaderTools(cl);
 
+        /* Set up Paperclip manager */
+        PaperclipManager paperclipManager = new PaperclipManager(
+                new URL(PAPERCLIP_URL), Paths.get(PAPERCLIP_JAR),
+                Paths.get(PAPER_SERVER_JAR), uclTool);
+
+        /* Set up Paper server */
+        if(!paperclipManager.isServerAvailable())
+            paperclipManager.invoke();
+
+        /* Set up classpath, Orion Tweaker & launch arguments */
+        paperclipManager.setupServer();
+
         /* Maven repositories */
         List<URI> repositories = Arrays.asList(
                 URI.create("https://repo.maven.apache.org/maven2"),                     /* Central */
@@ -122,20 +134,6 @@ public final class Bootstrap {
             downloadedLibraries.stream().map(ToURL::to).forEach(uclTool::addURL);
         }
         uclTool.resetCache();
-
-        /* Set up Paperclip manager */
-        PaperclipManager paperclipManager = new PaperclipManager(
-                new URL(PAPERCLIP_URL),
-                Paths.get(PAPERCLIP_JAR),
-                Paths.get(PAPER_SERVER_JAR)
-        );
-
-        /* Set up Paper server */
-        if(!paperclipManager.isServerAvailable())
-            paperclipManager.invoke();
-
-        /* Set up classpath, Orion Tweaker & launch arguments */
-        paperclipManager.setupServer();
 
         /* Do tricks with command line arguments */
         List<String> arguments = Arrays.asList(args);

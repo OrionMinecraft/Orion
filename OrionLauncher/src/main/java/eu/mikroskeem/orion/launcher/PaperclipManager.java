@@ -54,16 +54,21 @@ final class PaperclipManager {
     private final URL paperclipDownloadUrl;
     private final Path paperclipPath;
     private final Path serverPath;
+    private final ClassLoaderTools.URLClassLoaderTools uclTools;
 
-    PaperclipManager(URL paperclipDownloadUrl, Path paperclipPath, Path serverPath) {
+    PaperclipManager(URL paperclipDownloadUrl, Path paperclipPath, Path serverPath,
+                     ClassLoaderTools.URLClassLoaderTools uclTools) {
         this.oldSecurityManager = System.getSecurityManager();
         this.paperclipPath = paperclipPath;
         this.serverPath = serverPath;
         this.paperclipDownloadUrl = paperclipDownloadUrl;
+        this.uclTools = uclTools;
     }
 
     /**
      * Checks if server is available
+     *
+     * @return Whether server is available or not
      */
     boolean isServerAvailable() {
         return Files.exists(serverPath);
@@ -74,18 +79,10 @@ final class PaperclipManager {
      */
     void setupServer() {
         if(!isServerAvailable()) throw new IllegalStateException("Paper server jar is not available!");
-        OrionTweakerData.serverJar = serverPath;
         OrionTweakerData.launchTarget = Utils.getMainClassFromJar(serverPath);
 
         /* Load server jar to system classloader */
-        ClassLoader cl = ClassLoader.getSystemClassLoader();
-        ClassLoaderTools.URLClassLoaderTools uclTools;
-        if(cl instanceof URLClassLoader)
-            uclTools = new ClassLoaderTools.URLClassLoaderTools((URLClassLoader) cl);
-        else
-            uclTools = new ClassLoaderTools.URLClassLoaderTools(cl);
         uclTools.addURL(ToURL.to(serverPath));
-        uclTools.resetCache();
     }
 
     /**
