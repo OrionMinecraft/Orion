@@ -1,8 +1,13 @@
 dependencies {
     compile project(':OrionAPI')
 
-    compile group: 'eu.mikroskeem', name: 'picomaven', version: '0.0.3-SNAPSHOT'
+    compile group: 'eu.mikroskeem', name: 'picomaven', version: picomaven_version
 
-    downloadDep group: 'com.google.inject', name: 'guice', version: '4.1.0'
-    downloadDep group: 'eu.mikroskeem', name: 'orion.at', version: '0.0.1-SNAPSHOT'
+    downloadDep(group: 'com.google.inject', name: 'guice', version: guice_version) {
+        exclude group: 'com.google.guava', module: 'guava' // Supplied by Paper server
+    }
+    downloadDep(group: 'eu.mikroskeem', name: 'orion.at', version: orion_at_version) {
+        exclude group: 'org.jetbrains', module: 'annotations'
+        exclude group: 'org.ow2.asm', module: 'asm-all'
+    }
 }

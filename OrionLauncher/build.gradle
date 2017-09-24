@@ -19,7 +19,6 @@ shadowJar {
         include dependency('org.ow2.asm:asm-all')
         include dependency('eu.mikroskeem:shuriken.common')
         include dependency('eu.mikroskeem:shuriken.instrumentation')
-        include dependency('eu.mikroskeem:shuriken.injector')
         include dependency('eu.mikroskeem:shuriken.reflect')
 
         // Dependency downloader
@@ -41,14 +40,27 @@ shadowJar {
     relocate 'okhttp3', 'eu.mikroskeem.orion.internal.picomaven.okhttp3'
     relocate 'okio', 'eu.mikroskeem.orion.internal.picomaven.okio'
 
-    // Let's reuse libraries
-    relocate 'org.spongepowered.asm.lib', 'eu.mikroskeem.orion.internal.asm'
     relocate 'org.objectweb.asm', 'eu.mikroskeem.orion.internal.asm'
 
     // Exclude unneeded files
     exclude 'licenses/**'
     exclude 'publicsuffixes.gz'
     exclude 'META-INF/maven/**'
+
+    // Generate deps.txt
+    def depsFile = file("$buildDir/deps.txt")
+    depsFile.parentFile.mkdirs()
+    if(depsFile.exists()) depsFile.delete()
+
+    def deps = [] as Set
+    rootProject.subprojects.each { subproject ->
+        subproject.configurations.downloadDep.resolvedConfiguration.resolvedArtifacts.each { dep ->
+            deps += "${dep.id.componentIdentifier}"
+        }
+    }
+    deps.each { depsFile << it << "\n" }
+
+    from depsFile
 }
 
 build.dependsOn shadowJar

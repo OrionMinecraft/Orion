@@ -36,10 +36,13 @@ import eu.mikroskeem.shuriken.reflect.ClassWrapper;
 import eu.mikroskeem.shuriken.reflect.Reflect;
 import eu.mikroskeem.shuriken.reflect.wrappers.TypeWrapper;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -47,6 +50,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -90,27 +94,20 @@ public final class Bootstrap {
                 URI.create("http://jcenter.bintray.com")
         );
 
-        /* Download dependencies, TODO: do not hardcode */
-        List<String> dependencies = Arrays.asList(
-                "net.minecraft:launchwrapper:1.15-mikroskeem",
-                "org.spongepowered:mixin:0.7.3-SNAPSHOT",
-                "eu.mikroskeem:orion.at:0.0.1-SNAPSHOT",
-
-                /* Dependency injection */
-                "aopalliance:aopalliance:1.0",
-                "com.google.inject:guice:4.1.0",
-                "javax.inject:javax.inject:1",
-
-                /* Configurate */
-                "ninja.leaping.configurate:configurate-core:3.3",
-                "ninja.leaping.configurate:configurate-hocon:3.3",
-                "com.typesafe:config:1.3.1"
-        );
+        /* Download dependencies */
+        List<Dependency> dependencies = new ArrayList<>();
+        try(BufferedReader depsReader = new BufferedReader(
+                new InputStreamReader(Bootstrap.class.getClassLoader().getResourceAsStream("deps.txt")))) {
+            String line;
+            while((line = depsReader.readLine()) != null) {
+                dependencies.add(Dependency.fromGradle(line));
+            }
+        }
 
         PicoMaven.Builder picoMavenBuilder = new PicoMaven.Builder()
                 .withDownloadPath(OrionTweakerData.librariesPath = Paths.get(LIBRARIES_PATH))
                 .withRepositories(repositories)
-                .withDependencies(dependencies.stream().map(Dependency::fromGradle).collect(Collectors.toList()))
+                .withDependencies(dependencies)
                 .withExecutorService(Executors.newWorkStealingPool())
                 .shouldCloseExecutorService(true)
                 .withDownloaderCallbacks(new DownloaderCallbacks() {
