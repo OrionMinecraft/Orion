@@ -80,6 +80,30 @@ subprojects {
         //testCompile group:'org.junit.jupiter', name: 'junit-jupiter-api', version: junit_version
         //testRuntime group:'org.junit.jupiter', name: 'junit-jupiter-engine', version: junit_version
     }
+
+    // downloadDep configuration collector
+    task collectDependencies {
+        subprojects {
+            inputs.file(configurations.downloadDep)
+        }
+        outputs.file(new File(temporaryDir, 'deps.txt'))
+
+        doLast {
+            def outputFile = new File(temporaryDir, 'deps.txt')
+            def deps = [] as Set
+            rootProject.subprojects.each { subproject ->
+                subproject.configurations.downloadDep.resolvedConfiguration.resolvedArtifacts.each { dep ->
+                    deps += dep.id.componentIdentifier.toString()
+                }
+            }
+            outputFile.createNewFile()
+            outputFile.withWriter { BufferedWriter writer ->
+                deps.each {
+                    writer.writeLine it
+                }
+            }
+        }
+    }
 }
 
 // Wrapper task

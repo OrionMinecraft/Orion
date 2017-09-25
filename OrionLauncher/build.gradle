@@ -48,19 +48,7 @@ shadowJar {
     exclude 'META-INF/maven/**'
 
     // Generate deps.txt
-    def depsFile = file("$buildDir/deps.txt")
-    depsFile.parentFile.mkdirs()
-    if(depsFile.exists()) depsFile.delete()
-
-    def deps = [] as Set
-    rootProject.subprojects.each { subproject ->
-        subproject.configurations.downloadDep.resolvedConfiguration.resolvedArtifacts.each { dep ->
-            deps += "${dep.id.componentIdentifier}"
-        }
-    }
-    deps.each { depsFile << it << "\n" }
-
-    from depsFile
+    from collectDependencies
 }
 
 build.dependsOn shadowJar
