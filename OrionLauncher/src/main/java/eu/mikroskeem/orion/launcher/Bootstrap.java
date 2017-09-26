@@ -32,9 +32,9 @@ import eu.mikroskeem.picomaven.PicoMaven;
 import eu.mikroskeem.shuriken.common.Ensure;
 import eu.mikroskeem.shuriken.common.ToURL;
 import eu.mikroskeem.shuriken.instrumentation.ClassLoaderTools;
-import eu.mikroskeem.shuriken.reflect.ClassWrapper;
-import eu.mikroskeem.shuriken.reflect.Reflect;
-import eu.mikroskeem.shuriken.reflect.wrappers.TypeWrapper;
+import net.minecraft.launchwrapper.Launch;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -42,15 +42,12 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 /**
@@ -85,6 +82,9 @@ public final class Bootstrap {
         /* Set up classpath, Orion Tweaker & launch arguments */
         paperclipManager.setupServer();
 
+        /* Logger can be set up now */
+        Logger log = LogManager.getLogger("OrionBootstrap");
+
         /* Maven repositories */
         List<URI> repositories = Arrays.asList(
                 URI.create("https://repo.maven.apache.org/maven2"),                     /* Central */
@@ -100,6 +100,7 @@ public final class Bootstrap {
                 new InputStreamReader(Bootstrap.class.getClassLoader().getResourceAsStream("deps.txt")))) {
             String line;
             while((line = depsReader.readLine()) != null) {
+                log.debug("Required dependency: {}", line);
                 dependencies.add(Dependency.fromGradle(line));
             }
         }
@@ -110,19 +111,20 @@ public final class Bootstrap {
                 .withDependencies(dependencies)
                 .withExecutorService(Executors.newWorkStealingPool())
                 .shouldCloseExecutorService(true)
+                .withDebugLoggerImpl((format, contents) -> log.debug(format.replace("%s", "{}"), contents))
                 .withDownloaderCallbacks(new DownloaderCallbacks() {
                     @Override
                     public void onSuccess(Dependency dependency, Path dependencyPath) {
-                        System.out.format("%s download succeeded!%n", dependency);
+                        log.info("{} download succeeded!", dependency);
                     }
 
                     @Override
                     public void onFailure(Dependency dependency, IOException exception) {
-                        System.out.format("%s download failed! %s%n", dependency, exception.getMessage());
+                        log.warn("{} download failed! {}", dependency, exception);
                     }
                 });
 
-        System.out.println("Setting up Orion dependencies...");
+        log.info("Setting up Orion dependencies...");
         try(PicoMaven picoMaven = picoMavenBuilder.build()) {
             List<Path> downloadedLibraries = picoMaven.downloadAll();
             Ensure.ensureCondition(downloadedLibraries.size() == dependencies.size(),
@@ -143,12 +145,7 @@ public final class Bootstrap {
         OrionTweakerData.originalArguments.addAll(arguments);
 
         /* Launch LegacyLauncher */
-        ClassWrapper<?> launch = Reflect.getClass("net.minecraft.launchwrapper.Launch").orElseThrow(() ->
-                        new RuntimeException("Failed to load LegacyLauncher. Please delete libraries " +
-                                "folder and launch Orion again."));
-        launch.invokeMethod(
-                "main", void.class,
-                TypeWrapper.of(String[].class, tweakArgs.toArray(new String[tweakArgs.size()]))
-        );
+        log.info("Starting LegacyLauncher with arguments {}", tweakArgs);
+        Launch.main(tweakArgs.toArray(new String[tweakArgs.size()]));
     }
 }
