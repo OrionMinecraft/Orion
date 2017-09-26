@@ -25,6 +25,8 @@
 
 package eu.mikroskeem.orion.launcher;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import eu.mikroskeem.orion.core.OrionTweakClass.OrionTweakerData;
 import eu.mikroskeem.picomaven.Dependency;
 import eu.mikroskeem.picomaven.DownloaderCallbacks;
@@ -33,11 +35,16 @@ import eu.mikroskeem.shuriken.common.Ensure;
 import eu.mikroskeem.shuriken.common.ToURL;
 import eu.mikroskeem.shuriken.instrumentation.ClassLoaderTools;
 import net.minecraft.launchwrapper.Launch;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URL;
@@ -47,7 +54,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.Executors;
+
+import static java.util.Objects.requireNonNull;
 
 
 /**
@@ -84,6 +94,44 @@ public final class Bootstrap {
 
         /* Logger can be set up now */
         Logger log = LogManager.getLogger("OrionBootstrap");
+        try(InputStream is = requireNonNull(Bootstrap.class.getResourceAsStream("/orion-version.properties"))) {
+            Properties ver = new Properties(); ver.load(is);
+            log.info("Orion Launcher version {} (git: {}/{})",
+                    ver.getProperty("version"),
+                    ver.getProperty("gitBranch"),
+                    ver.getProperty("gitCommitId")
+            );
+            new Thread(() -> {
+                OkHttpClient client = new OkHttpClient();
+                HttpUrl url = HttpUrl.parse("https://api.github.com/repos/" +
+                        ver.getProperty("gitRepository") +
+                        "/compare/" +
+                        ver.getProperty("gitBranch") +
+                        "..." +
+                        ver.getProperty("gitCommitId"));
+                Request request = new Request.Builder()
+                        .get()
+                        .url(requireNonNull(url))
+                        .build();
+                try(Response response = client.newCall(request).execute()) {
+                    if(response.isSuccessful()) {
+                        JsonObject root = new JsonParser().parse(response.body().charStream()).getAsJsonObject();
+                        int behindBy = root.get("behind_by").getAsInt();
+                        if(behindBy > 0) {
+                            log.info("This Orion version is up to date!");
+                        } else {
+                            log.info("This Orion version is behind by {} commits!", behindBy);
+                        }
+                    } else {
+                        throw new IOException("HTTP code: " + response.code());
+                    }
+                } catch (IOException e) {
+                    log.warn("Failed to obtain latest version info from GitHub!", e);
+                }
+            }).start();
+        } catch (Exception e) {
+            log.warn("Failed to obtain version information from jar", e);
+        }
 
         /* Maven repositories */
         List<URI> repositories = Arrays.asList(

@@ -1,8 +1,11 @@
+import org.ajoberstar.grgit.Grgit
+
 // Buildscript configuration
 buildscript {
     repositories {
         mavenLocal()
         mavenCentral()
+        jcenter()
 
         maven {
             name = 'gradle-plugins'
@@ -12,12 +15,29 @@ buildscript {
 
     dependencies {
         classpath group: 'gradle.plugin.net.minecrell', name: 'licenser', version: minecrell_licenser_version
-        //classpath group: 'org.junit.platform', name: 'junit-platform-gradle-plugin', version: junit_gradle_version
         classpath group: 'com.github.jengelman.gradle.plugins', name: 'shadow', version: shadow_version
+        classpath group: 'org.ajoberstar', name: 'grgit', version: grgit_version
     }
 }
 
-// Gradle plugins
+// Git
+apply plugin: 'org.ajoberstar.grgit'
+
+String obtainRepositoryPath(String url) {
+    if(url == null) return null
+    if(url.startsWith("ssh://") || url.startsWith("http")) {
+        def uri = URI.create url
+        return uri.path.substring(1).replace(".git", "")
+    } else if(url.matches("^[a-zA-Z0-9_\\-]+@[a-zA-Z0-9_\\-]+.[a-z]+:(.+?)")) {
+        return url.split(":", 2)[1].replace(".git", "")
+    }
+    return null
+}
+
+project.ext.gitCommitId = grgit.head()?.getAbbreviatedId(7) ?: "UKNOWN"
+project.ext.gitBranch = grgit.branch?.current()?.name ?: "UKNOWN"
+project.ext.gitRepository = obtainRepositoryPath(grgit.remote.list().find { it.name == "origin" }?.url) ?: "UNKNOWN"
+
 apply plugin: 'idea'
 apply plugin: 'eclipse'
 
@@ -52,7 +72,6 @@ allprojects {
 }
 
 subprojects {
-    //apply plugin: 'org.junit.platform.gradle.plugin'
     apply plugin: 'com.github.johnrengelman.shadow'
     apply plugin: 'net.minecrell.licenser'
     apply plugin: 'java'
@@ -73,12 +92,6 @@ subprojects {
         header = rootProject.file('etc/HEADER')
         ignoreFailures = false
         include "**/*.java"
-    }
-
-    // Global dependencies
-    dependencies {
-        //testCompile group:'org.junit.jupiter', name: 'junit-jupiter-api', version: junit_version
-        //testRuntime group:'org.junit.jupiter', name: 'junit-jupiter-engine', version: junit_version
     }
 
     // downloadDep configuration collector

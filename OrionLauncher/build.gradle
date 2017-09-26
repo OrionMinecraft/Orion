@@ -51,4 +51,15 @@ shadowJar {
     from collectDependencies
 }
 
+processResources {
+    from(sourceSets.main.resources.srcDirs) {
+        filter org.apache.tools.ant.filters.ReplaceTokens, tokens: [
+                version: version,
+                gitBranch: rootProject.ext.get("gitBranch"),
+                gitCommitId: rootProject.ext.get("gitCommitId"),
+                gitRepository: rootProject.ext.get("gitRepository")
+        ]
+    }
+}
+
 build.dependsOn shadowJar
