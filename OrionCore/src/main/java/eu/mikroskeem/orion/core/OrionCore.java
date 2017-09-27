@@ -115,7 +115,7 @@ public final class OrionCore {
         logger.debug("Setting up SpongeMixin library...");
         MixinBootstrap.init();
 
-        logger.debug("Settinng Mixin Environment side to SERVER");
+        logger.debug("Setting Mixin Environment side to SERVER");
         MixinEnvironment.getDefaultEnvironment().setSide(MixinEnvironment.Side.SERVER);
 
         logger.debug("Setting up Mixin error handler");
