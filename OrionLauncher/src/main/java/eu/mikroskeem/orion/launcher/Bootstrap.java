@@ -49,6 +49,7 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -56,7 +57,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Executors;
+import java.util.stream.Stream;
 
+import static java.lang.Boolean.getBoolean;
 import static java.util.Objects.requireNonNull;
 
 
@@ -66,9 +69,12 @@ import static java.util.Objects.requireNonNull;
  * @author Mark Vainomaa
  */
 public final class Bootstrap {
-    final static String LIBRARIES_PATH = System.getProperty("orion.librariesPath", "./libraries");
-    final static String PAPER_SERVER_JAR = System.getProperty("orion.patchedJarPath", "./cache/patched_1.12.2.jar");
-    final static String PAPERCLIP_JAR = System.getProperty("orion.paperclipJarPath", "./paperclip.jar");
+    final static Path PRELOAD_LIBRARIES_PATH = Paths.get(System.getProperty("orion.preloadLibrariesPath", "./preload_libraries"));
+    final static boolean PRELOAD_ALLOWED = getBoolean("orion.allowPreloadLibraries");
+    final static boolean DONT_APPEND_TWEAK_CLASS_ARGUMENT = getBoolean("orion.dontAppendTweakClassArgument");
+    final static Path LIBRARIES_PATH = Paths.get(System.getProperty("orion.librariesPath", "./libraries"));
+    final static Path PAPER_SERVER_JAR = Paths.get(System.getProperty("orion.patchedJarPath", "./cache/patched_1.12.2.jar"));
+    final static Path PAPERCLIP_JAR = Paths.get(System.getProperty("orion.paperclipJarPath", "./paperclip.jar"));
     final static String PAPERCLIP_URL = System.getProperty("orion.paperclipDownloadUrl",
             "https://ci.destroystokyo.com/job/PaperSpigot/lastSuccessfulBuild/artifact/paperclip.jar");
 
@@ -80,10 +86,24 @@ public final class Bootstrap {
         else
             uclTool = new ClassLoaderTools.URLClassLoaderTools(cl);
 
+        /* Load preload libraries, if allowed */
+        if(PRELOAD_ALLOWED) {
+            if(Files.notExists(PRELOAD_LIBRARIES_PATH) || !Files.isDirectory(PRELOAD_LIBRARIES_PATH)) {
+                Files.deleteIfExists(PRELOAD_LIBRARIES_PATH);
+                Files.createDirectories(PRELOAD_LIBRARIES_PATH);
+            }
+            try(Stream<Path> file = Files.walk(PRELOAD_LIBRARIES_PATH)) {
+                file.filter(Files::isRegularFile)
+                        .filter(f -> f.toString().endsWith(".jar"))
+                        .map(ToURL::to)
+                        .forEach(uclTool::addURL);
+            }
+        }
+
         /* Set up Paperclip manager */
         PaperclipManager paperclipManager = new PaperclipManager(
-                new URL(PAPERCLIP_URL), Paths.get(PAPERCLIP_JAR),
-                Paths.get(PAPER_SERVER_JAR), uclTool);
+                new URL(PAPERCLIP_URL), PAPERCLIP_JAR,
+                PAPER_SERVER_JAR, uclTool);
 
         /* Set up Paper server */
         if(!paperclipManager.isServerAvailable())
@@ -154,7 +174,7 @@ public final class Bootstrap {
         }
 
         PicoMaven.Builder picoMavenBuilder = new PicoMaven.Builder()
-                .withDownloadPath(OrionTweakerData.librariesPath = Paths.get(LIBRARIES_PATH))
+                .withDownloadPath(OrionTweakerData.librariesPath = LIBRARIES_PATH)
                 .withRepositories(repositories)
                 .withDependencies(dependencies)
                 .withExecutorService(Executors.newWorkStealingPool())
@@ -186,8 +206,11 @@ public final class Bootstrap {
         List<String> arguments = Arrays.asList(args);
         List<String> tweakArgs = new ArrayList<>();
         tweakArgs.addAll(arguments);
-        tweakArgs.add("--tweakClass");
-        tweakArgs.add("eu.mikroskeem.orion.core.OrionTweakClass");
+
+        if(!DONT_APPEND_TWEAK_CLASS_ARGUMENT) {
+            tweakArgs.add("--tweakClass");
+            tweakArgs.add("eu.mikroskeem.orion.core.OrionTweakClass");
+        }
 
         /* Pass original arguments to tweak class */
         OrionTweakerData.originalArguments.addAll(arguments);
