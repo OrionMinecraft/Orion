@@ -69,13 +69,13 @@ import static java.util.Objects.requireNonNull;
  * @author Mark Vainomaa
  */
 public final class Bootstrap {
-    final static Path PRELOAD_LIBRARIES_PATH = Paths.get(System.getProperty("orion.preloadLibrariesPath", "./preload_libraries"));
-    final static boolean PRELOAD_ALLOWED = getBoolean("orion.allowPreloadLibraries");
-    final static boolean DONT_APPEND_TWEAK_CLASS_ARGUMENT = getBoolean("orion.dontAppendTweakClassArgument");
-    final static Path LIBRARIES_PATH = Paths.get(System.getProperty("orion.librariesPath", "./libraries"));
-    final static Path PAPER_SERVER_JAR = Paths.get(System.getProperty("orion.patchedJarPath", "./cache/patched_1.12.2.jar"));
-    final static Path PAPERCLIP_JAR = Paths.get(System.getProperty("orion.paperclipJarPath", "./paperclip.jar"));
-    final static String PAPERCLIP_URL = System.getProperty("orion.paperclipDownloadUrl",
+    private final static Path PRELOAD_LIBRARIES_PATH = Paths.get(System.getProperty("orion.preloadLibrariesPath", "./preload_libraries"));
+    private final static boolean PRELOAD_ALLOWED = getBoolean("orion.allowPreloadLibraries");
+    private final static boolean DONT_APPEND_TWEAK_CLASS_ARGUMENT = getBoolean("orion.dontAppendTweakClassArgument");
+    private final static Path LIBRARIES_PATH = Paths.get(System.getProperty("orion.librariesPath", "./libraries"));
+    private final static Path PAPER_SERVER_JAR = Paths.get(System.getProperty("orion.patchedJarPath", "./cache/patched_1.12.2.jar"));
+    private final static Path PAPERCLIP_JAR = Paths.get(System.getProperty("orion.paperclipJarPath", "./paperclip.jar"));
+    private final static String PAPERCLIP_URL = System.getProperty("orion.paperclipDownloadUrl",
             "https://ci.destroystokyo.com/job/PaperSpigot/lastSuccessfulBuild/artifact/paperclip.jar");
 
     public static void main(String... args) throws Exception {
