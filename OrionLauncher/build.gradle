@@ -3,6 +3,8 @@ dependencies {
         // Do not run Mixin AP here
         exclude module: 'mixin'
     }
+
+    compile group: 'org.ow2.asm', name: 'asm-debug-all', version: '5.2'
 }
 
 jar {
@@ -16,7 +18,7 @@ jar {
 shadowJar {
     dependencies {
         // Tools
-        include dependency('org.ow2.asm:asm-all')
+        include dependency('org.ow2.asm:asm-debug-all')
         include dependency('eu.mikroskeem:shuriken.common')
         include dependency('eu.mikroskeem:shuriken.instrumentation')
         include dependency('eu.mikroskeem:shuriken.reflect')

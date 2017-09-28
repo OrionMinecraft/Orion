@@ -25,10 +25,12 @@
 
 package eu.mikroskeem.orion.core;
 
+import eu.mikroskeem.orion.api.bytecode.OrionTransformer;
 import eu.mikroskeem.orion.at.AccessTransformer;
-import net.minecraft.launchwrapper.IClassTransformer;
+import eu.mikroskeem.orion.core.launcher.BlackboardKey;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.URL;
@@ -42,13 +44,13 @@ import java.util.List;
  *
  * @author Mark Vainomaa
  */
-public final class OrionAccessTransformer implements IClassTransformer {
+public final class OrionAccessTransformer implements OrionTransformer {
     private static final Logger logger = LogManager.getLogger("OrionAT");
-    private static final List<URL> atUrls = new ArrayList<>();
     private final AccessTransformer at = new AccessTransformer();
 
     public OrionAccessTransformer() {
-        logger.debug("Orion AT instantiated");
+        List<URL> atUrls = BlackboardKey.getOr(BlackboardKey.AT_URLS, ArrayList<URL>::new);
+        logger.debug("Initializing OrionAT with {} access transformers", atUrls.size());
 
         /* Load AT files to AT library */
         for(URL url : atUrls) {
@@ -61,6 +63,8 @@ public final class OrionAccessTransformer implements IClassTransformer {
                 logger.warn("Skipping AT {}", e);
             }
         }
+
+        logger.debug("OrionAT initialized");
     }
 
     /**
@@ -68,22 +72,23 @@ public final class OrionAccessTransformer implements IClassTransformer {
      *
      * @param url AT url from {@link Class#getResource(String)}
      */
-    public static void registerAT(URL url) {
+    public static void registerAT(@NotNull URL url) {
         try {
             /* Test connection */
             URLConnection urlConnection = url.openConnection();
+            urlConnection.setUseCaches(false);
             urlConnection.connect();
+            BlackboardKey.getOr(BlackboardKey.AT_URLS, ArrayList<URL>::new).add(url);
+            logger.debug("Registered AT {}", url);
         } catch (IOException e) {
             logger.warn("Failed to register AT {}", url);
-            return;
         }
-        logger.debug("Registered AT {}", url);
-        atUrls.add(url);
     }
 
+    @NotNull
     @Override
-    public byte[] transform(String name, String transformedName, byte[] basicClass) {
-        logger.debug("Transforming class {}", name);
-        return at.transformClass(basicClass);
+    public byte[] transformClass(@NotNull byte[] source, @NotNull String className, @NotNull String remappedClassName) {
+        logger.debug("Transforming class {}", className);
+        return at.transformClass(source);
     }
 }

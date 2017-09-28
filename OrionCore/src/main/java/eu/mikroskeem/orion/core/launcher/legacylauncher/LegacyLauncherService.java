@@ -23,56 +23,37 @@
  * THE SOFTWARE.
  */
 
-package eu.mikroskeem.orion.core;
+package eu.mikroskeem.orion.core.launcher.legacylauncher;
 
-import eu.mikroskeem.orion.core.launcher.BlackboardKey;
-import net.minecraft.launchwrapper.ITweaker;
-import net.minecraft.launchwrapper.LaunchClassLoader;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import eu.mikroskeem.orion.api.bytecode.OrionTransformer;
+import eu.mikroskeem.orion.core.launcher.AbstractLauncherService;
+import net.minecraft.launchwrapper.IClassTransformer;
+import net.minecraft.launchwrapper.Launch;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
+public final class LegacyLauncherService extends AbstractLauncherService {
+    private Map<Class<? extends OrionTransformer>, Class<? extends IClassTransformer>> convertedTransformers = new HashMap<>();
 
-/**
- * Orion Tweak class
- *
- * @author Mark Vainomaa
- */
-public final class OrionTweakClass implements ITweaker {
-    private static final Logger logger = LogManager.getLogger("OrionTweakClass");
+    @NotNull
+    @Override
+    public Map<String, Object> getBlackBoard() {
+        return Launch.blackboard;
+    }
 
     @Override
-    public void injectIntoClassLoader(@NotNull LaunchClassLoader classLoader) {
-        /* Set up Orion core */
-        OrionCore.INSTANCE.setupCore();
-
-        /* Set up mods */
-        try {
-            OrionCore.INSTANCE.setupMods(classLoader, BlackboardKey.get(BlackboardKey.MODS_PATH));
-        } catch (IOException e) {
-            logger.error("Failed to load mods", e);
-        }
-
-        /* Set up transformers */
-        OrionCore.INSTANCE.setupTransformers();
+    public void registerTransformer(@NotNull Class<? extends OrionTransformer> transformer) {
+        Launch.classLoader.registerTransformer(
+                convertedTransformers.computeIfAbsent(transformer, ClassTransformerConverter::convert).getName()
+        );
     }
 
     @NotNull
     @Override
-    public String getLaunchTarget() {
-        return BlackboardKey.get(BlackboardKey.LAUNCH_TARGET);
+    public Set<String> getClassLoaderExclusions() {
+        return Launch.classLoader.getClassLoaderExclusions();
     }
-
-    @NotNull
-    @Override
-    public String[] getLaunchArguments() {
-        List<String> arguments = BlackboardKey.get(BlackboardKey.ORIGINAL_ARGUMENTS);
-        return arguments.toArray(new String[arguments.size()]);
-    }
-
-    @Override
-    public void acceptOptions(@NotNull List<String> args) {}
 }

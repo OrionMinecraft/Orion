@@ -33,10 +33,14 @@ import com.google.inject.name.Names;
 import eu.mikroskeem.orion.api.CBVersion;
 import eu.mikroskeem.orion.api.Orion;
 import eu.mikroskeem.orion.api.OrionAPI;
+import eu.mikroskeem.orion.api.bytecode.OrionTransformer;
 import eu.mikroskeem.orion.api.events.ModLoadEvent;
 import eu.mikroskeem.orion.api.mod.ModInfo;
 import eu.mikroskeem.orion.core.extensions.OrionMixinErrorHandler;
 import eu.mikroskeem.orion.core.extensions.OrionTokenProvider;
+import eu.mikroskeem.orion.core.launcher.AbstractLauncherService;
+import eu.mikroskeem.orion.core.launcher.BlackboardKey;
+import eu.mikroskeem.orion.core.launcher.legacylauncher.LegacyLauncherService;
 import eu.mikroskeem.orion.core.mod.ModClassVisitor;
 import eu.mikroskeem.orion.core.mod.ModContainer;
 import eu.mikroskeem.picomaven.Dependency;
@@ -68,6 +72,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -95,6 +100,7 @@ public final class OrionCore {
     /** Static instance */
     public static OrionCore INSTANCE = new OrionCore();
 
+    private final AbstractLauncherService launcherService;
     private final CBVersion cbVersion;
     private Injector baseInjector;
 
@@ -102,15 +108,20 @@ public final class OrionCore {
     final List<String> mixinConfigurations = new ArrayList<>();
     final List<URI> modMavenRepositories = new ArrayList<>();
     final List<Dependency> modLibraries = new ArrayList<>();
+    final Set<Class<? extends OrionTransformer>> transformers = new HashSet<>();
 
     /**
      * Private constructor to set up Mixin loader
      */
     private OrionCore() {
+        launcherService = BlackboardKey.get(BlackboardKey.LAUNCHER_SERVICE);
+
         logger.debug("Detecting CraftBukkit version...");
-        Ensure.ensureCondition((this.cbVersion = detectCBVersion()) != null,
-                "Failed to detect CraftBukkit version.");
-        logger.debug("Detected CraftBukkit version {} (id {})", cbVersion.getName(), cbVersion.getId());
+        if((this.cbVersion = detectCBVersion()) == CBVersion.UNKNOWN) {
+            logger.warn("Failed to detect CraftBukkit version.");
+        } else {
+            logger.debug("Detected CraftBukkit version {} (id {})", cbVersion.getName(), cbVersion.getId());
+        }
 
         logger.debug("Setting up SpongeMixin library...");
         MixinBootstrap.init();
@@ -140,47 +151,48 @@ public final class OrionCore {
 
     /**
      * Sets up Orion transformers
-     *
-     * @param launchClassLoader LegacyLauncher class loader
      */
-    @Contract("null -> fail")
-    void setupTransformers(LaunchClassLoader launchClassLoader) {
+    void setupTransformers() {
         /* Access transformer */
-        launchClassLoader.registerTransformer(OrionAccessTransformer.class.getName());
+        launcherService.registerTransformer(OrionAccessTransformer.class);
+
+        /* Mod provided transformers */
+        transformers.forEach(launcherService::registerTransformer);
     }
 
     /**
      * Sets up Orion core mixins and transformers
-     *
-     * @param launchClassLoader LegacyLauncher class loader
      */
-    @Contract("null -> fail")
-    void setupCore(LaunchClassLoader launchClassLoader) {
+    void setupCore() {
         logger.debug("Adding class load exclusions");
-        launchClassLoader.getClassLoaderExclusions().add("ninja.leaping.configurate");
-        launchClassLoader.getClassLoaderExclusions().add("eu.mikroskeem.orion.api");
-        launchClassLoader.getClassLoaderExclusions().add("javax.inject");
 
         /* Remove invalid exclusion */
-        launchClassLoader.getClassLoaderExclusions().remove("org.apache.logging.");
+        launcherService.getClassLoaderExclusions().remove("org.apache.logging.");
 
-        /* Library packages */
-        launchClassLoader.getClassLoaderExclusions().add("joptsimple");
-        launchClassLoader.getClassLoaderExclusions().add("gnu.trove");
-        launchClassLoader.getClassLoaderExclusions().add("it.unimi.dsi.fastutil");
-        launchClassLoader.getClassLoaderExclusions().add("org.apache.logging.log4j");
-        launchClassLoader.getClassLoaderExclusions().add("org.yaml.snakeyaml");
-        launchClassLoader.getClassLoaderExclusions().add("com.google.inject");
-        launchClassLoader.getClassLoaderExclusions().add("com.google.common");
-        launchClassLoader.getClassLoaderExclusions().add("com.google.gson");
-        launchClassLoader.getClassLoaderExclusions().add("javax.annotation");
-        launchClassLoader.getClassLoaderExclusions().add("org.apache.commons");
-        launchClassLoader.getClassLoaderExclusions().add("com.mojang.authlib");
+        launcherService.getClassLoaderExclusions().addAll(Arrays.asList(
+            /* API */
+            "eu.mikroskeem.orion.api",
 
-        /* Note: magical lines to fix logging */
-        launchClassLoader.getClassLoaderExclusions().add("net.minecrell.terminalconsole");
-        launchClassLoader.getClassLoaderExclusions().add("com.sun.jna");
-        launchClassLoader.getClassLoaderExclusions().add("org.jline");
+            /* Library packages */
+            "ninja.leaping.configurate",
+            "javax.inject",
+            "joptsimple",
+            "gnu.trove",
+            "it.unimi.dsi.fastutil",
+            "org.apache.logging.log4j",
+            "org.yaml.snakeyaml",
+            "com.google.inject",
+            "com.google.common",
+            "com.google.gson",
+            "javax.annotation",
+            "org.apache.commons",
+            "com.mojang.authlib",
+
+            /* Note: magical lines to fix logging */
+            "net.minecrell.terminalconsole",
+            "com.sun.jna",
+            "org.jline"
+        ));
 
         logger.debug("Setting up OrionAPI singleton");
         OrionAPIImpl orionAPI = new OrionAPIImpl(this);
@@ -200,12 +212,12 @@ public final class OrionCore {
     /**
      * Sets up Orion mods
      *
-     * @param launchClassLoader LegacyLauncher class loader
+     * @param classLoader Classloader where to load mod jars
      * @param modsDirectory Directory where mods should reside
      * @throws IOException If {@link Files#list(Path)} fails
      */
     @Contract("null, null -> fail")
-    void setupMods(LaunchClassLoader launchClassLoader, Path modsDirectory) throws IOException {
+    void setupMods(LaunchClassLoader classLoader /* <-- TODO: Refactor LCL out */, Path modsDirectory) throws IOException {
         Set<String> modLoadOrder = new HashSet<>();
         Map<String, Pair<ModInfo, Path>> foundMods = new LinkedHashMap<>();
 
@@ -289,8 +301,8 @@ public final class OrionCore {
         for (String modId : modLoadOrder) {
             Pair<ModInfo, Path> modInfo = foundMods.get(modId);
             URL modUrl = ToURL.to(modInfo.getValue());
-            launchClassLoader.addURL(modUrl);
-            ClassWrapper<?> modClass = Reflect.getClassThrows(modInfo.getKey().getClassName(), launchClassLoader);
+            classLoader.addURL(modUrl);
+            ClassWrapper<?> modClass = Reflect.getClassThrows(modInfo.getKey().getClassName(), classLoader);
             ModContainer<?> mod = initializeMod(modClass, modInfo.getKey());
             mod.init();
             mods.add(mod);
@@ -302,7 +314,7 @@ public final class OrionCore {
             PicoMaven.Builder picoMavenBuilder = new PicoMaven.Builder()
                     .withExecutorService(Executors.newWorkStealingPool())
                     .shouldCloseExecutorService(true)
-                    .withDownloadPath(OrionTweakClass.OrionTweakerData.librariesPath)
+                    .withDownloadPath(BlackboardKey.get(BlackboardKey.LIBRARIES_PATH))
                     .withRepositories(modMavenRepositories)
                     .withDependencies(modLibraries)
                     .withDownloaderCallbacks(new DownloaderCallbacks() {
@@ -323,7 +335,7 @@ public final class OrionCore {
                         "Could not download all libraries!");
 
                 /* Add all libraries to LaunchClassLoader */
-                downloadedLibraries.stream().map(ToURL::to).forEach(launchClassLoader::addURL);
+                downloadedLibraries.stream().map(ToURL::to).forEach(classLoader::addURL);
             } catch (InterruptedException e) {
                 logger.error("Library download interrupted!", e);
             }
@@ -370,11 +382,12 @@ public final class OrionCore {
      *
      * @return Value from {@link CBVersion} enum
      */
+    @NotNull
     private CBVersion detectCBVersion() {
         for (CBVersion version : CBVersion.values()) {
             if(Reflect.getClass("net.minecraft.server." + version.getName() + ".DedicatedServer").isPresent())
                 return version;
         }
-        return null;
+        return CBVersion.UNKNOWN;
     }
 }

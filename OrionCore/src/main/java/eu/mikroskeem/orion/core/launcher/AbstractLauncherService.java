@@ -23,46 +23,29 @@
  * THE SOFTWARE.
  */
 
-package eu.mikroskeem.orion.api;
+package eu.mikroskeem.orion.core.launcher;
 
-import org.jetbrains.annotations.Contract;
+import eu.mikroskeem.orion.api.bytecode.OrionTransformer;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * Enum representing CraftBukkit relocation version
- *
  * @author Mark Vainomaa
  */
-public enum CBVersion {
-    /** Minecraft 1.12 */
-    v1_12_R1(0, "v1_12_R1"),
-    UNKNOWN(-1, "");
+public abstract class AbstractLauncherService {
+    private Map<String, Object> fallback$blackboard;
 
-    private final int id;
-    private final String name;
-
-    CBVersion(int id, String name) {
-        this.id = id;
-        this.name = name;
+    @NotNull
+    public Map<String, Object> getBlackBoard() {
+        if(fallback$blackboard == null) fallback$blackboard = new HashMap<>();
+        return fallback$blackboard;
     }
 
-    /**
-     * Gets given CraftBukkit version id (used in Mixin environment)
-     *
-     * @return CraftBukkit version id
-     */
-    @Contract(pure = true)
-    public int getId() {
-        return id;
-    }
+    public abstract void registerTransformer(@NotNull Class<? extends OrionTransformer> transformer);
 
-    /**
-     * Gets given CraftBukkit version name
-     *
-     * @return CraftBukkit version name
-     */
-    @Contract(pure = true)
-    public String getName() {
-        return name;
-    }
+    @NotNull
+    public abstract Set<String> getClassLoaderExclusions();
 }

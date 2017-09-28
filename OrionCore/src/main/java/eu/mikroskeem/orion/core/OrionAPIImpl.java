@@ -26,6 +26,7 @@
 package eu.mikroskeem.orion.core;
 
 import eu.mikroskeem.orion.api.Orion;
+import eu.mikroskeem.orion.api.bytecode.OrionTransformer;
 import eu.mikroskeem.orion.api.mod.ModInfo;
 import eu.mikroskeem.orion.core.mod.ModContainer;
 import eu.mikroskeem.picomaven.Dependency;
@@ -41,6 +42,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -127,5 +129,21 @@ final class OrionAPIImpl implements Orion {
     @NotNull
     public List<String> getMixinConfigurations() {
         return Collections.unmodifiableList(orionCore.mixinConfigurations);
+    }
+
+    @Override
+    public void registerTransformer(@NotNull Class<? extends OrionTransformer> transformer) {
+        orionCore.transformers.add(transformer);
+    }
+
+    @Override
+    public void unregisterTransformer(@NotNull Class<? extends OrionTransformer> transformer) {
+        orionCore.transformers.remove(transformer);
+    }
+
+    @Override
+    @NotNull
+    public Set<Class<? extends OrionTransformer>> getRegisteredTransformers() {
+        return Collections.unmodifiableSet(orionCore.transformers);
     }
 }

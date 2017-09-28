@@ -25,7 +25,6 @@
 
 package eu.mikroskeem.orion.launcher;
 
-import eu.mikroskeem.orion.core.OrionTweakClass.OrionTweakerData;
 import eu.mikroskeem.shuriken.common.ToURL;
 import eu.mikroskeem.shuriken.instrumentation.ClassLoaderTools;
 import eu.mikroskeem.shuriken.reflect.Reflect;
@@ -42,6 +41,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.Permission;
 import java.util.regex.Pattern;
+
+import static java.util.Objects.requireNonNull;
 
 
 /**
@@ -79,12 +80,14 @@ final class PaperclipManager {
     /**
      * Sets up Orion Tweaker
      */
-    void setupServer() {
+    String setupServer() {
         if(!isServerAvailable()) throw new IllegalStateException("Paper server jar is not available!");
-        OrionTweakerData.launchTarget = Utils.getMainClassFromJar(serverPath);
 
         /* Load server jar to system classloader */
         uclTools.addURL(ToURL.to(serverPath));
+
+        /* Return server jar main class */
+        return requireNonNull(Utils.getMainClassFromJar(serverPath), "Failed to get server main class!");
     }
 
     /**

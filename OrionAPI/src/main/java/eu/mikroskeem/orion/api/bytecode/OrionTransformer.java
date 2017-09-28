@@ -23,46 +23,26 @@
  * THE SOFTWARE.
  */
 
-package eu.mikroskeem.orion.api;
+package eu.mikroskeem.orion.api.bytecode;
 
-import org.jetbrains.annotations.Contract;
 
+import org.jetbrains.annotations.NotNull;
 
 /**
- * Enum representing CraftBukkit relocation version
+ * Orion bytecode transformer interface
  *
  * @author Mark Vainomaa
+ * @since 0.0.3-SNAPSHOT
  */
-public enum CBVersion {
-    /** Minecraft 1.12 */
-    v1_12_R1(0, "v1_12_R1"),
-    UNKNOWN(-1, "");
-
-    private final int id;
-    private final String name;
-
-    CBVersion(int id, String name) {
-        this.id = id;
-        this.name = name;
-    }
-
+public interface OrionTransformer {
     /**
-     * Gets given CraftBukkit version id (used in Mixin environment)
+     * Transforms class
      *
-     * @return CraftBukkit version id
+     * @param source             Class bytecode
+     * @param className          Class name
+     * @param remappedClassName  Remapped class name. Might equal to {@code className}, if not remapped.
+     * @return Transformed class
      */
-    @Contract(pure = true)
-    public int getId() {
-        return id;
-    }
-
-    /**
-     * Gets given CraftBukkit version name
-     *
-     * @return CraftBukkit version name
-     */
-    @Contract(pure = true)
-    public String getName() {
-        return name;
-    }
+    @NotNull
+    byte[] transformClass(@NotNull byte[] source, @NotNull String className, @NotNull String remappedClassName);
 }

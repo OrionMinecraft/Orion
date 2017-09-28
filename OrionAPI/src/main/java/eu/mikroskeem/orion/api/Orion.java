@@ -25,12 +25,14 @@
 
 package eu.mikroskeem.orion.api;
 
+import eu.mikroskeem.orion.api.bytecode.OrionTransformer;
 import eu.mikroskeem.orion.api.mod.ModInfo;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.URL;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -106,4 +108,29 @@ public interface Orion {
      */
     @NotNull
     List<String> getMixinConfigurations();
+
+    /**
+     * Register new {@link OrionTransformer} class
+     *
+     * @since 0.0.3-SNAPSHOT
+     * @param transformer New transformer
+     */
+    void registerTransformer(@NotNull Class<? extends OrionTransformer> transformer);
+
+    /**
+     * Unregisters registered {@link OrionTransformer} class
+     *
+     * @since 0.0.3-SNAPSHOT
+     * @param transformer Registered transformer. Check if transformer is registered with {@link #getRegisteredTransformers()}
+     */
+    void unregisterTransformer(@NotNull Class<? extends OrionTransformer> transformer);
+
+    /**
+     * Gets list of registered Orion bytecode transformers
+     *
+     * @since 0.0.3-SNAPSHOT
+     * @return {@link List} of registered {@link OrionTransformer}s
+     */
+    @NotNull
+    Set<Class<? extends OrionTransformer>> getRegisteredTransformers();
 }

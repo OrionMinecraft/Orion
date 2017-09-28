@@ -25,7 +25,9 @@
 
 package eu.mikroskeem.orion.launcher;
 
-import eu.mikroskeem.orion.core.OrionTweakClass.OrionTweakerData;
+import eu.mikroskeem.orion.core.launcher.AbstractLauncherService;
+import eu.mikroskeem.orion.core.launcher.BlackboardKey;
+import eu.mikroskeem.orion.core.launcher.legacylauncher.LegacyLauncherService;
 import eu.mikroskeem.picomaven.Dependency;
 import eu.mikroskeem.picomaven.DownloaderCallbacks;
 import eu.mikroskeem.picomaven.PicoMaven;
@@ -49,6 +51,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Executors;
@@ -70,6 +73,7 @@ public final class Bootstrap {
     private final static Path LIBRARIES_PATH = Paths.get(System.getProperty("orion.librariesPath", "./libraries"));
     private final static Path PAPER_SERVER_JAR = Paths.get(System.getProperty("orion.patchedJarPath", "./cache/patched_1.12.2.jar"));
     private final static Path PAPERCLIP_JAR = Paths.get(System.getProperty("orion.paperclipJarPath", "./paperclip.jar"));
+    private final static Path MODS_PATH = Paths.get(System.getProperty("orion.modsPath", "./mods"));
     private final static String PAPERCLIP_URL = System.getProperty("orion.paperclipDownloadUrl",
             "https://ci.destroystokyo.com/job/PaperSpigot/lastSuccessfulBuild/artifact/paperclip.jar");
 
@@ -106,7 +110,7 @@ public final class Bootstrap {
             paperclipManager.invoke();
 
         /* Set up classpath, Orion Tweaker & launch arguments */
-        paperclipManager.setupServer();
+        String launchTarget = paperclipManager.setupServer();
 
         /* Logger can be set up now */
         Logger log = LogManager.getLogger("OrionBootstrap");
@@ -144,7 +148,7 @@ public final class Bootstrap {
 
         PicoMaven.Builder picoMavenBuilder = new PicoMaven.Builder()
                 .withOkHttpClient(httpClient)
-                .withDownloadPath(OrionTweakerData.librariesPath = LIBRARIES_PATH)
+                .withDownloadPath(LIBRARIES_PATH)
                 .withRepositories(repositories)
                 .withDependencies(dependencies)
                 .withExecutorService(Executors.newWorkStealingPool())
@@ -182,8 +186,19 @@ public final class Bootstrap {
             tweakArgs.add("eu.mikroskeem.orion.core.OrionTweakClass");
         }
 
-        /* Pass original arguments to tweak class */
-        OrionTweakerData.originalArguments.addAll(arguments);
+        /* Set up LegacyLauncher */
+        log.debug("Setting up LegacyLauncher platform");
+        BlackboardKey.getOr(BlackboardKey.LAUNCHER_SERVICE, () -> {
+            AbstractLauncherService launcherService = new LegacyLauncherService();
+            BlackboardKey.blackboard = launcherService.getBlackBoard();
+            return launcherService;
+        });
+
+        /* Populate blackboard */
+        BlackboardKey.set(BlackboardKey.ORIGINAL_ARGUMENTS, Collections.unmodifiableList(arguments));
+        BlackboardKey.set(BlackboardKey.LAUNCH_TARGET, launchTarget);
+        BlackboardKey.set(BlackboardKey.MODS_PATH, MODS_PATH);
+        BlackboardKey.set(BlackboardKey.LIBRARIES_PATH, LIBRARIES_PATH);
 
         /* Launch LegacyLauncher */
         log.info("Starting LegacyLauncher with arguments {}", tweakArgs);
