@@ -25,8 +25,6 @@
 
 package eu.mikroskeem.orion.launcher;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import eu.mikroskeem.orion.core.OrionTweakClass.OrionTweakerData;
 import eu.mikroskeem.picomaven.Dependency;
 import eu.mikroskeem.picomaven.DownloaderCallbacks;
@@ -35,10 +33,7 @@ import eu.mikroskeem.shuriken.common.Ensure;
 import eu.mikroskeem.shuriken.common.ToURL;
 import eu.mikroskeem.shuriken.instrumentation.ClassLoaderTools;
 import net.minecraft.launchwrapper.Launch;
-import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -85,6 +80,7 @@ public final class Bootstrap {
             uclTool = new ClassLoaderTools.URLClassLoaderTools((URLClassLoader) cl);
         else
             uclTool = new ClassLoaderTools.URLClassLoaderTools(cl);
+        OkHttpClient httpClient = new OkHttpClient();
 
         /* Load preload libraries, if allowed */
         if(PRELOAD_ALLOWED) {
@@ -103,7 +99,7 @@ public final class Bootstrap {
         /* Set up Paperclip manager */
         PaperclipManager paperclipManager = new PaperclipManager(
                 new URL(PAPERCLIP_URL), PAPERCLIP_JAR,
-                PAPER_SERVER_JAR, uclTool);
+                PAPER_SERVER_JAR, uclTool, httpClient);
 
         /* Set up Paper server */
         if(!paperclipManager.isServerAvailable())
@@ -121,35 +117,7 @@ public final class Bootstrap {
                     ver.getProperty("gitBranch"),
                     ver.getProperty("gitCommitId")
             );
-            new Thread(() -> {
-                OkHttpClient client = new OkHttpClient();
-                HttpUrl url = HttpUrl.parse("https://api.github.com/repos/" +
-                        ver.getProperty("gitRepository") +
-                        "/compare/" +
-                        ver.getProperty("gitBranch") +
-                        "..." +
-                        ver.getProperty("gitCommitId"));
-                Request request = new Request.Builder()
-                        .get()
-                        .url(requireNonNull(url))
-                        .build();
-                try(Response response = client.newCall(request).execute()) {
-                    if(response.isSuccessful()) {
-                        //noinspection ConstantConditions
-                        JsonObject root = new JsonParser().parse(response.body().charStream()).getAsJsonObject();
-                        int behindBy = root.get("behind_by").getAsInt();
-                        if(behindBy > 0) {
-                            log.info("This Orion version is up to date!");
-                        } else {
-                            log.info("This Orion version is behind by {} commits!", behindBy);
-                        }
-                    } else {
-                        throw new IOException("HTTP code: " + response.code());
-                    }
-                } catch (IOException e) {
-                    log.warn("Failed to obtain latest version info from GitHub!", e);
-                }
-            }).start();
+            new GithubChecker(log, ver, httpClient).check();
         } catch (Exception e) {
             log.warn("Failed to obtain version information from jar", e);
         }
@@ -175,6 +143,7 @@ public final class Bootstrap {
         }
 
         PicoMaven.Builder picoMavenBuilder = new PicoMaven.Builder()
+                .withOkHttpClient(httpClient)
                 .withDownloadPath(OrionTweakerData.librariesPath = LIBRARIES_PATH)
                 .withRepositories(repositories)
                 .withDependencies(dependencies)

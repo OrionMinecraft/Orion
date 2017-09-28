@@ -55,14 +55,16 @@ final class PaperclipManager {
     private final Path paperclipPath;
     private final Path serverPath;
     private final ClassLoaderTools.URLClassLoaderTools uclTools;
+    private final OkHttpClient client;
 
     PaperclipManager(URL paperclipDownloadUrl, Path paperclipPath, Path serverPath,
-                     ClassLoaderTools.URLClassLoaderTools uclTools) {
+                     ClassLoaderTools.URLClassLoaderTools uclTools, OkHttpClient httpClient) {
         this.oldSecurityManager = System.getSecurityManager();
         this.paperclipPath = paperclipPath;
         this.serverPath = serverPath;
         this.paperclipDownloadUrl = paperclipDownloadUrl;
         this.uclTools = uclTools;
+        this.client = httpClient;
     }
 
     /**
@@ -92,7 +94,6 @@ final class PaperclipManager {
         /* Check if paperclip jar is present */
         if(Files.notExists(paperclipPath)) {
             System.out.println("Downloading Paperclip...");
-            OkHttpClient client = new OkHttpClient();
             Request request = new Request.Builder()
                     .url(paperclipDownloadUrl)
                     .get()
@@ -102,6 +103,7 @@ final class PaperclipManager {
                     throw new IOException(String.format("HTTP request to %s returned %s!%n",
                             paperclipDownloadUrl, response.cacheControl()));
                 Files.createDirectories(paperclipPath.getParent());
+                //noinspection ConstantConditions
                 Files.copy(response.body().byteStream(), paperclipPath);
             } catch (IOException e) {
                 throw new RuntimeException(e);
