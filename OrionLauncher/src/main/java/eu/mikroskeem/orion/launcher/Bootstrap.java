@@ -135,6 +135,7 @@ public final class Bootstrap {
                         .build();
                 try(Response response = client.newCall(request).execute()) {
                     if(response.isSuccessful()) {
+                        //noinspection ConstantConditions
                         JsonObject root = new JsonParser().parse(response.body().charStream()).getAsJsonObject();
                         int behindBy = root.get("behind_by").getAsInt();
                         if(behindBy > 0) {
