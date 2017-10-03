@@ -95,6 +95,7 @@ public final class Bootstrap {
             try(Stream<Path> file = Files.walk(PRELOAD_LIBRARIES_PATH)) {
                 file.filter(Files::isRegularFile)
                         .filter(f -> f.toString().endsWith(".jar"))
+                        .peek(f -> System.out.println("Preloading library: " + f))
                         .map(ToURL::to)
                         .forEach(uclTool::addURL);
             }
