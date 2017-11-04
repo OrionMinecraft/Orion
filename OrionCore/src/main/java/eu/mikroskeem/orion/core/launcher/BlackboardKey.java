@@ -26,8 +26,11 @@
 package eu.mikroskeem.orion.core.launcher;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.net.URL;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -48,23 +51,33 @@ public enum BlackboardKey {
     LIBRARIES_PATH("orion.path.libraries", Path.class, false),
     MODS_PATH("orion.path.mods", Path.class, false),
 
-    AT_URLS("orion.at.urls", List.class)
+    AT_URLS("orion.at.urls", List.class, ArrayList<URL>::new)
     ;
 
     private final String key;
     private final Class<?> type;
     private final boolean mutable;
+    @Nullable private final Supplier<?> initializer;
 
     BlackboardKey(String key, Class<?> type) {
         this.key = key;
         this.type = type;
         this.mutable = true;
+        this.initializer = null;
     }
 
     BlackboardKey(String key, Class<?> type, boolean mutable) {
         this.key = key;
         this.type = type;
         this.mutable = mutable;
+        this.initializer = null;
+    }
+
+    BlackboardKey(String key, Class<?> type, @Nullable Supplier<?> initializer) {
+        this.key = key;
+        this.type = type;
+        this.mutable = true;
+        this.initializer = initializer;
     }
 
     public static Map<String, Object> blackboard = null;
@@ -72,6 +85,8 @@ public enum BlackboardKey {
     @NotNull
     @SuppressWarnings("unchecked")
     public static <T> T get(@NotNull BlackboardKey key) {
+        if(key.initializer != null)
+            return (T) getOr(key, key.initializer);
         Object value = requireNonNull(blackboard.get(key.key), "No value in blackboard with key " + key.key);
         return (T) key.type.cast(value);
     }

@@ -49,7 +49,7 @@ public final class OrionAccessTransformer implements OrionTransformer {
     private final AccessTransformer at = new AccessTransformer();
 
     public OrionAccessTransformer() {
-        List<URL> atUrls = BlackboardKey.getOr(BlackboardKey.AT_URLS, ArrayList<URL>::new);
+        List<URL> atUrls = BlackboardKey.get(BlackboardKey.AT_URLS);
         logger.debug("Initializing OrionAT with {} access transformers", atUrls.size());
 
         /* Load AT files to AT library */
@@ -78,7 +78,7 @@ public final class OrionAccessTransformer implements OrionTransformer {
             URLConnection urlConnection = url.openConnection();
             urlConnection.setUseCaches(false);
             urlConnection.connect();
-            BlackboardKey.getOr(BlackboardKey.AT_URLS, ArrayList<URL>::new).add(url);
+            BlackboardKey.<List<URL>>get(BlackboardKey.AT_URLS).add(url);
             logger.debug("Registered AT {}", url);
         } catch (IOException e) {
             logger.warn("Failed to register AT {}", url);

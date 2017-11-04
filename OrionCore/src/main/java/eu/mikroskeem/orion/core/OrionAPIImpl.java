@@ -37,11 +37,13 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixins;
 
+import java.lang.ref.SoftReference;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -56,6 +58,10 @@ final class OrionAPIImpl implements Orion {
     private static final Logger logger = LogManager.getLogger("OrionAPI");
     private static final Pattern MIXIN_NAME_PATTERN = Pattern.compile("mixins\\.(.*\\.)?.*\\.json");
     private final OrionCore orionCore;
+
+    private SoftReference<List<URL>> registeredMavenRepositories;
+    private SoftReference<List<String>> registeredLibraries;
+    private SoftReference<List<ModInfo>> mods;
 
     OrionAPIImpl(OrionCore orionCore) {
         this.orionCore = orionCore;
@@ -83,17 +89,21 @@ final class OrionAPIImpl implements Orion {
     @NotNull
     @Override
     public List<URL> getRegisteredMavenRepositories() {
-        return Collections.unmodifiableList(orionCore.modMavenRepositories.stream()
-                .map(u -> {
-                    try {
-                        return u.toURL();
-                    } catch (MalformedURLException e) {
-                        SneakyThrow.throwException(e);
-                        return null;
-                    }
-                })
-                .collect(Collectors.toList())
-        );
+        if(registeredMavenRepositories == null || registeredMavenRepositories.get() == null) {
+            registeredMavenRepositories = new SoftReference<>(Collections.unmodifiableList(
+                    orionCore.modMavenRepositories.stream().map(u -> {
+                        try {
+                            return u.toURL();
+                        } catch (MalformedURLException e) {
+                            SneakyThrow.throwException(e);
+                            return null;
+                        }
+                    })
+                    .collect(Collectors.toList())
+            ));
+        }
+
+        return Objects.requireNonNull(registeredMavenRepositories.get()); // Should not throw NPE
     }
 
     @Override
@@ -101,6 +111,9 @@ final class OrionAPIImpl implements Orion {
         Ensure.notNull(url, "Repository URL should not be null");
         try {
             orionCore.modMavenRepositories.add(url.toURI());
+
+            if(registeredMavenRepositories != null)
+                registeredMavenRepositories.clear();
         } catch (URISyntaxException e) {
             SneakyThrow.throwException(e);
         }
@@ -109,20 +122,35 @@ final class OrionAPIImpl implements Orion {
     @Override
     public void registerLibrary(String dependencyString) {
         orionCore.modLibraries.add(Dependency.fromGradle(dependencyString));
+        if(mods != null)
+            mods.clear();
     }
 
     @NotNull
     @Override
     public List<String> getRegisteredLibraries() {
-        return Collections.unmodifiableList(orionCore.modLibraries.stream()
-                .map(d -> d.getGroupId() + ':' + d.getArtifactId() + ':' + d.getVersion())
-                .collect(Collectors.toList()));
+        if(registeredLibraries == null || registeredLibraries.get() == null) {
+            registeredLibraries = new SoftReference<>(Collections.unmodifiableList(
+                    orionCore.modLibraries.stream()
+                            .map(d -> d.getGroupId() + ':' + d.getArtifactId() + ':' + d.getVersion())
+                    .collect(Collectors.toList())
+            ));
+        }
+
+        return Objects.requireNonNull(registeredLibraries.get());
     }
 
     @Override
     @NotNull
     public List<ModInfo> getMods() {
-        return orionCore.mods.stream().map(ModContainer::getModInfo).collect(Collectors.toList());
+        if(mods == null || mods.get() == null) {
+            mods = new SoftReference<>(orionCore.mods.stream()
+                            .map(ModContainer::getModInfo)
+                            .collect(Collectors.toList())
+            );
+        }
+
+        return Objects.requireNonNull(mods.get());
     }
 
     @Override
