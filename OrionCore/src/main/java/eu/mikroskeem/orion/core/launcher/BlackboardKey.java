@@ -86,7 +86,7 @@ public enum BlackboardKey {
     @SuppressWarnings("unchecked")
     public static <T> T get(@NotNull BlackboardKey key) {
         if(key.initializer != null)
-            return (T) getOr(key, key.initializer);
+            return (T) theGetOr(key, key.initializer);
         Object value = requireNonNull(blackboard.get(key.key), "No value in blackboard with key " + key.key);
         return (T) key.type.cast(value);
     }
@@ -96,9 +96,7 @@ public enum BlackboardKey {
         try {
             return get(key);
         } catch (NullPointerException e) {
-            T value = requireNonNull(def.get(), "Supplier should not return null!");
-            set(key, value);
-            return value;
+            return theGetOr(key, def);
         }
     }
 
@@ -111,5 +109,11 @@ public enum BlackboardKey {
     public static void unset(@NotNull BlackboardKey key) {
         if(!key.mutable) throw new IllegalArgumentException("Key " + key.key + " is not mutable");
         blackboard.remove(key.key);
+    }
+
+    private static <T> T theGetOr(@NotNull BlackboardKey key, @NotNull Supplier<T> def) {
+        T value = requireNonNull(def.get(), "Supplier should not return null!");
+        set(key, value);
+        return value;
     }
 }
