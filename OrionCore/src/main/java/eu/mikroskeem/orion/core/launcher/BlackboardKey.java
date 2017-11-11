@@ -86,17 +86,18 @@ public enum BlackboardKey {
     @SuppressWarnings("unchecked")
     public static <T> T get(@NotNull BlackboardKey key) {
         if(key.initializer != null)
-            return (T) theGetOr(key, key.initializer);
-        Object value = requireNonNull(blackboard.get(key.key), "No value in blackboard with key " + key.key);
-        return (T) key.type.cast(value);
+            return (T) getOr(key, key.initializer);
+        return actualGet(key);
     }
 
     @NotNull
     public static <T> T getOr(@NotNull BlackboardKey key, @NotNull Supplier<T> def) {
         try {
-            return get(key);
+            return actualGet(key);
         } catch (NullPointerException e) {
-            return theGetOr(key, def);
+            T value = requireNonNull(def.get(), "Supplier should not return null!");
+            set(key, value);
+            return value;
         }
     }
 
@@ -111,9 +112,9 @@ public enum BlackboardKey {
         blackboard.remove(key.key);
     }
 
-    private static <T> T theGetOr(@NotNull BlackboardKey key, @NotNull Supplier<T> def) {
-        T value = requireNonNull(def.get(), "Supplier should not return null!");
-        set(key, value);
-        return value;
+    @SuppressWarnings("unchecked")
+    private static <T> T actualGet(@NotNull BlackboardKey key) {
+        Object value = requireNonNull(blackboard.get(key.key), "No value in blackboard with key " + key.key);
+        return (T) key.type.cast(value);
     }
 }
