@@ -28,6 +28,7 @@ package eu.mikroskeem.orion.core.launcher.legacylauncher;
 import eu.mikroskeem.orion.api.bytecode.OrionTransformer;
 import eu.mikroskeem.shuriken.instrumentation.ClassLoaderTools;
 import net.minecraft.launchwrapper.IClassTransformer;
+import net.minecraft.launchwrapper.Launch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -39,20 +40,17 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.MethodNode;
 
-import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import static eu.mikroskeem.shuriken.common.streams.ByteArrays.fromInputStream;
 import static java.util.Objects.requireNonNull;
+import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
+import static org.objectweb.asm.Opcodes.NEW;
 
 /**
- * This is so hacky code omg
+ * Wraps Orion transformer into LegacyLauncher-compatible transformer
  *
  * @author Mark Vainomaa
  */
@@ -60,9 +58,9 @@ final class ClassTransformerConverter {
     private final static Logger log = LogManager.getLogger("ClassTransformerConverter");
 
     private final static AtomicInteger COUNTER = new AtomicInteger(0);
-    private final static Method OT_TRANSFORM = OrionTransformer.class.getMethods()[0];
-    private final static String ICT_INTERNAL = Type.getInternalName(IClassTransformer.class);
-    private final static Method ICT_TRANSFORM = IClassTransformer.class.getMethods()[0];
+    private final static byte[] TW_DATA;
+    private final static Type TW_TYPE = Type.getType(TransformerWrapper.class);
+    private final static Type DT_TYPE = Type.getType(DummyTransformer.class);
 
     @NotNull
     @SuppressWarnings("unchecked")
@@ -70,70 +68,21 @@ final class ClassTransformerConverter {
         if(Arrays.asList(transformer.getInterfaces()).contains(IClassTransformer.class))
             return (Class<T>) transformer; /* no-op */
 
-        String rawName = transformer.getName().replace('.', '/');
+        // Orion transformer name
+        String rawTransformerName = transformer.getName().replace('.', '/');
 
-        byte[] rawTransformer = fromInputStream(transformer.getClassLoader().getResourceAsStream(rawName.concat(".class")));
-        String newName = getNewName(transformer);
-        Type transformerType = Type.getObjectType(newName.replace('.', '/'));
+        // New wrapper class name
+        String newWrapperName = getNewName(transformer);
 
-        ClassReader cr = new ClassReader(rawTransformer);
+        // Start generating new TransformerWrapper
+        ClassReader cr = new ClassReader(TW_DATA);
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
         ClassNode cn = new ClassNode();
         cr.accept(cn, 0);
 
-        /* Start transforming */
-        log.trace("Transforming class {}(s:{}) implementing {} -> {}",
-                cn.name.replace('/', '.'),
-                cn.superName.replace('/', '.'),
-                ((List<String>)cn.interfaces).stream().map(i -> i.replace('/', '.')).collect(Collectors.toList()),
-                newName
-        );
+        cn.accept(new WrapperGenerator(cw, TW_TYPE.getInternalName(), newWrapperName.replace('.', '/'), rawTransformerName));
 
-        cn.interfaces.add(ICT_INTERNAL);
-        cn.methods.add(newProxyMethod());
-
-        /*
-         * TODO: figure out why this is broken:
-         * cn.accept(new ClassRemapper(cw, new org.objectweb.asm.commons.SimpleRemapper(rawName, transformerType.getInternalName())));
-         */
-
-        cn.accept(new Remapper(cw, rawName, transformerType.getInternalName()));
-
-        return requireNonNull((Class<T>) ClassLoaderTools.defineClass(ClassLoader.getSystemClassLoader(), newName, cw.toByteArray()));
-    }
-
-    private static MethodNode newProxyMethod() {
-        MethodNode mn = new MethodNode();
-        mn.access = Opcodes.ACC_PUBLIC;
-        mn.name = "transform";
-        mn.desc = Type.getMethodDescriptor(ICT_TRANSFORM);
-        mn.signature = "";
-        mn.exceptions = Collections.emptyList();
-
-        /* Ugh */
-        mn.visitCode();
-
-        mn.visitVarInsn(Opcodes.ALOAD, 0);
-
-        /* Load arguments */
-        mn.visitVarInsn(Opcodes.ALOAD, 3);
-        mn.visitVarInsn(Opcodes.ALOAD, 1);
-        mn.visitVarInsn(Opcodes.ALOAD, 2);
-
-        /* Invoke self */
-        mn.visitMethodInsn(Opcodes.INVOKEINTERFACE,
-                OT_TRANSFORM.getDeclaringClass().getName().replace('.', '/'),
-                "transformClass",
-                Type.getMethodDescriptor(OT_TRANSFORM),
-                true
-        );
-
-        /* Return */
-        mn.visitInsn(Opcodes.ARETURN);
-        mn.visitMaxs(0, 0);
-        mn.visitEnd();
-
-        return mn;
+        return requireNonNull((Class<T>) ClassLoaderTools.defineClass(Launch.classLoader, newWrapperName, cw.toByteArray()));
     }
 
     private static String getNewName(Class<?> clazz) {
@@ -145,14 +94,16 @@ final class ClassTransformerConverter {
                 .concat(name.substring(name.lastIndexOf('.') + 1));
     }
 
-    static class Remapper extends ClassVisitor {
+    static class WrapperGenerator extends ClassVisitor {
         private final String oldName;
         private final String newName;
+        private final String transformerName;
 
-        Remapper(ClassVisitor cv, String oldName, String newName) {
+        WrapperGenerator(ClassVisitor cv, String oldName, String newName, String transformerName) {
             super(Opcodes.ASM5, cv);
             this.oldName = oldName;
             this.newName = newName;
+            this.transformerName = transformerName;
         }
 
         @Override
@@ -163,7 +114,11 @@ final class ClassTransformerConverter {
 
         @Override
         public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-            return new MethodRemapper(this, super.visitMethod(access, name, desc, signature, exceptions));
+            MethodRemapper mr = new MethodRemapper(this, super.visitMethod(access, name, desc, signature, exceptions));
+            if("<init>".equals(name) && desc.equals("()V")) {
+                return new InitTransformer(this, mr, transformerName);
+            }
+            return mr;
         }
 
         @Override
@@ -174,9 +129,9 @@ final class ClassTransformerConverter {
     }
 
     static class MethodRemapper extends MethodVisitor {
-        private final Remapper sr;
+        private final WrapperGenerator sr;
 
-        MethodRemapper(Remapper sr, MethodVisitor mv) {
+        MethodRemapper(WrapperGenerator sr, MethodVisitor mv) {
             super(Opcodes.ASM5, mv);
             this.sr = sr;
         }
@@ -192,5 +147,38 @@ final class ClassTransformerConverter {
             if(sr.oldName.equals(owner)) owner = sr.newName;
             super.visitFieldInsn(opcode, owner, name, desc);
         }
+    }
+
+    static class InitTransformer extends MethodVisitor {
+        private final WrapperGenerator sr;
+        private final String transformerName;
+
+        InitTransformer(WrapperGenerator sr, MethodVisitor mv, String transformerName) {
+            super(Opcodes.ASM5, mv);
+            this.sr = sr;
+            this.transformerName = transformerName;
+        }
+
+        @Override
+        public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
+            if(opcode == INVOKESPECIAL && owner.equals(DT_TYPE.getInternalName())) {
+                owner = transformerName;
+            }
+            super.visitMethodInsn(opcode, owner, name, desc, itf);
+        }
+
+        @Override
+        public void visitTypeInsn(int opcode, String type) {
+            if(opcode == NEW && DT_TYPE.getInternalName().equals(type)) {
+                type = transformerName;
+            }
+            super.visitTypeInsn(opcode, type);
+        }
+    }
+
+    static {
+         TW_DATA = fromInputStream(TransformerWrapper.class.getResourceAsStream('/' +
+                 TransformerWrapper.class.getName().replace('.', '/').concat(".class")
+         ));
     }
 }
