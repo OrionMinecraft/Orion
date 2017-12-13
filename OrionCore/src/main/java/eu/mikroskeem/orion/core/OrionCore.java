@@ -355,7 +355,7 @@ public final class OrionCore {
         Path configurationPath;
         ConfigurationLoader<CommentedConfigurationNode> configurationLoader;
         try {
-            configurationPath = Paths.get(BlackboardKey.get(BlackboardKey.MOD_CONFIGS_PATH), modInfo.getId() + ".cfg");
+            configurationPath = Paths.get(BlackboardKey.get(BlackboardKey.MOD_CONFIGS_PATH).toString(), modInfo.getId() + ".cfg");
             if(Files.notExists(configurationPath.getParent())) Files.createDirectories(configurationPath.getParent());
             configurationLoader = HoconConfigurationLoader.builder()
                     .setPath(configurationPath)
