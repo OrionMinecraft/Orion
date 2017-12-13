@@ -34,12 +34,9 @@ String obtainRepositoryPath(String url) {
     return null
 }
 
-project.ext.gitCommitId = grgit.head()?.getAbbreviatedId(7) ?: "UKNOWN"
-project.ext.gitBranch = grgit.branch?.current()?.name ?: "UKNOWN"
+project.ext.gitCommitId = grgit.head()?.getAbbreviatedId(7) ?: "UNKNOWN"
+project.ext.gitBranch = grgit.branch?.current()?.name ?: "UNKNOWN"
 project.ext.gitRepository = obtainRepositoryPath(grgit.remote.list().find { it.name == "origin" }?.url) ?: "UNKNOWN"
-
-apply plugin: 'idea'
-apply plugin: 'eclipse'
 
 // Subproject configurations
 allprojects {

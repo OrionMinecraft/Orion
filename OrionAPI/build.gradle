@@ -43,83 +43,83 @@ artifacts {
     archives javadocJar
 }
 
-if(project.hasProperty('repoUsername') && project.hasProperty('repoPassword')) {
-    apply plugin: 'maven-publish'
+apply plugin: 'maven-publish'
 
-    publishing {
-        publications {
-            maven(MavenPublication) {
-                artifactId 'orion.api'
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifactId 'orion.api'
 
-                artifact sourcesJar
-                artifact javadocJar
-                from components.java
+            artifact sourcesJar
+            artifact javadocJar
+            from components.java
 
-                // Customize POM
-                pom.withXml {
-                    def root = asNode()
-                    root.appendNode 'description', project.description
-                    root.appendNode 'name', 'OrionAPI'
-                    root.appendNode 'url', 'https://github.com/OrionMinecraft/Orion'
+            // Customize POM
+            pom.withXml {
+                def root = asNode()
+                root.appendNode 'description', project.description
+                root.appendNode 'name', 'OrionAPI'
+                root.appendNode 'url', 'https://github.com/OrionMinecraft/Orion'
 
-                    // <repositories>
-                    def repositories = root.appendNode 'repositories'
-                    // * <repository>
-                    def repository0 = repositories.appendNode 'repository'
-                    repository0.appendNode 'id', 'sponge-repo'
-                    repository0.appendNode 'url', 'https://repo.spongepowered.org/maven'
-                    // * </repository>
-                    // * <repository>
-                    def repository1 = repositories.appendNode 'repository'
-                    repository1.appendNode 'id', 'mikroskeem-repo'
-                    repository1.appendNode 'url', 'https://repo.wut.ee/repository/mikroskeem-repo'
-                    // * </repository>
-                    // </repositories>
+                // <repositories>
+                def repositories = root.appendNode 'repositories'
+                // * <repository>
+                def repository0 = repositories.appendNode 'repository'
+                repository0.appendNode 'id', 'sponge-repo'
+                repository0.appendNode 'url', 'https://repo.spongepowered.org/maven'
+                // * </repository>
+                // * <repository>
+                def repository1 = repositories.appendNode 'repository'
+                repository1.appendNode 'id', 'mikroskeem-repo'
+                repository1.appendNode 'url', 'https://repo.wut.ee/repository/mikroskeem-repo'
+                // * </repository>
+                // </repositories>
 
-                    // <issueManagement>
-                    def issueManagement = root.appendNode 'issueManagement'
-                    issueManagement.appendNode 'system', 'GitHub Issues'
-                    issueManagement.appendNode 'url', 'https://github.com/OrionMinecraft/Orion/issues'
-                    // </issueManagement>
+                // <issueManagement>
+                def issueManagement = root.appendNode 'issueManagement'
+                issueManagement.appendNode 'system', 'GitHub Issues'
+                issueManagement.appendNode 'url', 'https://github.com/OrionMinecraft/Orion/issues'
+                // </issueManagement>
 
-                    // <licenses>
-                    def licenses = root.appendNode 'licenses'
-                    // * <license>
-                    def license0 = licenses.appendNode 'license'
-                    license0.appendNode 'name', 'MIT License'
-                    license0.appendNode 'url', 'https://opensource.org/licenses/MIT'
-                    // * </license>
-                    // </licenses>
+                // <licenses>
+                def licenses = root.appendNode 'licenses'
+                // * <license>
+                def license0 = licenses.appendNode 'license'
+                license0.appendNode 'name', 'MIT License'
+                license0.appendNode 'url', 'https://opensource.org/licenses/MIT'
+                // * </license>
+                // </licenses>
 
-                    // <developers>
-                    def developers = root.appendNode 'developers'
-                    // * <developer>
-                    def developer0 = developers.appendNode 'developer'
-                    developer0.appendNode 'id', 'mikroskeem'
-                    developer0.appendNode 'name', 'Mark Vainomaa'
-                    developer0.appendNode 'email', 'mikroskeem@mikroskeem.eu'
-                    // * </developer>
-                    // </developers>
+                // <developers>
+                def developers = root.appendNode 'developers'
+                // * <developer>
+                def developer0 = developers.appendNode 'developer'
+                developer0.appendNode 'id', 'mikroskeem'
+                developer0.appendNode 'name', 'Mark Vainomaa'
+                developer0.appendNode 'email', 'mikroskeem@mikroskeem.eu'
+                // * </developer>
+                // </developers>
 
-                    // <scm>
-                    def scm = root.appendNode 'scm'
-                    scm.appendNode 'connection', 'scm:git@github.com:OrionMinecraft/Orion.git'
-                    scm.appendNode 'developerConnection', 'scm:git@github.com:OrionMinecraft/Orion.git'
-                    scm.appendNode 'url', 'https://github.com/OrionMinecraft/Orion'
-                    // </scm>
+                // <scm>
+                def scm = root.appendNode 'scm'
+                scm.appendNode 'connection', 'scm:git@github.com:OrionMinecraft/Orion.git'
+                scm.appendNode 'developerConnection', 'scm:git@github.com:OrionMinecraft/Orion.git'
+                scm.appendNode 'url', 'https://github.com/OrionMinecraft/Orion'
+                // </scm>
 
-                    new XmlNodePrinter(preserveWhitespace: true).print root
-                }
+                new XmlNodePrinter(preserveWhitespace: true).print root
             }
         }
+    }
 
-        repositories {
-            mavenLocal()
+    repositories {
+        mavenLocal()
 
+        if(project.hasProperty('wutRepoUsername') && project.hasProperty('wutRepoPassword')) {
             maven {
                 credentials {
-                    username repoUsername
-                    password repoPassword
+                    username rootProject.properties.wutRepoUsername
+                    password rootProject.properties.wutRepoPassword
                 }
 
                 name = 'mikroskeem-repo'
