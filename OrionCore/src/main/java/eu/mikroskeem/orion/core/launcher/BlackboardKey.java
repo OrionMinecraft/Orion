@@ -50,6 +50,7 @@ public enum BlackboardKey {
 
     LIBRARIES_PATH("orion.path.libraries", Path.class, false),
     MODS_PATH("orion.path.mods", Path.class, false),
+    MOD_CONFIGS_PATH("orion.path.modconfigs", Path.class, false),
 
     AT_URLS("orion.at.urls", List.class, ArrayList<URL>::new)
     ;

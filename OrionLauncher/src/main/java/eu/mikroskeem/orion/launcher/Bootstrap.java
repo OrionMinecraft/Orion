@@ -77,6 +77,7 @@ public final class Bootstrap {
     private final static Path PAPERCLIP_JAR = Paths.get(System.getProperty("orion.paperclipJarPath", "./paperclip.jar"));
     private final static boolean CHECK_FOR_SERVER_JAR_INSTEAD = getBoolean("orion.checkForServerJarInstead");
     private final static Path MODS_PATH = Paths.get(System.getProperty("orion.modsPath", "./mods"));
+    private final static Path MOD_CONFIGS_PATH = Paths.get(System.getProperty("orion.modconfigsPath", "./modconfigs"));
     private final static String PAPERCLIP_URL = System.getProperty("orion.paperclipDownloadUrl",
             "https://ci.destroystokyo.com/job/PaperSpigot/lastSuccessfulBuild/artifact/paperclip.jar");
 
@@ -207,6 +208,7 @@ public final class Bootstrap {
         BlackboardKey.set(BlackboardKey.ORIGINAL_ARGUMENTS, Collections.unmodifiableList(arguments));
         BlackboardKey.set(BlackboardKey.LAUNCH_TARGET, launchTarget);
         BlackboardKey.set(BlackboardKey.MODS_PATH, MODS_PATH);
+        BlackboardKey.set(BlackboardKey.MOD_CONFIGS_PATH, MOD_CONFIGS_PATH);
         BlackboardKey.set(BlackboardKey.LIBRARIES_PATH, LIBRARIES_PATH);
 
         /* Launch LegacyLauncher */
