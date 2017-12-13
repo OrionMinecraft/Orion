@@ -69,15 +69,34 @@ import static java.util.Objects.requireNonNull;
  * @author Mark Vainomaa
  */
 public final class Bootstrap {
+    /** Preload libraries path - used to add libraries to classpath before loading server jar */
     private final static Path PRELOAD_LIBRARIES_PATH = Paths.get(System.getProperty("orion.preloadLibrariesPath", "./preload_libraries"));
+
+    /** Allows loading jars from {@link Bootstrap#PRELOAD_LIBRARIES_PATH} */
     private final static boolean PRELOAD_ALLOWED = getBoolean("orion.allowPreloadLibraries");
+
+    /** Makes {@link Bootstrap} not append Orion {@link eu.mikroskeem.orion.core.OrionTweakClass} argument to LegacyLauncher */
     private final static boolean DONT_APPEND_TWEAK_CLASS_ARGUMENT = getBoolean("orion.dontAppendTweakClassArgument");
+
+    /** Runtime libraries directory */
     private final static Path LIBRARIES_PATH = Paths.get(System.getProperty("orion.librariesPath", "./libraries"));
+
+    /** Specifies Paper server jar path */
     private final static Path PAPER_SERVER_JAR = Paths.get(System.getProperty("orion.patchedJarPath", "./cache/patched_1.12.2.jar"));
+
+    /** Specifies Paperclip jar path */
     private final static Path PAPERCLIP_JAR = Paths.get(System.getProperty("orion.paperclipJarPath", "./paperclip.jar"));
+
+    /** Whether to check for server jar only or check for both (default behaviour). Last one triggers paperclip invocation if paperclip's jar is missing */
     private final static boolean CHECK_FOR_SERVER_JAR_INSTEAD = getBoolean("orion.checkForServerJarInstead");
+
+    /** Path, where Orion should look up mod jars */
     private final static Path MODS_PATH = Paths.get(System.getProperty("orion.modsPath", "./mods"));
+
+    /** Path, where per-mod configurations are stored */
     private final static Path MOD_CONFIGS_PATH = Paths.get(System.getProperty("orion.modconfigsPath", "./modconfigs"));
+
+    /** Paperclip download URL */
     private final static String PAPERCLIP_URL = System.getProperty("orion.paperclipDownloadUrl",
             "https://ci.destroystokyo.com/job/PaperSpigot/lastSuccessfulBuild/artifact/paperclip.jar");
 
