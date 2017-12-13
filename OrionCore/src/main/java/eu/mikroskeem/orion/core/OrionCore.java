@@ -98,7 +98,7 @@ public final class OrionCore {
     private static final Logger logger = LogManager.getLogger("OrionCore");
 
     /** Static instance */
-    public static OrionCore INSTANCE = new OrionCore();
+    public final static OrionCore INSTANCE = new OrionCore();
 
     private final AbstractLauncherService launcherService;
     private final CBVersion cbVersion;
