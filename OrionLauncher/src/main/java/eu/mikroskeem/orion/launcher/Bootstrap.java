@@ -38,6 +38,8 @@ import net.minecraft.launchwrapper.Launch;
 import okhttp3.OkHttpClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -124,6 +126,7 @@ public final class Bootstrap {
             );
             new GithubChecker(log, ver, httpClient).check();
         } catch (Exception e) {
+            log.info("Orion Launcher");
             log.warn("Failed to obtain version information from jar", e);
         }
 
@@ -162,7 +165,7 @@ public final class Bootstrap {
                     }
 
                     @Override
-                    public void onFailure(Dependency dependency, IOException exception) {
+                    public void onFailure(Dependency dependency, Exception exception) {
                         log.warn("{} download failed! {}", dependency, exception);
                     }
                 });
@@ -179,8 +182,7 @@ public final class Bootstrap {
 
         /* Do tricks with command line arguments */
         List<String> arguments = Arrays.asList(args);
-        List<String> tweakArgs = new ArrayList<>();
-        tweakArgs.addAll(arguments);
+        List<String> tweakArgs = new ArrayList<>(arguments);
 
         if(!DONT_APPEND_TWEAK_CLASS_ARGUMENT) {
             tweakArgs.add("--tweakClass");
