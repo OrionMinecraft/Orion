@@ -38,8 +38,6 @@ import net.minecraft.launchwrapper.Launch;
 import okhttp3.OkHttpClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.Marker;
-import org.apache.logging.log4j.MarkerManager;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -59,7 +57,6 @@ import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
-import static java.lang.Boolean.getBoolean;
 import static java.util.Objects.requireNonNull;
 
 
@@ -69,8 +66,36 @@ import static java.util.Objects.requireNonNull;
  * @author Mark Vainomaa
  */
 public final class Bootstrap {
+    /** Orion properties */
+    private final static Properties orionProperties = new Properties();
+
+    static {
+        Path propertiesPath = Paths.get(System.getProperty("orion.propertiesPath"), "./orion.properties");
+        if(Files.exists(propertiesPath) && Files.isRegularFile(propertiesPath)) {
+            try {
+                orionProperties.load(Files.newBufferedReader(propertiesPath));
+            } catch (IOException e) {
+                System.out.println("Failed to load properties from " + propertiesPath);
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+    private static String getProperty(String key, String def) {
+        return orionProperties.getProperty(key, System.getProperty(key, def));
+    }
+
+    private static boolean getBoolean(String key) {
+        boolean result = false;
+        try {
+            result = Boolean.parseBoolean(orionProperties.getProperty(key, System.getProperty(key)));
+        } catch (IllegalArgumentException | NullPointerException ignored) {}
+        return result;
+    }
+
     /** Preload libraries path - used to add libraries to classpath before loading server jar */
-    private final static Path PRELOAD_LIBRARIES_PATH = Paths.get(System.getProperty("orion.preloadLibrariesPath", "./preload_libraries"));
+    private final static Path PRELOAD_LIBRARIES_PATH = Paths.get(getProperty("orion.preloadLibrariesPath", "./preload_libraries"));
 
     /** Allows loading jars from {@link Bootstrap#PRELOAD_LIBRARIES_PATH} */
     private final static boolean PRELOAD_ALLOWED = getBoolean("orion.allowPreloadLibraries");
@@ -79,25 +104,25 @@ public final class Bootstrap {
     private final static boolean DONT_APPEND_TWEAK_CLASS_ARGUMENT = getBoolean("orion.dontAppendTweakClassArgument");
 
     /** Runtime libraries directory */
-    private final static Path LIBRARIES_PATH = Paths.get(System.getProperty("orion.librariesPath", "./libraries"));
+    private final static Path LIBRARIES_PATH = Paths.get(getProperty("orion.librariesPath", "./libraries"));
 
     /** Specifies Paper server jar path */
-    private final static Path PAPER_SERVER_JAR = Paths.get(System.getProperty("orion.patchedJarPath", "./cache/patched_1.12.2.jar"));
+    private final static Path PAPER_SERVER_JAR = Paths.get(getProperty("orion.patchedJarPath", "./cache/patched_1.12.2.jar"));
 
     /** Specifies Paperclip jar path */
-    private final static Path PAPERCLIP_JAR = Paths.get(System.getProperty("orion.paperclipJarPath", "./paperclip.jar"));
+    private final static Path PAPERCLIP_JAR = Paths.get(getProperty("orion.paperclipJarPath", "./paperclip.jar"));
 
     /** Whether to check for server jar only or check for both (default behaviour). Last one triggers paperclip invocation if paperclip's jar is missing */
     private final static boolean CHECK_FOR_SERVER_JAR_INSTEAD = getBoolean("orion.checkForServerJarInstead");
 
     /** Path, where Orion should look up mod jars */
-    private final static Path MODS_PATH = Paths.get(System.getProperty("orion.modsPath", "./mods"));
+    private final static Path MODS_PATH = Paths.get(getProperty("orion.modsPath", "./mods"));
 
     /** Path, where per-mod configurations are stored */
-    private final static Path MOD_CONFIGS_PATH = Paths.get(System.getProperty("orion.modconfigsPath", "./modconfigs"));
+    private final static Path MOD_CONFIGS_PATH = Paths.get(getProperty("orion.modconfigsPath", "./modconfigs"));
 
     /** Paperclip download URL */
-    private final static String PAPERCLIP_URL = System.getProperty("orion.paperclipDownloadUrl",
+    private final static String PAPERCLIP_URL = getProperty("orion.paperclipDownloadUrl",
             "https://ci.destroystokyo.com/job/PaperSpigot/lastSuccessfulBuild/artifact/paperclip.jar");
 
     public static void main(String... args) throws Exception {
