@@ -75,6 +75,7 @@ public final class Bootstrap {
     private final static Path LIBRARIES_PATH = Paths.get(System.getProperty("orion.librariesPath", "./libraries"));
     private final static Path PAPER_SERVER_JAR = Paths.get(System.getProperty("orion.patchedJarPath", "./cache/patched_1.12.2.jar"));
     private final static Path PAPERCLIP_JAR = Paths.get(System.getProperty("orion.paperclipJarPath", "./paperclip.jar"));
+    private final static boolean CHECK_FOR_SERVER_JAR_INSTEAD = getBoolean("orion.checkForServerJarInstead");
     private final static Path MODS_PATH = Paths.get(System.getProperty("orion.modsPath", "./mods"));
     private final static String PAPERCLIP_URL = System.getProperty("orion.paperclipDownloadUrl",
             "https://ci.destroystokyo.com/job/PaperSpigot/lastSuccessfulBuild/artifact/paperclip.jar");
@@ -109,8 +110,13 @@ public final class Bootstrap {
                 PAPER_SERVER_JAR, uclTool, httpClient);
 
         /* Set up Paper server */
-        if(!paperclipManager.isServerAvailable())
-            paperclipManager.invoke();
+        if(CHECK_FOR_SERVER_JAR_INSTEAD) {
+            if(!paperclipManager.isServerAvailable())
+                paperclipManager.invoke();
+        } else {
+            if(Files.notExists(PAPERCLIP_JAR) || !paperclipManager.isServerAvailable())
+                paperclipManager.invoke();
+        }
 
         /* Set up classpath, Orion Tweaker & launch arguments */
         String launchTarget = paperclipManager.setupServer();
