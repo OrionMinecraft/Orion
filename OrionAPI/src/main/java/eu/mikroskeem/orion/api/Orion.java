@@ -46,8 +46,7 @@ public interface Orion {
      *
      * @param atUrl Resource {@link URL} of access transformer file (in other words {@link Class#getResource(String)})
      */
-    @Contract("null -> fail")
-    void registerAT(URL atUrl);
+    void registerAT(@NotNull URL atUrl);
 
     /**
      * Registers mixin config.
@@ -56,8 +55,7 @@ public interface Orion {
      *
      * @param mixinConfigName Mixin configuration name in format: <pre>mixins.MOD_ID.WHATEVER.json</pre>
      */
-    @Contract("null -> fail")
-    void registerMixinConfig(String mixinConfigName);
+    void registerMixinConfig(@NotNull String mixinConfigName);
 
     /**
      * Gets list of registered Maven repositories
@@ -73,8 +71,7 @@ public interface Orion {
      * @param url Maven repository url
      * @see Orion#registerLibrary(String)
      */
-    @Contract("null -> fail")
-    void registerMavenRepository(URL url);
+    void registerMavenRepository(@NotNull URL url);
 
     /**
      * Gets list of registered mod libraries
@@ -90,8 +87,7 @@ public interface Orion {
      *
      * @param dependencyString Dependency string, like <pre>groupId:artifactId:version</pre>
      */
-    @Contract("null -> fail")
-    void registerLibrary(String dependencyString);
+    void registerLibrary(@NotNull String dependencyString);
 
     /**
      * Gets unmodifiable list of loaded mods
