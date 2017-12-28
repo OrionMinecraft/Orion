@@ -324,7 +324,7 @@ public final class OrionCore {
                         }
 
                         @Override
-                        public void onFailure(Dependency dependency, IOException exception) {
+                        public void onFailure(Dependency dependency, Exception exception) {
                             logger.error("Failed to download dependency {}! {}", dependency, exception);
                         }
                     });
