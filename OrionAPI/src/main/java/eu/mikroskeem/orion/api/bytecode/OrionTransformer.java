@@ -27,6 +27,7 @@ package eu.mikroskeem.orion.api.bytecode;
 
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Orion bytecode transformer interface
@@ -38,11 +39,11 @@ public interface OrionTransformer {
     /**
      * Transforms class
      *
-     * @param source             Class bytecode
+     * @param source             Class bytecode. Might not be present
      * @param className          Class name
      * @param remappedClassName  Remapped class name. Might equal to {@code className}, if not remapped.
-     * @return Transformed class
+     * @return Transformed class or null
      */
-    @NotNull
-    byte[] transformClass(@NotNull byte[] source, @NotNull String className, @NotNull String remappedClassName);
+    @Nullable
+    byte[] transformClass(@Nullable byte[] source, @NotNull String className, @NotNull String remappedClassName);
 }

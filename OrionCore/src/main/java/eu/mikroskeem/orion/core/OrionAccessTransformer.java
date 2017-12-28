@@ -31,6 +31,7 @@ import eu.mikroskeem.orion.core.launcher.BlackboardKey;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.net.URL;
@@ -85,9 +86,12 @@ public final class OrionAccessTransformer implements OrionTransformer {
         }
     }
 
-    @NotNull
+    @Nullable
     @Override
-    public byte[] transformClass(@NotNull byte[] source, @NotNull String className, @NotNull String remappedClassName) {
+    public byte[] transformClass(@Nullable byte[] source, @NotNull String className, @NotNull String remappedClassName) {
+        if(source == null)
+            return null;
+
         logger.debug("Transforming class {}", className);
         return at.transformClass(source);
     }
