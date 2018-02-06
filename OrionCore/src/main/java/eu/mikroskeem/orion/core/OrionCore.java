@@ -40,7 +40,6 @@ import eu.mikroskeem.orion.core.extensions.OrionMixinErrorHandler;
 import eu.mikroskeem.orion.core.extensions.OrionTokenProvider;
 import eu.mikroskeem.orion.core.launcher.AbstractLauncherService;
 import eu.mikroskeem.orion.core.launcher.BlackboardKey;
-import eu.mikroskeem.orion.core.launcher.legacylauncher.LegacyLauncherService;
 import eu.mikroskeem.orion.core.mod.ModClassVisitor;
 import eu.mikroskeem.orion.core.mod.ModContainer;
 import eu.mikroskeem.picomaven.Dependency;
@@ -61,6 +60,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.launch.MixinBootstrap;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.Mixins;
@@ -385,9 +385,18 @@ public final class OrionCore {
     @NotNull
     private CBVersion detectCBVersion() {
         for (CBVersion version : CBVersion.values()) {
-            if(Reflect.getClass("net.minecraft.server." + version.getName() + ".DedicatedServer").isPresent())
+            if(findClass("net.minecraft.server." + version.getName() + ".DedicatedServer") != null)
                 return version;
         }
         return CBVersion.UNKNOWN;
+    }
+
+    @Nullable
+    private Class<?> findClass(@NotNull String className) {
+        try {
+            return Class.forName(className, false, this.getClass().getClassLoader());
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
     }
 }
