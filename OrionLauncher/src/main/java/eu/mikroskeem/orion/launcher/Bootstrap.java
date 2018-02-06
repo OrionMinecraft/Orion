@@ -83,7 +83,8 @@ public final class Bootstrap {
 
 
     private static String getProperty(String key, String def) {
-        return orionProperties.getProperty(key, System.getProperty(key, def));
+        String value = orionProperties.getProperty(key, System.getProperty(key, def));
+        return value.isEmpty() ? def : value;
     }
 
     private static boolean getBoolean(String key) {
