@@ -28,6 +28,12 @@ dependencies {
     compile group: 'com.google.guava', name: 'guava', version: guava_version
 }
 
+jar {
+    manifest {
+        attributes("Automatic-Module-Name": "eu.mikroskeem.orion.api")
+    }
+}
+
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
     from sourceSets.main.allSource
