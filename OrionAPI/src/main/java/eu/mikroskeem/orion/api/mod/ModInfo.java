@@ -57,5 +57,6 @@ public interface ModInfo {
      *
      * @return Mod dependency list
      */
-    @NotNull List<String> getDependencies();
+    @NotNull
+    List<String> getDependencies();
 }

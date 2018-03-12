@@ -26,6 +26,7 @@
 package eu.mikroskeem.orion.api;
 
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 
 /**
@@ -61,6 +62,7 @@ public enum CBVersion {
      *
      * @return CraftBukkit version name
      */
+    @NotNull
     @Contract(pure = true)
     public String getName() {
         return name;

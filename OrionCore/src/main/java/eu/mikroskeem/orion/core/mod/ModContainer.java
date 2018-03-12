@@ -32,6 +32,7 @@ import eu.mikroskeem.orion.api.mod.ModInfo;
 import eu.mikroskeem.shuriken.common.Ensure;
 import eu.mikroskeem.shuriken.reflect.ClassWrapper;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 
 /**
@@ -45,7 +46,8 @@ public final class ModContainer<T> {
     private final Injector injector;
     private final EventBus eventBus;
 
-    public ModContainer(ClassWrapper<T> modClass, ModInfo modInfo, Injector injector, EventBus eventBus) {
+    public ModContainer(@NotNull ClassWrapper<T> modClass, @NotNull ModInfo modInfo,
+                        @NotNull Injector injector, @NotNull EventBus eventBus) {
         this.modClass = modClass;
         this.modInfo = modInfo;
         this.injector = injector;
@@ -68,6 +70,7 @@ public final class ModContainer<T> {
      *
      * @return instance of {@link ModInfo}
      */
+    @NotNull
     @Contract(pure = true)
     public ModInfo getModInfo() {
         return modInfo;
@@ -78,6 +81,7 @@ public final class ModContainer<T> {
      *
      * @return {@link EventBus} of mod
      */
+    @NotNull
     @Contract(pure = true)
     public EventBus getEventBus() {
         return eventBus;

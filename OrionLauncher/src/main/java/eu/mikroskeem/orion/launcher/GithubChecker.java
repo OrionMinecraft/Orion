@@ -34,6 +34,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -49,7 +50,7 @@ final class GithubChecker {
     private final Properties ver;
     private final OkHttpClient client;
 
-    GithubChecker(Logger log, Properties ver, OkHttpClient client) {
+    GithubChecker(@NotNull Logger log, @NotNull Properties ver, @NotNull OkHttpClient client) {
         this.log = log;
         this.ver = ver;
         this.client = client;

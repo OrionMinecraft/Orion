@@ -56,7 +56,8 @@ public final class OrionAPI {
      * @param instance {@link Orion}
      */
     @Contract("null -> fail")
-    public static void setInstance(Orion instance) {
+    public static void setInstance(@NotNull Orion instance) {
+        Ensure.ensureCondition(instance != null, "Can not set Orion instance to null!");
         Ensure.ensureCondition(OrionAPI.instance == null, "Orion instance is already set!");
         OrionAPI.instance = instance;
     }

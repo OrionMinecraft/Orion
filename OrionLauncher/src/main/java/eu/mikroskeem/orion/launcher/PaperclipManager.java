@@ -32,6 +32,7 @@ import eu.mikroskeem.shuriken.reflect.wrappers.TypeWrapper;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -58,8 +59,8 @@ final class PaperclipManager {
     private final ClassLoaderTools.URLClassLoaderTools uclTools;
     private final OkHttpClient client;
 
-    PaperclipManager(URL paperclipDownloadUrl, Path paperclipPath, Path serverPath,
-                     ClassLoaderTools.URLClassLoaderTools uclTools, OkHttpClient httpClient) {
+    PaperclipManager(@NotNull URL paperclipDownloadUrl, @NotNull Path paperclipPath, @NotNull Path serverPath,
+                     @NotNull ClassLoaderTools.URLClassLoaderTools uclTools, @NotNull OkHttpClient httpClient) {
         this.oldSecurityManager = System.getSecurityManager();
         this.paperclipPath = paperclipPath;
         this.serverPath = serverPath;
@@ -80,6 +81,7 @@ final class PaperclipManager {
     /**
      * Sets up Orion Tweaker
      */
+    @NotNull
     String setupServer() {
         if(!isServerAvailable()) throw new IllegalStateException("Paper server jar is not available!");
 
@@ -130,7 +132,7 @@ final class PaperclipManager {
             }
 
             Throwable target = ((InvocationTargetException) e).getTargetException();
-            if(target == null || !(target instanceof PaperclipExitException)) {
+            if(!(target instanceof PaperclipExitException)) {
                 throw new RuntimeException(e);
             }
 
@@ -154,7 +156,7 @@ final class PaperclipManager {
     /** SecurityManager to catch Paperclip exit */
     class PaperclipExitCatcher extends SecurityManager {
         @Override
-        public void checkPermission(Permission perm) {
+        public void checkPermission(@NotNull Permission perm) {
             /* Check only exitVM, as this security manager needs to catch only System.exit(int) */
             if(!perm.getName().startsWith("exitVM"))
                 return;

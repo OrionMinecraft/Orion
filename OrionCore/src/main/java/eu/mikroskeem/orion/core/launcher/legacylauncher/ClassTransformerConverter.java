@@ -74,6 +74,9 @@ final class ClassTransformerConverter {
         // New wrapper class name
         String newWrapperName = getNewName(transformer);
 
+        // Debug log
+        log.debug("Wrapping transformer class '{}' to '{}'", transformer.getClass(), newWrapperName);
+
         // Start generating new TransformerWrapper
         ClassReader cr = new ClassReader(TW_DATA);
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
@@ -85,7 +88,7 @@ final class ClassTransformerConverter {
         return requireNonNull((Class<T>) ClassLoaderTools.defineClass(Launch.classLoader, newWrapperName, cw.toByteArray()));
     }
 
-    private static String getNewName(Class<?> clazz) {
+    private static String getNewName(@NotNull Class<?> clazz) {
         String name = clazz.getName();
         return ClassTransformerConverter.class.getName()
                 .concat("$")

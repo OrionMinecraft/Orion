@@ -70,7 +70,7 @@ public final class OrionTweakClass implements ITweaker {
     @Override
     public String[] getLaunchArguments() {
         List<String> arguments = BlackboardKey.get(BlackboardKey.ORIGINAL_ARGUMENTS);
-        return arguments.toArray(new String[arguments.size()]);
+        return arguments.toArray(new String[0]);
     }
 
     @Override

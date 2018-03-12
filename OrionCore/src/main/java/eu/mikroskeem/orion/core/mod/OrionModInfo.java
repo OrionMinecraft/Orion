@@ -50,7 +50,7 @@ final class OrionModInfo implements ModInfo {
     }
 
     @Contract("null -> fail")
-    void setId(String id) {
+    void setId(@NotNull String id) {
         this.id = Ensure.notNull(id, "Id cannot be null!");
     }
 
@@ -61,7 +61,7 @@ final class OrionModInfo implements ModInfo {
     }
 
     @Contract("null -> fail")
-    void setClassName(String className) {
+    void setClassName(@NotNull String className) {
         this.className = Ensure.notNull(className, "Class name cannot be null!");
     }
 
@@ -72,7 +72,7 @@ final class OrionModInfo implements ModInfo {
     }
 
     @Contract("null -> fail")
-    void setDependencies(List<String> dependencies) {
+    void setDependencies(@NotNull List<String> dependencies) {
         this.dependencies = Ensure.notNull(dependencies, "Dependencies cannot be null!");
     }
 

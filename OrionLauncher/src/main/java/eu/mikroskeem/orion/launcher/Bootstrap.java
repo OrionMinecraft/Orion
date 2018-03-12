@@ -38,6 +38,7 @@ import net.minecraft.launchwrapper.Launch;
 import okhttp3.OkHttpClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -81,13 +82,13 @@ public final class Bootstrap {
         }
     }
 
-
-    private static String getProperty(String key, String def) {
+    @NotNull
+    private static String getProperty(@NotNull String key, @NotNull String def) {
         String value = orionProperties.getProperty(key, System.getProperty(key, def));
         return value.isEmpty() ? def : value;
     }
 
-    private static boolean getBoolean(String key) {
+    private static boolean getBoolean(@NotNull String key) {
         boolean result = false;
         try {
             result = Boolean.parseBoolean(orionProperties.getProperty(key, System.getProperty(key)));

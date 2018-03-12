@@ -25,6 +25,9 @@
 
 package eu.mikroskeem.orion.launcher;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,7 +38,8 @@ import java.util.jar.JarInputStream;
  * @author Mark Vainomaa
  */
 final class Utils {
-    static String getMainClassFromJar(Path jarPath) {
+    @Nullable
+    static String getMainClassFromJar(@NotNull Path jarPath) {
         try(JarInputStream js = new JarInputStream(Files.newInputStream(jarPath))) {
             return js.getManifest().getMainAttributes().getValue("Main-Class");
         } catch (IOException e) {

@@ -60,21 +60,21 @@ public enum BlackboardKey {
     private final boolean mutable;
     @Nullable private final Supplier<?> initializer;
 
-    BlackboardKey(String key, Class<?> type) {
+    BlackboardKey(@NotNull String key, @NotNull Class<?> type) {
         this.key = key;
         this.type = type;
         this.mutable = true;
         this.initializer = null;
     }
 
-    BlackboardKey(String key, Class<?> type, boolean mutable) {
+    BlackboardKey(@NotNull String key, @NotNull Class<?> type, boolean mutable) {
         this.key = key;
         this.type = type;
         this.mutable = mutable;
         this.initializer = null;
     }
 
-    BlackboardKey(String key, Class<?> type, @Nullable Supplier<?> initializer) {
+    BlackboardKey(@NotNull String key, @NotNull Class<?> type, @Nullable Supplier<?> initializer) {
         this.key = key;
         this.type = type;
         this.mutable = true;
