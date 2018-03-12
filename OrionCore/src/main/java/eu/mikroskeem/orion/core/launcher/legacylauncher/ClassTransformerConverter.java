@@ -65,7 +65,7 @@ final class ClassTransformerConverter {
     @NotNull
     @SuppressWarnings("unchecked")
     static <T extends IClassTransformer> Class<T> convert(@NotNull Class<? extends OrionTransformer> transformer) {
-        if(Arrays.asList(transformer.getInterfaces()).contains(IClassTransformer.class))
+        if(IClassTransformer.class.isAssignableFrom(transformer.getClass()))
             return (Class<T>) transformer; /* no-op */
 
         // Orion transformer name
