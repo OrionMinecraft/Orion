@@ -105,7 +105,12 @@ subprojects {
             def deps = [] as Set
             rootProject.subprojects.each { subproject ->
                 subproject.configurations.downloadDep.resolvedConfiguration.resolvedArtifacts.each { dep ->
-                    deps += dep.id.componentIdentifier.toString()
+                    def depString = dep.id.componentIdentifier.toString()
+                    def splitted = depString.split(':')
+                    if(splitted.length > 3) {
+                        depString = java.util.Arrays.copyOf(splitted, 3).join(":")
+                    }
+                    deps += depString
                 }
             }
             outputFile.createNewFile()
