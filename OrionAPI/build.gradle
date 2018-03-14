@@ -28,6 +28,10 @@ dependencies {
     compile group: 'com.google.guava', name: 'guava', version: guava_version
 }
 
+compileJava {
+    options.compilerArgs += "-proc:none"
+}
+
 jar {
     manifest {
         attributes("Automatic-Module-Name": "eu.mikroskeem.orion.api")
