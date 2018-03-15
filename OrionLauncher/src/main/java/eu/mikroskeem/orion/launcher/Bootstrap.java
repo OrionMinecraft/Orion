@@ -255,6 +255,6 @@ public final class Bootstrap {
 
         /* Launch LegacyLauncher */
         log.info("Starting LegacyLauncher with arguments {}", tweakArgs);
-        Launch.main(tweakArgs.toArray(new String[tweakArgs.size()]));
+        Launch.main(tweakArgs.toArray(new String[0]));
     }
 }
