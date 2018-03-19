@@ -248,8 +248,19 @@ public final class OrionCore {
                     if(entry.isDirectory()) continue;
 
                     if(entry.getName().endsWith(".class")) {
-                        byte[] classData = ByteArrays.fromInputStream(zipFile.getInputStream(entry));
-                        modInfo = ModClassVisitor.getModInfo(classData);
+                        byte[] classData;
+                        try {
+                            classData = ByteArrays.fromInputStream(zipFile.getInputStream(entry));
+                        } catch (IOException e) {
+                            logger.error("Failed to read class '{}' file from '{}'", entry, modFile);
+                            continue;
+                        }
+                        try {
+                            modInfo = ModClassVisitor.getModInfo(classData);
+                        } catch (Exception e) {
+                            logger.error("Failed to get mod info from class '{}'", entry.getName(), e);
+                            continue;
+                        }
                         if(modInfo != null) {
                             logger.info("Found mod with id '{}' from '{}'", modInfo.getId(), modFile);
                             break;
