@@ -26,8 +26,10 @@
 package eu.mikroskeem.orion.core;
 
 import eu.mikroskeem.orion.api.Orion;
+import eu.mikroskeem.orion.api.asset.AssetManager;
 import eu.mikroskeem.orion.api.bytecode.OrionTransformer;
 import eu.mikroskeem.orion.api.mod.ModInfo;
+import eu.mikroskeem.orion.core.mod.AssetManagerImpl;
 import eu.mikroskeem.orion.core.mod.ModContainer;
 import eu.mikroskeem.picomaven.Dependency;
 import eu.mikroskeem.shuriken.common.Ensure;
@@ -35,6 +37,7 @@ import eu.mikroskeem.shuriken.common.SneakyThrow;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixins;
 
 import java.lang.ref.SoftReference;
@@ -58,6 +61,7 @@ final class OrionAPIImpl implements Orion {
     private static final Logger logger = LogManager.getLogger("OrionAPI");
     private static final Pattern MIXIN_NAME_PATTERN = Pattern.compile("mixins\\.(.*\\.)?.*\\.json");
     private final OrionCore orionCore;
+    private final AssetManagerImpl assetManager;
 
     private SoftReference<List<URL>> registeredMavenRepositories;
     private SoftReference<List<String>> registeredLibraries;
@@ -65,6 +69,7 @@ final class OrionAPIImpl implements Orion {
 
     OrionAPIImpl(OrionCore orionCore) {
         this.orionCore = orionCore;
+        this.assetManager = new AssetManagerImpl();
     }
 
     @Override
@@ -153,6 +158,12 @@ final class OrionAPIImpl implements Orion {
         return Objects.requireNonNull(mods.get());
     }
 
+    @Nullable
+    @Override
+    public ModInfo getMod(@NotNull String modId) {
+        return getMods().stream().filter(m -> m.getId().equals(modId)).findFirst().orElse(null);
+    }
+
     @Override
     @NotNull
     public List<String> getMixinConfigurations() {
@@ -173,5 +184,11 @@ final class OrionAPIImpl implements Orion {
     @NotNull
     public Set<Class<? extends OrionTransformer>> getRegisteredTransformers() {
         return Collections.unmodifiableSet(orionCore.transformers);
+    }
+
+    @NotNull
+    @Override
+    public AssetManager.ForMod getAssetManager() {
+        return assetManager;
     }
 }

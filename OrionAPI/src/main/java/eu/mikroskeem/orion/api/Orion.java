@@ -25,10 +25,12 @@
 
 package eu.mikroskeem.orion.api;
 
+import eu.mikroskeem.orion.api.asset.AssetManager;
 import eu.mikroskeem.orion.api.bytecode.OrionTransformer;
 import eu.mikroskeem.orion.api.mod.ModInfo;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.URL;
 import java.util.List;
@@ -98,6 +100,16 @@ public interface Orion {
     List<ModInfo> getMods();
 
     /**
+     * Gets mod by its id
+     *
+     * @since 0.0.4-SNAPSHOT
+     * @param modId Mod id
+     * @return Instance of {@link ModInfo} or null, if mod wasn't found
+     */
+    @Nullable
+    ModInfo getMod(@NotNull String modId);
+
+    /**
      * Gets unmodifiable list of registered Mixin configurations
      *
      * @return Unmodifiable list of registered Mixin configurations
@@ -129,4 +141,13 @@ public interface Orion {
      */
     @NotNull
     Set<Class<? extends OrionTransformer>> getRegisteredTransformers();
+
+    /**
+     * Gets mod asset manager
+     *
+     * @since 0.0.4-SNAPSHOT
+     * @return Mod asset manager
+     */
+    @NotNull
+    AssetManager.ForMod getAssetManager();
 }
