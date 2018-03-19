@@ -38,12 +38,12 @@ import java.util.WeakHashMap;
  * @author Mark Vainomaa
  */
 public final class AssetManagerImpl implements AssetManager.ForMod {
-    private final Map<ModInfo, ModAssetManager> assetManagers = new WeakHashMap<>();
+    private final Map<String, ModAssetManager> assetManagers = new WeakHashMap<>();
 
     @NotNull
     @Override
     public AssetManager forMod(@NotNull ModInfo modInfo) {
-        return assetManagers.computeIfAbsent(modInfo, ModAssetManager::new);
+        return assetManagers.computeIfAbsent(modInfo.getId(), ModAssetManager::new);
     }
 
     @Override
@@ -51,5 +51,11 @@ public final class AssetManagerImpl implements AssetManager.ForMod {
     public AssetManager forMod(@NotNull String modId) {
         ModInfo modInfo = OrionAPI.getInstance().getMod(modId);
         return modInfo != null ? forMod(modInfo) : null;
+    }
+
+    public AssetManager createExplicitly(@NotNull String modId) {
+        ModAssetManager assetManager = new ModAssetManager(modId);
+        assetManagers.put(modId, assetManager);
+        return assetManager;
     }
 }

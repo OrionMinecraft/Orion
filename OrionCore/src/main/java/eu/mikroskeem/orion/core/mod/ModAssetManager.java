@@ -48,8 +48,8 @@ final class ModAssetManager implements AssetManager {
 
     private final String modAssetPath;
 
-    ModAssetManager(@NotNull ModInfo modInfo) {
-        this.modAssetPath = String.format(PATH_FORMAT, modInfo.getId());
+    ModAssetManager(@NotNull String modId) {
+        this.modAssetPath = String.format(PATH_FORMAT, modId);
     }
 
     @NotNull

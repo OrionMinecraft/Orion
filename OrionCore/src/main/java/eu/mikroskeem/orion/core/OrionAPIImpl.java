@@ -61,7 +61,7 @@ final class OrionAPIImpl implements Orion {
     private static final Logger logger = LogManager.getLogger("OrionAPI");
     private static final Pattern MIXIN_NAME_PATTERN = Pattern.compile("mixins\\.(.*\\.)?.*\\.json");
     private final OrionCore orionCore;
-    private final AssetManagerImpl assetManager;
+    final AssetManagerImpl assetManager;
 
     private SoftReference<List<URL>> registeredMavenRepositories;
     private SoftReference<List<String>> registeredLibraries;

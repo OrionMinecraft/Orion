@@ -33,6 +33,7 @@ import com.google.inject.name.Names;
 import eu.mikroskeem.orion.api.CBVersion;
 import eu.mikroskeem.orion.api.Orion;
 import eu.mikroskeem.orion.api.OrionAPI;
+import eu.mikroskeem.orion.api.asset.AssetManager;
 import eu.mikroskeem.orion.api.bytecode.OrionTransformer;
 import eu.mikroskeem.orion.api.events.ModLoadEvent;
 import eu.mikroskeem.orion.api.mod.ModInfo;
@@ -102,6 +103,7 @@ public final class OrionCore {
 
     private final AbstractLauncherService launcherService;
     private final CBVersion cbVersion;
+    private OrionAPIImpl orionAPI;
     private Injector baseInjector;
 
     final List<ModContainer<?>> mods = new ArrayList<>();
@@ -195,7 +197,7 @@ public final class OrionCore {
         ));
 
         logger.debug("Setting up OrionAPI singleton");
-        OrionAPIImpl orionAPI = new OrionAPIImpl(this);
+        orionAPI = new OrionAPIImpl(this);
         OrionAPI.setInstance(orionAPI);
 
         /* Add Maven Central to repository list */
@@ -372,6 +374,7 @@ public final class OrionCore {
             b.bind(COMMENTED_CONFIGURATION_NODE_LOADER).toInstance(configurationLoader);
             b.bind(Path.class).annotatedWith(Names.named("configurationPath"))
                     .toInstance(configurationPath);
+            b.bind(AssetManager.class).toInstance(orionAPI.assetManager.createExplicitly(modInfo.getId()));
         });
 
         return new ModContainer<>(modClass, modInfo, injector, modEventBus);
