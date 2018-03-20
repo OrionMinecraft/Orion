@@ -35,10 +35,12 @@ import eu.mikroskeem.orion.api.Orion;
 import eu.mikroskeem.orion.api.OrionAPI;
 import eu.mikroskeem.orion.api.asset.AssetManager;
 import eu.mikroskeem.orion.api.bytecode.OrionTransformer;
+import eu.mikroskeem.orion.api.configuration.ObjectConfigurationLoader;
 import eu.mikroskeem.orion.api.events.ModLoadEvent;
 import eu.mikroskeem.orion.api.mod.ModInfo;
 import eu.mikroskeem.orion.core.extensions.OrionMixinErrorHandler;
 import eu.mikroskeem.orion.core.extensions.OrionTokenProvider;
+import eu.mikroskeem.orion.core.guice.TypeLiteralGenerator;
 import eu.mikroskeem.orion.core.launcher.AbstractLauncherService;
 import eu.mikroskeem.orion.core.launcher.BlackboardKey;
 import eu.mikroskeem.orion.core.mod.ModClassVisitor;
@@ -55,7 +57,6 @@ import eu.mikroskeem.shuriken.reflect.ClassWrapper;
 import eu.mikroskeem.shuriken.reflect.Reflect;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -71,7 +72,6 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -311,14 +311,27 @@ public final class OrionCore {
         }
 
         /* Construct mods */
+        // TODO: make dependent mods fail to load if dependency fails
         for (String modId : modLoadOrder) {
             Pair<ModInfo, Path> modInfo = foundMods.get(modId);
             URL modUrl = ToURL.to(modInfo.getValue());
             classLoader.addURL(modUrl);
-            ClassWrapper<?> modClass = Reflect.getClassThrows(modInfo.getKey().getClassName(), classLoader);
-            ModContainer<?> mod = initializeMod(modClass, modInfo.getKey());
-            mod.init();
-            mods.add(mod);
+            ClassWrapper<?> modClass;
+            ModContainer<?> mod;
+            try {
+                modClass = Reflect.getClassThrows(modInfo.getKey().getClassName(), classLoader);
+                mod = initializeMod(modClass, modInfo.getKey());
+            } catch (Exception e) {
+                logger.error("Failed to initialize mod '{}' class '{}'!", modId, modInfo.getKey().getClassName(), e);
+                continue;
+            }
+            try {
+                mod.init();
+                mods.add(mod);
+            } catch (Exception e) {
+                logger.error("Failed to construct mod '{}'!", modId, e);
+                continue;
+            }
         }
 
         /* Process mod requested libraries */
@@ -365,16 +378,15 @@ public final class OrionCore {
         EventBus modEventBus = new EventBus();
 
         /* Set up configuration loader */
+        TypeLiteral<ObjectConfigurationLoader<?>> configurationTL = TypeLiteralGenerator
+                .get(ObjectConfigurationLoader.class, modInfo.getConfigClass());
         Path configurationPath;
-        ConfigurationLoader<CommentedConfigurationNode> configurationLoader;
+        ObjectConfigurationLoader<?> objectConfigurationLoader;
         try {
-            configurationPath = Paths.get(BlackboardKey.get(BlackboardKey.MOD_CONFIGS_PATH).toString(), modInfo.getId() + ".cfg");
-            if(Files.notExists(configurationPath.getParent())) Files.createDirectories(configurationPath.getParent());
-            configurationLoader = HoconConfigurationLoader.builder()
-                    .setPath(configurationPath)
-                    .build();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            configurationPath = BlackboardKey.<Path>get(BlackboardKey.MOD_CONFIGS_PATH).resolve(modInfo.getId() + ".cfg");
+            objectConfigurationLoader = new ObjectConfigurationLoader<>(configurationPath, modInfo.getConfigClass());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to initialize mod '" + modInfo.getId() + "' configuration!", e);
         }
 
         /* Set up dependency injector */
@@ -382,7 +394,10 @@ public final class OrionCore {
             b.bind(ModInfo.class).toInstance(modInfo);
             b.bind(EventBus.class).toInstance(modEventBus);
             b.bind(Logger.class).toInstance(LogManager.getLogger(modInfo.getId()));
-            b.bind(COMMENTED_CONFIGURATION_NODE_LOADER).toInstance(configurationLoader);
+            b.bind(configurationTL).toInstance(objectConfigurationLoader);
+            b.bind(ObjectConfigurationLoader.class).annotatedWith(Names.named("defaultConfiguration"))
+                    .toInstance(objectConfigurationLoader);
+            b.bind(COMMENTED_CONFIGURATION_NODE_LOADER).toInstance(objectConfigurationLoader.getLoader());
             b.bind(Path.class).annotatedWith(Names.named("configurationPath"))
                     .toInstance(configurationPath);
             b.bind(AssetManager.class).toInstance(orionAPI.assetManager.createExplicitly(modInfo.getId()));

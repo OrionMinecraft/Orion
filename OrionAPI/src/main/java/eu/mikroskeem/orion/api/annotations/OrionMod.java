@@ -25,6 +25,8 @@
 
 package eu.mikroskeem.orion.api.annotations;
 
+import eu.mikroskeem.orion.api.configuration.DummyConfiguration;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -52,4 +54,11 @@ public @interface OrionMod {
      * @return List of dependency mod id's
      */
     String[] dependencies() default {};
+
+    /**
+     * Mod configuration class to be loaded with {@link eu.mikroskeem.orion.api.configuration.ObjectConfigurationLoader}
+     *
+     * @return Configuration class
+     */
+    Class<?> configurationClass() default DummyConfiguration.class;
 }

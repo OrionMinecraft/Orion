@@ -27,6 +27,8 @@ package eu.mikroskeem.orion.core.mod;
 
 import eu.mikroskeem.orion.api.mod.ModInfo;
 import eu.mikroskeem.shuriken.common.Ensure;
+import eu.mikroskeem.shuriken.common.SneakyThrow;
+import net.minecraft.launchwrapper.Launch;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -42,6 +44,8 @@ final class OrionModInfo implements ModInfo {
     private String id;
     private String className;
     private List<String> dependencies;
+    private String configClassName;
+    private Class<?> configClass = null;
 
     @NotNull
     @Contract(pure = true)
@@ -76,8 +80,30 @@ final class OrionModInfo implements ModInfo {
         this.dependencies = Ensure.notNull(dependencies, "Dependencies cannot be null!");
     }
 
+    @NotNull
+    @Override
+    public Class<?> getConfigClass() {
+        if(configClass == null) {
+            try {
+                configClass = Class.forName(configClassName, true, Launch.classLoader);
+            } catch (ClassNotFoundException e) {
+                SneakyThrow.throwException(new ClassNotFoundException("Failed to find specified configuration class!", e));
+            }
+        }
+        return configClass;
+    }
+
+    void setConfigClass(@NotNull String configClass) {
+        this.configClassName = Ensure.notNull(configClass, "Configuration class name cannot be null!");
+    }
+
     @Override
     public String toString() {
-        return "ModInfo{" + "id='" + id + '\'' + ", className='" + className + '\'' + ", dependencies=" + dependencies + '}';
+        return "ModInfo{" +
+                "id='" + id + '\'' +
+                ", className='" + className + '\'' +
+                ", dependencies=" + dependencies +
+                ", configClass=" + configClass +
+                '}';
     }
 }

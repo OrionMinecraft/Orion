@@ -23,48 +23,14 @@
  * THE SOFTWARE.
  */
 
-package eu.mikroskeem.orion.api.mod;
+package eu.mikroskeem.orion.api.configuration;
 
-import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
-
+import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
 /**
- * Represents mod info annotation
+ * Dummy configuration class
  *
  * @author Mark Vainomaa
  */
-public interface ModInfo {
-    /**
-     * Gets mod id
-     *
-     * @return Mod id
-     */
-    @NotNull
-    String getId();
-
-    /**
-     * Gets mod main class name
-     *
-     * @return Mod main class name
-     */
-    @NotNull
-    String getClassName();
-
-    /**
-     * Gets mod dependencies
-     *
-     * @return Mod dependency list
-     */
-    @NotNull
-    List<String> getDependencies();
-
-    /**
-     * Gets mod configuration class
-     *
-     * @return Mod configuration class
-     */
-    @NotNull
-    Class<?> getConfigClass();
-}
+@ConfigSerializable
+public class DummyConfiguration {}

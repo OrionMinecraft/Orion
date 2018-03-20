@@ -23,48 +23,25 @@
  * THE SOFTWARE.
  */
 
-package eu.mikroskeem.orion.api.mod;
+package eu.mikroskeem.orion.api.annotations;
 
-import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
-
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Represents mod info annotation
+ * Used to figure out configuration base node name. Used with configuration class specified in {@link OrionMod#configurationClass()}
  *
  * @author Mark Vainomaa
  */
-public interface ModInfo {
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface ConfigurationBaseNode {
     /**
-     * Gets mod id
+     * Configuration class base node name. If empty, lowered case class name is used instead.
      *
-     * @return Mod id
+     * @return Configuration class base node name
      */
-    @NotNull
-    String getId();
-
-    /**
-     * Gets mod main class name
-     *
-     * @return Mod main class name
-     */
-    @NotNull
-    String getClassName();
-
-    /**
-     * Gets mod dependencies
-     *
-     * @return Mod dependency list
-     */
-    @NotNull
-    List<String> getDependencies();
-
-    /**
-     * Gets mod configuration class
-     *
-     * @return Mod configuration class
-     */
-    @NotNull
-    Class<?> getConfigClass();
+    String value() default "";
 }

@@ -26,6 +26,7 @@
 package eu.mikroskeem.orion.core.mod;
 
 import eu.mikroskeem.orion.api.annotations.OrionMod;
+import eu.mikroskeem.orion.api.configuration.DummyConfiguration;
 import eu.mikroskeem.orion.api.mod.ModInfo;
 import eu.mikroskeem.shuriken.common.Ensure;
 import org.jetbrains.annotations.Nullable;
@@ -99,6 +100,7 @@ public final class ModClassVisitor extends ClassVisitor {
             super(Opcodes.ASM5);
             modInfo = new OrionModInfo();
             modInfo.setDependencies(dependencies);
+            modInfo.setConfigClass(DummyConfiguration.class.getName());
             modInfo.setClassName(className.replace('/', '.'));
         }
 
@@ -120,6 +122,10 @@ public final class ModClassVisitor extends ClassVisitor {
                 case "id":
                     gotId = true;
                     modInfo.setId((String)value);
+                    break;
+                case "configurationClass":
+                    Type configClass = (Type) value;
+                    modInfo.setConfigClass(configClass.getClassName());
                     break;
                 default:
                     super.visit(name, value);
