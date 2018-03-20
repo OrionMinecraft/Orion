@@ -32,13 +32,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.HashMap;
 
 /**
  * @author Mark Vainomaa
  */
 public final class AssetManagerImpl implements AssetManager.ForMod {
-    private final Map<String, ModAssetManager> assetManagers = new WeakHashMap<>();
+    private final Map<String, ModAssetManager> assetManagers = new HashMap<>();
 
     @NotNull
     @Override
