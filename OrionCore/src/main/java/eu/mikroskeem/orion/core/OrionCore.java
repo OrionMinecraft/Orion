@@ -84,6 +84,8 @@ import java.util.concurrent.Executors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import static eu.mikroskeem.orion.core.guice.TypeLiteralGenerator.SignatureBuilder.of;
+
 
 /**
  * The mighty Orion Core
@@ -378,8 +380,12 @@ public final class OrionCore {
         EventBus modEventBus = new EventBus();
 
         /* Set up configuration loader */
-        TypeLiteral<ObjectConfigurationLoader<?>> configurationTL = TypeLiteralGenerator
-                .get(ObjectConfigurationLoader.class, modInfo.getConfigClass());
+        TypeLiteral<ObjectConfigurationLoader<?>> configurationTL = TypeLiteralGenerator.get(
+                of(ObjectConfigurationLoader.class,
+                        of(modInfo.getConfigClass())
+                )
+        );
+
         Path configurationPath;
         ObjectConfigurationLoader<?> objectConfigurationLoader;
         try {

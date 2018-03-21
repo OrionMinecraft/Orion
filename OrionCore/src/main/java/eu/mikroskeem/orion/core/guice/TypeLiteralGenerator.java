@@ -27,7 +27,6 @@ package eu.mikroskeem.orion.core.guice;
 
 import com.google.inject.TypeLiteral;
 import eu.mikroskeem.shuriken.common.Ensure;
-import eu.mikroskeem.shuriken.common.data.Pair;
 import eu.mikroskeem.shuriken.instrumentation.ClassLoaderTools;
 import eu.mikroskeem.shuriken.instrumentation.ClassTools;
 import eu.mikroskeem.shuriken.reflect.Reflect;
@@ -37,9 +36,14 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static eu.mikroskeem.orion.core.guice.TypeLiteralGenerator.SignatureBuilder.of;
 
 /**
  * There are some limits with {@link com.google.inject.TypeLiteral}, so let's use ASM to jump over that limit
@@ -48,37 +52,20 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public final class TypeLiteralGenerator {
     private final static AtomicInteger generatedCounter = new AtomicInteger(0);
-    private final static Map<Pair<Class<?>, Class<?>>, TypeLiteral<?>> generated = new HashMap<>();
+    private final static Map<SignatureBuilder, TypeLiteral<?>> generated = new HashMap<>();
     private final static Type thisType = Type.getType(TypeLiteralGenerator.class);
     private final static Type typeLiteralType = Type.getType(TypeLiteral.class);
 
     @NotNull
     @SuppressWarnings("unchecked")
-    public static <T> TypeLiteral<T> get(@NotNull Class<?> clazz, @NotNull Class<?> clazzParam) {
-        return (TypeLiteral<T>) generated.computeIfAbsent(new Pair<>(clazz, clazzParam), c -> generate(clazz, clazzParam));
+    public static <T> TypeLiteral<T> get(@NotNull SignatureBuilder signatureBuilder) {
+        return (TypeLiteral<T>) generated.computeIfAbsent(signatureBuilder, c -> generate(of(TypeLiteral.class, signatureBuilder).build()));
     }
 
     @NotNull
-    private static TypeLiteral<?> generate(@NotNull Class<?> clazz, @NotNull Class<?> clazzParam) {
-        // Make sure that classes are loaded
-        clazz.getName();
-        clazzParam.getName();
-
+    private static TypeLiteral<?> generate(@NotNull String signature) {
         // Figure out new inner class name
         String className = TypeLiteralGenerator.class.getName() + "$g" + generatedCounter.incrementAndGet();
-
-        // Start building a class signature. TypeLiteral uses that to workaround type erasure
-        String typeLiteral = new StringBuilder()
-                .append('L')
-                .append(typeLiteralType.getInternalName())
-                    .append("<L")
-                    .append(Type.getInternalName(clazz))
-                        .append("<L")
-                        .append(Type.getInternalName(clazzParam))
-                        .append(";>")
-                    .append(';')
-                .append(">;")
-                .toString();
 
         // Start writing an inner class
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
@@ -86,7 +73,7 @@ public final class TypeLiteralGenerator {
         cw.visit(Opcodes.V1_8,
                 Opcodes.ACC_FINAL | Opcodes.ACC_SUPER,
                 ClassTools.unqualifyName(className),
-                typeLiteral,
+                signature,
                 typeLiteralType.getInternalName(),
                 null);
 
@@ -103,5 +90,54 @@ public final class TypeLiteralGenerator {
                 Ensure.notNull(ClassLoaderTools.defineClass(Launch.classLoader, className, classData), "Failed to define TypeLiteral class: " + className);
 
         return Ensure.notNull(Reflect.wrapClass(definedLiteral).construct().getClassInstance(), "Class instance was null!");
+    }
+
+    public final static class SignatureBuilder {
+        private final String base;
+        private final List<SignatureBuilder> parameters;
+
+        private SignatureBuilder(@NotNull String base, @NotNull List<SignatureBuilder> parameters) {
+            this.base = base;
+            this.parameters = parameters;
+        }
+
+        @NotNull
+        public String build() {
+            StringBuilder builder = new StringBuilder();
+            builder.append('L')
+                   .append(base);
+            if(parameters.size() > 0) {
+                builder.append('<');
+                for(SignatureBuilder subBuilder : parameters)
+                    builder.append(subBuilder.build());
+                builder.append('>');
+            }
+            builder.append(';');
+            return builder.toString();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if(this == o) return true;
+            if(!(o instanceof SignatureBuilder)) return false;
+            SignatureBuilder that = (SignatureBuilder) o;
+            return Objects.equals(base, that.base) &&
+                    Objects.equals(parameters, that.parameters);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(base, parameters);
+        }
+
+        @NotNull
+        public static SignatureBuilder of(@NotNull Class<?> base, @NotNull SignatureBuilder... parameters) {
+            return of(Type.getType(base), parameters);
+        }
+
+        @NotNull
+        public static SignatureBuilder of(@NotNull Type base, @NotNull SignatureBuilder... parameters) {
+            return new SignatureBuilder(base.getInternalName(), Arrays.asList(parameters));
+        }
     }
 }
