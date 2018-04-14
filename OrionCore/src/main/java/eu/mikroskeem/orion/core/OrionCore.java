@@ -240,6 +240,9 @@ public final class OrionCore {
             logger.debug("Scanning mod candidate '{}' for mod classes", modFile);
 
             /* Scan for mod classes */
+            boolean foundBukkit = false;
+            boolean foundBungee = false;
+            boolean foundSpongeOrForge = false;
             ModInfo modInfo = null;
             try(ZipFile zipFile = new ZipFile(modFile.toFile())) {
                 Enumeration<? extends ZipEntry> entries = zipFile.entries();
@@ -274,11 +277,15 @@ public final class OrionCore {
                      * include plugin code in same jar (for... runtime retransformations?)
                      */
                     if(entry.getName().equals("plugin.yml")) {
-                        logger.warn("Mod file '{}' seems to be actually a Bukkit plugin.", modFile);
+                        foundBukkit = true;
+                    }
+
+                    if(entry.getName().equals("bungee.yml")) {
+                        foundBungee = true;
                     }
 
                     if(entry.getName().equals("mcmod.info")) {
-                        logger.warn("Mod file '{}' seems to be actually a Sponge or Forge mod.", modFile);
+                        foundSpongeOrForge = true;
                     }
                 }
             } catch (IOException e) {
@@ -287,6 +294,16 @@ public final class OrionCore {
 
             if(modInfo == null) {
                 logger.warn("Skipping invalid mod: {}", modFile);
+
+                if(foundBukkit)
+                    logger.warn("Mod file '{}' seems to be actually a Bukkit plugin.", modFile);
+
+                if(foundBungee)
+                    logger.warn("Mod file '{}' seems to be actually a BungeeCord plugin.", modFile);
+
+                if(foundSpongeOrForge)
+                    logger.warn("Mod file '{}' seems to be actually a Sponge or Forge mod.", modFile);
+
                 return;
             }
 
