@@ -333,10 +333,15 @@ public final class OrionCore {
         // TODO: make dependent mods fail to load if dependency fails
         for (String modId : modLoadOrder) {
             Pair<ModInfo, Path> modInfo = foundMods.get(modId);
+
+            // Add mod to classloader
             URL modUrl = ToURL.to(modInfo.getValue());
             classLoader.addURL(modUrl);
+
             ClassWrapper<?> modClass;
             ModContainer<?> mod;
+
+            // Try loading mod class, initializing the mod logger, event bus etc.
             try {
                 modClass = Reflect.getClassThrows(modInfo.getKey().getClassName(), classLoader);
                 mod = initializeMod(modClass, modInfo.getKey());
@@ -344,13 +349,17 @@ public final class OrionCore {
                 logger.error("Failed to initialize mod '{}' class '{}'!", modId, modInfo.getKey().getClassName(), e);
                 continue;
             }
+
+            // Try constructing the mod main class
             try {
-                mod.init();
-                mods.add(mod);
+                mod.construct();
             } catch (Exception e) {
                 logger.error("Failed to construct mod '{}'!", modId, e);
                 continue;
             }
+
+            // Mod initialization succeeded
+            mods.add(mod);
         }
 
         /* Process mod requested libraries */

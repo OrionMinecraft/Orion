@@ -55,9 +55,9 @@ public final class ModContainer<T> {
     }
 
     /**
-     * Initializes mod
+     * Constructs mod's main class
      */
-    public void init() {
+    public void construct() {
         Ensure.ensureCondition(modClass.getClassInstance() == null, "Mod is already initialized!");
         Object instance = injector.getInstance(modClass.getWrappedClass());
         modClass.setClassInstance(instance);
