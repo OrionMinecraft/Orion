@@ -225,6 +225,9 @@ public final class OrionCore {
         Set<String> modLoadOrder = new HashSet<>();
         Map<String, Pair<ModInfo, Path>> foundMods = new LinkedHashMap<>();
 
+        // List of failed mod ids
+        List<String> failedMods = new ArrayList<>();
+
         logger.debug("Initializing Orion mods");
         if(Files.notExists(modsDirectory)) Files.createDirectories(modsDirectory);
         Ensure.ensureCondition(Files.isDirectory(modsDirectory), modsDirectory + " is not a directory!");
@@ -311,28 +314,43 @@ public final class OrionCore {
             foundMods.put(modInfo.getId(), new Pair<>(modInfo, modFile));
         });
 
-        /* Order mod loading */
+        // Order mod loading
         for (Pair<ModInfo, Path> modInfo : foundMods.values()) {
             String modId = modInfo.getKey().getId();
             //if(modLoadOrder.contains(modInfo.getKey().getId())) continue;
 
             /* Iterate over mod dependencies */
-            for(String dependencyId : modInfo.getKey().getDependencies()) {
-                /* People like to do dumb stuff */
-                Ensure.ensureCondition(!modId.equals(dependencyId),
-                        "Mod '" + dependencyId + "' cannot depend on itself!");
-                Ensure.ensureCondition(foundMods.containsKey(dependencyId),
-                        "Could not find dependency '" + dependencyId + "' for mod '" + modId + "'");
-                modLoadOrder.add(dependencyId);
+            try {
+                for(String dependencyId : modInfo.getKey().getDependencies()) {
+                    /* People like to do dumb stuff */
+                    Ensure.ensureCondition(!modId.equals(dependencyId),
+                            "Mod '" + dependencyId + "' cannot depend on itself!");
+                    Ensure.ensureCondition(foundMods.containsKey(dependencyId),
+                            "Could not find dependency '" + dependencyId + "' for mod '" + modId + "'");
+                    modLoadOrder.add(dependencyId);
+                }
+            } catch (Exception e) {
+                logger.error(e);
+                failedMods.add(modId);
+                continue;
             }
 
             modLoadOrder.add(modId);
         }
 
-        /* Construct mods */
-        // TODO: make dependent mods fail to load if dependency fails
+        // Load and construct mods
+        modLoadLoop:
         for (String modId : modLoadOrder) {
             Pair<ModInfo, Path> modInfo = foundMods.get(modId);
+
+            // Check if dependent mod is in failed mods list
+            for(String failedModId: failedMods) {
+                if(modInfo.getKey().getDependencies().contains(failedModId)) {
+                    logger.error("Skipping loading mod '{}' because its dependency '{}' failed to load previously!", modId, failedModId);
+                    failedMods.add(modId);
+                    continue modLoadLoop;
+                }
+            }
 
             // Add mod to classloader
             URL modUrl = ToURL.to(modInfo.getValue());
@@ -347,6 +365,7 @@ public final class OrionCore {
                 mod = initializeMod(modClass, modInfo.getKey());
             } catch (Exception e) {
                 logger.error("Failed to initialize mod '{}' class '{}'!", modId, modInfo.getKey().getClassName(), e);
+                failedMods.add(modId);
                 continue;
             }
 
@@ -355,6 +374,7 @@ public final class OrionCore {
                 mod.construct();
             } catch (Exception e) {
                 logger.error("Failed to construct mod '{}'!", modId, e);
+                failedMods.add(modId);
                 continue;
             }
 

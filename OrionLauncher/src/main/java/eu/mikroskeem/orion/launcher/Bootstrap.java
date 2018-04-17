@@ -127,6 +127,9 @@ public final class Bootstrap {
     private final static String PAPERCLIP_URL = getProperty("orion.paperclipDownloadUrl",
             "https://ci.destroystokyo.com/job/PaperSpigot/lastSuccessfulBuild/artifact/paperclip.jar");
 
+    // ** Whether to die on mod loading error or not */
+    //private final static Boolean DONT_DIE_ON_MOD_LOAD_ERROR = getBoolean("orion.dontDieOnModLoadError");
+
     public static void main(String... args) throws Exception {
         ClassLoader cl = ClassLoader.getSystemClassLoader();
         ClassLoaderTools.URLClassLoaderTools uclTool = new ClassLoaderTools.URLClassLoaderTools(cl);
