@@ -177,6 +177,9 @@ public final class OrionCore {
             /* API */
             "eu.mikroskeem.orion.api",
 
+            /* Don't try to transform the access transformer */
+            "eu.mikroskeem.orion.at",
+
             /* Library packages */
             "ninja.leaping.configurate",
             "javax.inject",
