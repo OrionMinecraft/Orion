@@ -92,9 +92,13 @@ final class GithubChecker {
                         //noinspection ConstantConditions
                         try(Reader content = response.body().charStream()) {
                             JsonObject root = new JsonParser().parse(content).getAsJsonObject();
-                            if(root.get("message").getAsString().equals("Not Found")) {
+                            String message = root.get("message").getAsString();
+                            if(message.equals("Not Found")) {
                                 log.warn("Commit id {} not found, failed to obtain version information",
                                         ver.getProperty("gitCommitId"));
+                                return;
+                            } else {
+                                log.warn("Github response while trying to compare commits: {}", message);
                                 return;
                             }
                         }
