@@ -79,7 +79,7 @@ public final class OrionAccessTransformer implements OrionTransformer {
             URLConnection urlConnection = url.openConnection();
             urlConnection.setUseCaches(false);
             urlConnection.connect();
-            BlackboardKey.<List<URL>>get(BlackboardKey.AT_URLS).add(url);
+            BlackboardKey.<List<URL>>getOr(BlackboardKey.AT_URLS, ArrayList::new).add(url);
             logger.debug("Registered AT {}", url);
         } catch (IOException e) {
             logger.warn("Failed to register AT {}", url);

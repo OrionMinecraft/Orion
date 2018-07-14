@@ -245,7 +245,7 @@ public final class Bootstrap {
         log.debug("Setting up LegacyLauncher platform");
         BlackboardKey.getOr(BlackboardKey.LAUNCHER_SERVICE, () -> {
             AbstractLauncherService launcherService = new LegacyLauncherService();
-            BlackboardKey.blackboard = launcherService.getBlackBoard();
+            BlackboardKey.setBlackboard(launcherService.getBlackBoard());
             return launcherService;
         });
 

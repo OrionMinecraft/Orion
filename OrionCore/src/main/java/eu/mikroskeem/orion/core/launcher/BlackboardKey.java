@@ -31,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -81,7 +82,14 @@ public enum BlackboardKey {
         this.initializer = initializer;
     }
 
-    public static Map<String, Object> blackboard = null;
+    private static Map<String, Object> blackboard = new HashMap<>();
+
+    public static void setBlackboard(@NotNull Map<String, Object> blackboard) {
+        if(!BlackboardKey.blackboard.isEmpty()) {
+            blackboard.putAll(BlackboardKey.blackboard);
+        }
+        BlackboardKey.blackboard = blackboard;
+    }
 
     @NotNull
     @SuppressWarnings("unchecked")
