@@ -65,7 +65,7 @@ final class ClassTransformerConverter {
     @NotNull
     @SuppressWarnings("unchecked")
     static <T extends IClassTransformer> Class<T> convert(@NotNull Class<? extends OrionTransformer> transformer) {
-        if(IClassTransformer.class.isAssignableFrom(transformer.getClass()))
+        if(IClassTransformer.class.isAssignableFrom(transformer))
             return (Class<T>) transformer; /* no-op */
 
         // Orion transformer name
@@ -75,7 +75,7 @@ final class ClassTransformerConverter {
         String newWrapperName = getNewName(transformer);
 
         // Debug log
-        log.debug("Wrapping transformer class '{}' to '{}'", transformer.getClass(), newWrapperName);
+        log.debug("Wrapping transformer class '{}' to '{}'", transformer, newWrapperName);
 
         // Start generating new TransformerWrapper
         ClassReader cr = new ClassReader(TW_DATA);
