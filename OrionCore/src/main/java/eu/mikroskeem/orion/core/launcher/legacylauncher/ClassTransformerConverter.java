@@ -75,7 +75,7 @@ final class ClassTransformerConverter {
         String newWrapperName = getNewName(transformer);
 
         // Debug log
-        log.debug("Wrapping transformer class '{}' to '{}'", transformer, newWrapperName);
+        log.debug("Wrapping transformer class '{}' to '{}'", transformer.getName(), newWrapperName);
 
         // Start generating new TransformerWrapper
         ClassReader cr = new ClassReader(TW_DATA);
