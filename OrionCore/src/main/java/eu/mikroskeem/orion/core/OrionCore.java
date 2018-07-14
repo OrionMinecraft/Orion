@@ -190,7 +190,6 @@ public final class OrionCore {
             "com.google.gson",
             "javax.annotation",
             "org.apache.commons",
-            "com.mojang.authlib",
 
             /* Note: magical lines to fix logging */
             "net.minecrell.terminalconsole",
