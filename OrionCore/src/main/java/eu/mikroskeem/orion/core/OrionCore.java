@@ -43,6 +43,7 @@ import eu.mikroskeem.orion.core.extensions.OrionTokenProvider;
 import eu.mikroskeem.orion.core.guice.TypeLiteralGenerator;
 import eu.mikroskeem.orion.core.launcher.AbstractLauncherService;
 import eu.mikroskeem.orion.core.launcher.BlackboardKey;
+import eu.mikroskeem.orion.core.launcher.LauncherService;
 import eu.mikroskeem.orion.core.mod.ModClassVisitor;
 import eu.mikroskeem.orion.core.mod.ModContainer;
 import eu.mikroskeem.picomaven.Dependency;
@@ -55,7 +56,6 @@ import eu.mikroskeem.shuriken.common.data.Pair;
 import eu.mikroskeem.shuriken.common.streams.ByteArrays;
 import eu.mikroskeem.shuriken.reflect.ClassWrapper;
 import eu.mikroskeem.shuriken.reflect.Reflect;
-import net.minecraft.launchwrapper.LaunchClassLoader;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.apache.logging.log4j.LogManager;
@@ -156,7 +156,7 @@ public final class OrionCore {
     /**
      * Sets up Orion transformers
      */
-    void setupTransformers() {
+    public void setupTransformers() {
         /* Access transformer */
         launcherService.registerTransformer(OrionAccessTransformer.class);
 
@@ -167,7 +167,7 @@ public final class OrionCore {
     /**
      * Sets up Orion core mixins and transformers
      */
-    void setupCore() {
+    public void setupCore() {
         logger.debug("Adding class load exclusions");
 
         /* Remove invalid exclusion */
@@ -216,12 +216,12 @@ public final class OrionCore {
     /**
      * Sets up Orion mods
      *
-     * @param classLoader Classloader where to load mod jars
+     * @param launcherService Minecraft server launcher service
      * @param modsDirectory Directory where mods should reside
      * @throws IOException If {@link Files#list(Path)} fails
      */
     @Contract("null, null -> fail")
-    void setupMods(LaunchClassLoader classLoader /* <-- TODO: Refactor LCL out */, Path modsDirectory) throws IOException {
+    public void setupMods(LauncherService launcherService, Path modsDirectory) throws IOException {
         Set<String> modLoadOrder = new HashSet<>();
         Map<String, Pair<ModInfo, Path>> foundMods = new LinkedHashMap<>();
 
@@ -354,14 +354,14 @@ public final class OrionCore {
 
             // Add mod to classloader
             URL modUrl = ToURL.to(modInfo.getValue());
-            classLoader.addURL(modUrl);
+            launcherService.addURLToClassLoader(modUrl);
 
             ClassWrapper<?> modClass;
             ModContainer<?> mod;
 
             // Try loading mod class, initializing the mod logger, event bus etc.
             try {
-                modClass = Reflect.getClassThrows(modInfo.getKey().getClassName(), classLoader);
+                modClass = Reflect.getClassThrows(modInfo.getKey().getClassName(), launcherService.getClassLoader());
                 mod = initializeMod(modClass, modInfo.getKey());
             } catch (Exception e) {
                 logger.error("Failed to initialize mod '{}' class '{}'!", modId, modInfo.getKey().getClassName(), e);
@@ -409,7 +409,7 @@ public final class OrionCore {
                         "Could not download all libraries!");
 
                 /* Add all libraries to LaunchClassLoader */
-                downloadedLibraries.stream().map(ToURL::to).forEach(classLoader::addURL);
+                downloadedLibraries.stream().map(ToURL::to).forEach(launcherService::addURLToClassLoader);
             } catch (InterruptedException e) {
                 logger.error("Library download interrupted!", e);
             }

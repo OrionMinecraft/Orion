@@ -28,6 +28,7 @@ package eu.mikroskeem.orion.launcher;
 import eu.mikroskeem.orion.core.launcher.AbstractLauncherService;
 import eu.mikroskeem.orion.core.launcher.BlackboardKey;
 import eu.mikroskeem.orion.core.launcher.legacylauncher.LegacyLauncherService;
+import eu.mikroskeem.orion.core.launcher.legacylauncher.OrionTweakClass;
 import eu.mikroskeem.picomaven.Dependency;
 import eu.mikroskeem.picomaven.DownloaderCallbacks;
 import eu.mikroskeem.picomaven.PicoMaven;
@@ -46,7 +47,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -102,7 +102,7 @@ public final class Bootstrap {
     /** Allows loading jars from {@link Bootstrap#PRELOAD_LIBRARIES_PATH} */
     private final static boolean PRELOAD_ALLOWED = getBoolean("orion.allowPreloadLibraries");
 
-    /** Makes {@link Bootstrap} not append Orion {@link eu.mikroskeem.orion.core.OrionTweakClass} argument to LegacyLauncher */
+    /** Makes {@link Bootstrap} not append Orion {@link OrionTweakClass} argument to LegacyLauncher */
     private final static boolean DONT_APPEND_TWEAK_CLASS_ARGUMENT = getBoolean("orion.dontAppendTweakClassArgument");
 
     /** Runtime libraries directory */
@@ -238,7 +238,7 @@ public final class Bootstrap {
 
         if(!DONT_APPEND_TWEAK_CLASS_ARGUMENT) {
             tweakArgs.add("--tweakClass");
-            tweakArgs.add("eu.mikroskeem.orion.core.OrionTweakClass");
+            tweakArgs.add("eu.mikroskeem.orion.core.launcher.legacylauncher.OrionTweakClass");
         }
 
         /* Set up LegacyLauncher */

@@ -26,11 +26,12 @@
 package eu.mikroskeem.orion.core.guice;
 
 import com.google.inject.TypeLiteral;
+import eu.mikroskeem.orion.core.launcher.BlackboardKey;
+import eu.mikroskeem.orion.core.launcher.LauncherService;
 import eu.mikroskeem.shuriken.common.Ensure;
 import eu.mikroskeem.shuriken.instrumentation.ClassLoaderTools;
 import eu.mikroskeem.shuriken.instrumentation.ClassTools;
 import eu.mikroskeem.shuriken.reflect.Reflect;
-import net.minecraft.launchwrapper.Launch;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
@@ -85,9 +86,10 @@ public final class TypeLiteralGenerator {
         // Load TypeLiteral extending class
         byte[] classData = cw.toByteArray();
 
+        ClassLoader loader = BlackboardKey.<LauncherService>get(BlackboardKey.LAUNCHER_SERVICE).getClassLoader();
         @SuppressWarnings("unchecked")
         Class<? extends TypeLiteral<?>> definedLiteral = (Class<? extends TypeLiteral<?>>)
-                Ensure.notNull(ClassLoaderTools.defineClass(Launch.classLoader, className, classData), "Failed to define TypeLiteral class: " + className);
+                Ensure.notNull(ClassLoaderTools.defineClass(loader, className, classData), "Failed to define TypeLiteral class: " + className);
 
         return Ensure.notNull(Reflect.wrapClass(definedLiteral).construct().getClassInstance(), "Class instance was null!");
     }

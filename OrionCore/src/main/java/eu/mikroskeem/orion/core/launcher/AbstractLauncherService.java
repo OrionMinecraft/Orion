@@ -35,17 +35,20 @@ import java.util.Set;
 /**
  * @author Mark Vainomaa
  */
-public abstract class AbstractLauncherService {
+public abstract class AbstractLauncherService implements LauncherService {
     private Map<String, Object> fallback$blackboard;
 
     @NotNull
+    @Override
     public Map<String, Object> getBlackBoard() {
         if(fallback$blackboard == null) fallback$blackboard = new HashMap<>();
         return fallback$blackboard;
     }
 
+    @Override
     public abstract void registerTransformer(@NotNull Class<? extends OrionTransformer> transformer);
 
     @NotNull
+    @Override
     public abstract Set<String> getClassLoaderExclusions();
 }

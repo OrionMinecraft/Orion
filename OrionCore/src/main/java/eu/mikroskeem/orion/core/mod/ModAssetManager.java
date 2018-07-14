@@ -26,8 +26,8 @@
 package eu.mikroskeem.orion.core.mod;
 
 import eu.mikroskeem.orion.api.asset.AssetManager;
-import eu.mikroskeem.orion.api.mod.ModInfo;
-import net.minecraft.launchwrapper.Launch;
+import eu.mikroskeem.orion.core.launcher.BlackboardKey;
+import eu.mikroskeem.orion.core.launcher.LauncherService;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -61,8 +61,9 @@ final class ModAssetManager implements AssetManager {
     private InputStream getAssetInternal(@NotNull String assetPath) throws IOException {
         String theAssetPath = formatAssetPath(assetPath);
 
+        ClassLoader loader = BlackboardKey.<LauncherService>get(BlackboardKey.LAUNCHER_SERVICE).getClassLoader();
         InputStream assetStream;
-        if((assetStream = Launch.classLoader.getResourceAsStream(theAssetPath)) == null)
+        if((assetStream = loader.getResourceAsStream(theAssetPath)) == null)
             throw new IOException("Failed to find asset: " + theAssetPath);
 
         return assetStream;

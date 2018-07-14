@@ -31,6 +31,7 @@ import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraft.launchwrapper.Launch;
 import org.jetbrains.annotations.NotNull;
 
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -55,5 +56,16 @@ public final class LegacyLauncherService extends AbstractLauncherService {
     @Override
     public Set<String> getClassLoaderExclusions() {
         return Launch.classLoader.getClassLoaderExclusions();
+    }
+
+    @Override
+    @NotNull
+    public ClassLoader getClassLoader() {
+        return Launch.classLoader;
+    }
+
+    @Override
+    public void addURLToClassLoader(@NotNull URL url) {
+        Launch.classLoader.addURL(url);
     }
 }

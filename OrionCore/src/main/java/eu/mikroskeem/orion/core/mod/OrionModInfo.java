@@ -26,9 +26,10 @@
 package eu.mikroskeem.orion.core.mod;
 
 import eu.mikroskeem.orion.api.mod.ModInfo;
+import eu.mikroskeem.orion.core.launcher.BlackboardKey;
+import eu.mikroskeem.orion.core.launcher.LauncherService;
 import eu.mikroskeem.shuriken.common.Ensure;
 import eu.mikroskeem.shuriken.common.SneakyThrow;
-import net.minecraft.launchwrapper.Launch;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -84,8 +85,9 @@ final class OrionModInfo implements ModInfo {
     @Override
     public Class<?> getConfigClass() {
         if(configClass == null) {
+            ClassLoader loader = BlackboardKey.<LauncherService>get(BlackboardKey.LAUNCHER_SERVICE).getClassLoader();
             try {
-                configClass = Class.forName(configClassName, true, Launch.classLoader);
+                configClass = Class.forName(configClassName, true, loader);
             } catch (ClassNotFoundException e) {
                 SneakyThrow.throwException(new ClassNotFoundException("Failed to find specified configuration class!", e));
             }

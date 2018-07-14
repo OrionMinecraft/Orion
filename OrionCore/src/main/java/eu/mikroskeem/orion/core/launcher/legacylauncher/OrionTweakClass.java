@@ -23,8 +23,9 @@
  * THE SOFTWARE.
  */
 
-package eu.mikroskeem.orion.core;
+package eu.mikroskeem.orion.core.launcher.legacylauncher;
 
+import eu.mikroskeem.orion.core.OrionCore;
 import eu.mikroskeem.orion.core.launcher.BlackboardKey;
 import net.minecraft.launchwrapper.ITweaker;
 import net.minecraft.launchwrapper.LaunchClassLoader;
@@ -34,6 +35,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.List;
+
+import static eu.mikroskeem.orion.core.launcher.BlackboardKey.LAUNCHER_SERVICE;
 
 
 /**
@@ -51,7 +54,7 @@ public final class OrionTweakClass implements ITweaker {
 
         /* Set up mods */
         try {
-            OrionCore.INSTANCE.setupMods(classLoader, BlackboardKey.get(BlackboardKey.MODS_PATH));
+            OrionCore.INSTANCE.setupMods(BlackboardKey.get(LAUNCHER_SERVICE), BlackboardKey.get(BlackboardKey.MODS_PATH));
         } catch (IOException e) {
             logger.error("Failed to load mods", e);
         }
