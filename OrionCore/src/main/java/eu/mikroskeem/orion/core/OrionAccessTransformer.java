@@ -50,7 +50,7 @@ public final class OrionAccessTransformer implements OrionTransformer {
     private final AccessTransformer at = new AccessTransformer();
 
     public OrionAccessTransformer() {
-        List<URL> atUrls = BlackboardKey.get(BlackboardKey.AT_URLS);
+        List<URL> atUrls = BlackboardKey.getOr(BlackboardKey.AT_URLS, ArrayList::new);
         logger.debug("Initializing OrionAT with {} access transformers", atUrls.size());
 
         /* Load AT files to AT library */
