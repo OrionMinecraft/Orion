@@ -109,7 +109,7 @@ public final class Bootstrap {
     private final static Path LIBRARIES_PATH = Paths.get(getProperty("orion.librariesPath", "./libraries"));
 
     /** Specifies Paper server jar path */
-    private final static Path PAPER_SERVER_JAR = Paths.get(getProperty("orion.patchedJarPath", "./cache/patched_1.12.2.jar"));
+    private final static Path PAPER_SERVER_JAR = Paths.get(getProperty("orion.patchedJarPath", "./cache/patched_1.13.1.jar"));
 
     /** Specifies Paperclip jar path */
     private final static Path PAPERCLIP_JAR = Paths.get(getProperty("orion.paperclipJarPath", "./paperclip.jar"));
@@ -125,7 +125,7 @@ public final class Bootstrap {
 
     /** Paperclip download URL */
     private final static String PAPERCLIP_URL = getProperty("orion.paperclipDownloadUrl",
-            "https://papermc.io/ci/job/Paper/lastSuccessfulBuild/artifact/paperclip.jar");
+            "https://papermc.io/ci/job/Paper-1.13/lastSuccessfulBuild/artifact/paperclip.jar");
 
     // ** Whether to die on mod loading error or not */
     //private final static Boolean DONT_DIE_ON_MOD_LOAD_ERROR = getBoolean("orion.dontDieOnModLoadError");
