@@ -192,45 +192,49 @@ public final class Bootstrap {
         );
 
         /* Download dependencies */
-        List<Dependency> dependencies = new ArrayList<>();
-        try(BufferedReader depsReader = new BufferedReader(
-                new InputStreamReader(Bootstrap.class.getClassLoader().getResourceAsStream("deps.txt")))) {
-            String line;
-            while((line = depsReader.readLine()) != null) {
-                log.debug("Required dependency: {}", line);
-                dependencies.add(Dependency.fromGradle(line));
+        InputStream depsStream = Bootstrap.class.getClassLoader().getResourceAsStream("deps.txt");
+        if(depsStream != null) {
+            List<Dependency> dependencies = new ArrayList<>();
+            try(BufferedReader depsReader = new BufferedReader(new InputStreamReader(depsStream))) {
+                String line;
+                while((line = depsReader.readLine()) != null) {
+                    log.debug("Required dependency: {}", line);
+                    dependencies.add(Dependency.fromGradle(line));
+                }
             }
+
+            PicoMaven.Builder picoMavenBuilder = new PicoMaven.Builder()
+                    .withOkHttpClient(httpClient)
+                    .withDownloadPath(LIBRARIES_PATH)
+                    .withRepositories(repositories)
+                    .withDependencies(dependencies)
+                    .withExecutorService(Executors.newWorkStealingPool())
+                    .shouldCloseExecutorService(true)
+                    .withDebugLoggerImpl((format, contents) -> log.debug(format.replace("%s", "{}"), contents))
+                    .withDownloaderCallbacks(new DownloaderCallbacks() {
+                        @Override
+                        public void onSuccess(@NotNull Dependency dependency, @NotNull Path dependencyPath) {
+                            log.info("{} download succeeded!", dependency);
+                        }
+
+                        @Override
+                        public void onFailure(@NotNull Dependency dependency, @NotNull Exception exception) {
+                            log.warn("{} download failed! {}", dependency, exception);
+                        }
+                    });
+
+            log.info("Setting up Orion dependencies...");
+            try(PicoMaven picoMaven = picoMavenBuilder.build()) {
+                List<Path> downloadedLibraries = picoMaven.downloadAll();
+                Ensure.ensureCondition(downloadedLibraries.size() == dependencies.size(),
+                        "Could not download all dependencies!");
+
+                downloadedLibraries.stream().map(ToURL::to).forEach(uclTool::addURL);
+            }
+            uclTool.resetCache();
+        } else {
+            log.debug("deps.txt resource was not found, assuming no dependencies are needed on runtime.");
         }
-
-        PicoMaven.Builder picoMavenBuilder = new PicoMaven.Builder()
-                .withOkHttpClient(httpClient)
-                .withDownloadPath(LIBRARIES_PATH)
-                .withRepositories(repositories)
-                .withDependencies(dependencies)
-                .withExecutorService(Executors.newWorkStealingPool())
-                .shouldCloseExecutorService(true)
-                .withDebugLoggerImpl((format, contents) -> log.debug(format.replace("%s", "{}"), contents))
-                .withDownloaderCallbacks(new DownloaderCallbacks() {
-                    @Override
-                    public void onSuccess(Dependency dependency, Path dependencyPath) {
-                        log.info("{} download succeeded!", dependency);
-                    }
-
-                    @Override
-                    public void onFailure(Dependency dependency, Exception exception) {
-                        log.warn("{} download failed! {}", dependency, exception);
-                    }
-                });
-
-        log.info("Setting up Orion dependencies...");
-        try(PicoMaven picoMaven = picoMavenBuilder.build()) {
-            List<Path> downloadedLibraries = picoMaven.downloadAll();
-            Ensure.ensureCondition(downloadedLibraries.size() == dependencies.size(),
-                    "Could not download all dependencies!");
-
-            downloadedLibraries.stream().map(ToURL::to).forEach(uclTool::addURL);
-        }
-        uclTool.resetCache();
 
         /* Do tricks with command line arguments */
         List<String> arguments = Arrays.asList(args);
