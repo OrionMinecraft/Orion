@@ -126,7 +126,6 @@ subprojects {
 // Wrapper task
 wrapper {
     gradleVersion = gradle_version
-    distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
 }
 
 defaultTasks 'build'
