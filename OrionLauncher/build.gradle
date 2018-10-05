@@ -4,6 +4,8 @@ dependencies {
     compile group: 'org.ow2.asm', name: 'asm-debug-all', version: '5.2'
 }
 
+apply plugin: "net.kyori.blossom"
+
 compileJava {
     options.compilerArgs += "-proc:none"
 }
@@ -54,15 +56,13 @@ shadowJar {
     from collectDependencies
 }
 
-processResources {
-    from(sourceSets.main.resources.srcDirs) {
-        filter org.apache.tools.ant.filters.ReplaceTokens, tokens: [
-                version: version,
-                gitBranch: rootProject.ext.get("gitBranch"),
-                gitCommitId: rootProject.ext.get("gitCommitId"),
-                gitRepository: rootProject.ext.get("gitRepository")
-        ]
-    }
+blossom {
+    def constants = 'src/main/java/eu/mikroskeem/orion/launcher/VersionInfo.java'
+    replaceToken '@version@', version, constants
+    replaceToken '@gitBranch@', rootProject.ext.get("gitBranch"), constants
+    replaceToken '@gitCommitId@', rootProject.ext.get("gitCommitId"), constants
+    replaceToken '@gitRepository@', rootProject.ext.get("gitRepository"), constants
 }
 
+compileJava.dependsOn 'blossomSourceReplacementJava' // TODO: might break, keep an eye on it.
 build.dependsOn shadowJar

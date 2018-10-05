@@ -15,6 +15,7 @@ buildscript {
         classpath group: 'gradle.plugin.net.minecrell', name: 'licenser', version: minecrell_licenser_version
         classpath group: 'com.github.jengelman.gradle.plugins', name: 'shadow', version: shadow_version
         classpath group: 'org.ajoberstar', name: 'grgit', version: grgit_version
+        classpath group: 'gradle.plugin.net.kyori', name: 'blossom', version: blossom_version
     }
 }
 

@@ -57,8 +57,6 @@ import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
-import static java.util.Objects.requireNonNull;
-
 
 /**
  * Orion Bootstrap
@@ -168,18 +166,11 @@ public final class Bootstrap {
 
         /* Logger can be set up now */
         Logger log = LogManager.getLogger("OrionBootstrap");
-        try(InputStream is = requireNonNull(Bootstrap.class.getResourceAsStream("/orion-version.properties"))) {
-            Properties ver = new Properties(); ver.load(is);
-            log.info("Orion Launcher version {} (git: {}/{})",
-                    ver.getProperty("version"),
-                    ver.getProperty("gitBranch"),
-                    ver.getProperty("gitCommitId")
-            );
-            new GithubChecker(log, ver, httpClient).check();
-        } catch (Exception e) {
-            log.info("Orion Launcher");
-            log.warn("Failed to obtain version information from jar", e);
-        }
+        log.info("Orion Launcher version {} (git: {}/{})",
+                VersionInfo.VERSION,
+                VersionInfo.GIT_BRANCH,
+                VersionInfo.GIT_COMMIT_ID
+        );
 
         /* Maven repositories */
         List<URI> repositories = Arrays.asList(
