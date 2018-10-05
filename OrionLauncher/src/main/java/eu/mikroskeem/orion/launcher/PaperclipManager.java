@@ -41,6 +41,7 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.Permission;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 import static java.util.Objects.requireNonNull;
@@ -120,7 +121,7 @@ final class PaperclipManager {
         try {
             System.setSecurityManager(new PaperclipExitCatcher());
             URLClassLoader ucl = new URLClassLoader(new URL[]{ToURL.to(paperclipPath)});
-            String paperclipTargetClass = Utils.getMainClassFromJar(paperclipPath);
+            String paperclipTargetClass = Objects.requireNonNull(Utils.getMainClassFromJar(paperclipPath), "Failed to get Paperclip Main-Class from its manifest!");
 
             System.setProperty("paperclip.patchonly", "true");
             Reflect.getClass(paperclipTargetClass, ucl)
