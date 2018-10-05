@@ -25,9 +25,10 @@
 
 package eu.mikroskeem.orion.api;
 
-import eu.mikroskeem.shuriken.common.Ensure;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 
 /**
@@ -57,8 +58,8 @@ public final class OrionAPI {
      */
     @Contract("null -> fail")
     public static void setInstance(@NotNull Orion instance) {
-        Ensure.ensureCondition(instance != null, "Can not set Orion instance to null!");
-        Ensure.ensureCondition(OrionAPI.instance == null, "Orion instance is already set!");
+        Objects.requireNonNull(instance, "Can not set Orion instance to null!");
+        if(OrionAPI.instance != null) throw new IllegalStateException("Orion instance is already set!");
         OrionAPI.instance = instance;
     }
 }

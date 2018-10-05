@@ -32,7 +32,6 @@ import eu.mikroskeem.orion.api.mod.ModInfo;
 import eu.mikroskeem.orion.core.mod.AssetManagerImpl;
 import eu.mikroskeem.orion.core.mod.ModContainer;
 import eu.mikroskeem.picomaven.Dependency;
-import eu.mikroskeem.shuriken.common.Ensure;
 import eu.mikroskeem.shuriken.common.SneakyThrow;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -79,13 +78,12 @@ final class OrionAPIImpl implements Orion {
 
     @Override
     public void registerMixinConfig(String mixinConfigName) {
-        Ensure.ensureCondition(MIXIN_NAME_PATTERN.matcher(mixinConfigName).matches(),
-                "Mixin configuration name '" + mixinConfigName + "' does not match pattern '" +
-                        MIXIN_NAME_PATTERN + "'");
+        if(!MIXIN_NAME_PATTERN.matcher(mixinConfigName).matches())
+                throw new IllegalStateException("Mixin configuration name '" + mixinConfigName + "' does not match pattern '" + MIXIN_NAME_PATTERN + "'");
 
         /* Check if mixin configuration with same name already exists, as people like to do dumb stuff... */
-        Ensure.ensureCondition(!orionCore.mixinConfigurations.contains(mixinConfigName),
-                "Mixin configuration with name '" + mixinConfigName + "' already exists!");
+        if(orionCore.mixinConfigurations.contains(mixinConfigName))
+                throw new IllegalStateException("Mixin configuration with name '" + mixinConfigName + "' already exists!");
 
         orionCore.mixinConfigurations.add(mixinConfigName);
         Mixins.addConfiguration(mixinConfigName);
@@ -113,7 +111,7 @@ final class OrionAPIImpl implements Orion {
 
     @Override
     public void registerMavenRepository(URL url) {
-        Ensure.notNull(url, "Repository URL should not be null");
+        Objects.requireNonNull(url, "Repository URL should not be null");
         try {
             orionCore.modMavenRepositories.add(url.toURI());
 

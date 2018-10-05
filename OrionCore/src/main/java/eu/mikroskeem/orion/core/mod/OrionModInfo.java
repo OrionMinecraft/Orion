@@ -28,12 +28,12 @@ package eu.mikroskeem.orion.core.mod;
 import eu.mikroskeem.orion.api.mod.ModInfo;
 import eu.mikroskeem.orion.core.launcher.BlackboardKey;
 import eu.mikroskeem.orion.core.launcher.LauncherService;
-import eu.mikroskeem.shuriken.common.Ensure;
 import eu.mikroskeem.shuriken.common.SneakyThrow;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Objects;
 
 
 /**
@@ -56,7 +56,7 @@ final class OrionModInfo implements ModInfo {
 
     @Contract("null -> fail")
     void setId(@NotNull String id) {
-        this.id = Ensure.notNull(id, "Id cannot be null!");
+        this.id = Objects.requireNonNull(id, "Id cannot be null!");
     }
 
     @NotNull
@@ -67,7 +67,7 @@ final class OrionModInfo implements ModInfo {
 
     @Contract("null -> fail")
     void setClassName(@NotNull String className) {
-        this.className = Ensure.notNull(className, "Class name cannot be null!");
+        this.className = Objects.requireNonNull(className, "Class name cannot be null!");
     }
 
     @NotNull
@@ -78,7 +78,7 @@ final class OrionModInfo implements ModInfo {
 
     @Contract("null -> fail")
     void setDependencies(@NotNull List<String> dependencies) {
-        this.dependencies = Ensure.notNull(dependencies, "Dependencies cannot be null!");
+        this.dependencies = Objects.requireNonNull(dependencies, "Dependencies cannot be null!");
     }
 
     @NotNull
@@ -96,7 +96,7 @@ final class OrionModInfo implements ModInfo {
     }
 
     void setConfigClass(@NotNull String configClass) {
-        this.configClassName = Ensure.notNull(configClass, "Configuration class name cannot be null!");
+        this.configClassName = Objects.requireNonNull(configClass, "Configuration class name cannot be null!");
     }
 
     @Override

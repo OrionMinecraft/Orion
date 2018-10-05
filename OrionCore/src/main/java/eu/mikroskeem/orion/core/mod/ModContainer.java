@@ -29,7 +29,6 @@ import com.google.common.eventbus.EventBus;
 import com.google.inject.Injector;
 import eu.mikroskeem.orion.api.events.ModConstructEvent;
 import eu.mikroskeem.orion.api.mod.ModInfo;
-import eu.mikroskeem.shuriken.common.Ensure;
 import eu.mikroskeem.shuriken.reflect.ClassWrapper;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -58,8 +57,8 @@ public final class ModContainer<T> {
      * Constructs mod's main class
      */
     public void construct() {
-        Ensure.ensureCondition(modClass.getClassInstance() == null, "Mod is already initialized!");
-        Object instance = injector.getInstance(modClass.getWrappedClass());
+        if(modClass.getClassInstance() != null) throw new IllegalStateException("Mod is already initialized!");
+        T instance = injector.getInstance(modClass.getWrappedClass());
         modClass.setClassInstance(instance);
         eventBus.register(instance);
         eventBus.post(new ModConstructEvent());

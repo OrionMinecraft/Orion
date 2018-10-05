@@ -32,7 +32,6 @@ import eu.mikroskeem.orion.core.launcher.legacylauncher.OrionTweakClass;
 import eu.mikroskeem.picomaven.Dependency;
 import eu.mikroskeem.picomaven.DownloaderCallbacks;
 import eu.mikroskeem.picomaven.PicoMaven;
-import eu.mikroskeem.shuriken.common.Ensure;
 import eu.mikroskeem.shuriken.common.ToURL;
 import eu.mikroskeem.shuriken.instrumentation.ClassLoaderTools;
 import net.minecraft.launchwrapper.Launch;
@@ -226,8 +225,8 @@ public final class Bootstrap {
             log.info("Setting up Orion dependencies...");
             try(PicoMaven picoMaven = picoMavenBuilder.build()) {
                 List<Path> downloadedLibraries = picoMaven.downloadAll();
-                Ensure.ensureCondition(downloadedLibraries.size() == dependencies.size(),
-                        "Could not download all dependencies!");
+                if(downloadedLibraries.size() != dependencies.size())
+                        throw new IllegalStateException("Could not download all dependencies!");
 
                 downloadedLibraries.stream().map(ToURL::to).forEach(uclTool::addURL);
             }

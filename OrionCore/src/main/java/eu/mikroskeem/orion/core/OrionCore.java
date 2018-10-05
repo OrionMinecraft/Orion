@@ -49,7 +49,6 @@ import eu.mikroskeem.orion.core.mod.ModContainer;
 import eu.mikroskeem.picomaven.Dependency;
 import eu.mikroskeem.picomaven.DownloaderCallbacks;
 import eu.mikroskeem.picomaven.PicoMaven;
-import eu.mikroskeem.shuriken.common.Ensure;
 import eu.mikroskeem.shuriken.common.SneakyThrow;
 import eu.mikroskeem.shuriken.common.ToURL;
 import eu.mikroskeem.shuriken.common.data.Pair;
@@ -232,7 +231,8 @@ public final class OrionCore {
 
         logger.debug("Initializing Orion mods");
         if(Files.notExists(modsDirectory)) Files.createDirectories(modsDirectory);
-        Ensure.ensureCondition(Files.isDirectory(modsDirectory), modsDirectory + " is not a directory!");
+        if(!Files.isDirectory(modsDirectory))
+            throw new IllegalStateException(modsDirectory + " is not a directory!");
 
         /* Scan mods directory for plugin files */
         Files.list(modsDirectory).filter(file -> {
@@ -325,10 +325,10 @@ public final class OrionCore {
             try {
                 for(String dependencyId : modInfo.getKey().getDependencies()) {
                     /* People like to do dumb stuff */
-                    Ensure.ensureCondition(!modId.equals(dependencyId),
-                            "Mod '" + dependencyId + "' cannot depend on itself!");
-                    Ensure.ensureCondition(foundMods.containsKey(dependencyId),
-                            "Could not find dependency '" + dependencyId + "' for mod '" + modId + "'");
+                    if(modId.equals(dependencyId))
+                            throw new IllegalStateException("Mod '" + dependencyId + "' cannot depend on itself!");
+                    if(!foundMods.containsKey(dependencyId))
+                            throw new IllegalStateException("Could not find dependency '" + dependencyId + "' for mod '" + modId + "'");
                     modLoadOrder.add(dependencyId);
                 }
             } catch (Exception e) {
@@ -407,8 +407,8 @@ public final class OrionCore {
 
             try(PicoMaven picoMaven = picoMavenBuilder.build()) {
                 List<Path> downloadedLibraries = picoMaven.downloadAll();
-                Ensure.ensureCondition(downloadedLibraries.size() == modLibraries.size(),
-                        "Could not download all libraries!");
+                if(downloadedLibraries.size() != modLibraries.size())
+                        throw new IllegalStateException("Could not download all libraries!");
 
                 /* Add all libraries to LaunchClassLoader */
                 downloadedLibraries.stream().map(ToURL::to).forEach(launcherService::addURLToClassLoader);

@@ -28,7 +28,6 @@ package eu.mikroskeem.orion.core.mod;
 import eu.mikroskeem.orion.api.annotations.OrionMod;
 import eu.mikroskeem.orion.api.configuration.DummyConfiguration;
 import eu.mikroskeem.orion.api.mod.ModInfo;
-import eu.mikroskeem.shuriken.common.Ensure;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
@@ -38,6 +37,7 @@ import org.objectweb.asm.Type;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 /**
@@ -105,8 +105,8 @@ public final class ModClassVisitor extends ClassVisitor {
         }
 
         private void check(State state) {
-            Ensure.ensureCondition(currentState == state,
-                    String.format("Expected state %s, but is %s", state, currentState));
+            if(currentState != state)
+                    throw new IllegalStateException("Expected state " + state + ", but is " + currentState);
         }
 
         @Override
@@ -117,7 +117,7 @@ public final class ModClassVisitor extends ClassVisitor {
             }
 
             check(State.DEFAULT);
-            Ensure.notNull(name, "Name is null");
+            Objects.requireNonNull(name, "Name is null");
             switch (name) {
                 case "id":
                     gotId = true;
@@ -134,7 +134,7 @@ public final class ModClassVisitor extends ClassVisitor {
 
         @Override
         public AnnotationVisitor visitArray(String name) {
-            Ensure.notNull(name, "Name is null");
+            Objects.requireNonNull(name, "Name is null");
             switch (name) {
                 case "dependencies":
                     this.currentState = State.DEPENDENCIES;
@@ -151,7 +151,8 @@ public final class ModClassVisitor extends ClassVisitor {
                 return;
             }
 
-            Ensure.ensureCondition(gotId, "Mod annotation doesn't have required element 'id'");
+            if(!gotId)
+                throw new IllegalStateException("Mod annotation doesn't have required element 'id'");
         }
     }
 }
