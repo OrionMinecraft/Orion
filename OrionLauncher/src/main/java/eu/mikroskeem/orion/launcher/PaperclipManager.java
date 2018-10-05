@@ -83,7 +83,7 @@ final class PaperclipManager {
      */
     @NotNull
     String setupServer() {
-        if(!isServerAvailable()) throw new IllegalStateException("Paper server jar is not available!");
+        if(!isServerAvailable()) throw new IllegalStateException("Paper server jar is not available! Check if '" + serverPath + "' is available.");
 
         /* Load server jar to system classloader */
         uclTools.addURL(ToURL.to(serverPath));
@@ -111,7 +111,7 @@ final class PaperclipManager {
                 //noinspection ConstantConditions
                 Files.copy(response.body().byteStream(), paperclipPath);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("Failed to download Paperclip, either download it yourself or try again later.", e);
             }
         }
 
