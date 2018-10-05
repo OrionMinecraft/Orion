@@ -6,3 +6,5 @@ include 'OrionLauncher'
 project(':OrionAPI').projectDir = "$rootDir/OrionAPI" as File
 project(':OrionCore').projectDir = "$rootDir/OrionCore" as File
 project(':OrionLauncher').projectDir = "$rootDir/OrionLauncher" as File
+
+enableFeaturePreview('STABLE_PUBLISHING')
