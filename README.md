@@ -10,5 +10,3 @@ Dependencies:
 - Java 8
 
 See [wiki](https://github.com/OrionMinecraft/Orion/wiki) for more information
-
-Recommended mod: [Helios](https://github.com/OrionMinecraft/Helios)
