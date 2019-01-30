@@ -10,3 +10,5 @@ Dependencies:
 - Java 8
 
 See [wiki](https://github.com/OrionMinecraft/Orion/wiki) for more information
+
+[CI Builds](https://ci.codemc.org/job/Mikroskeem/job/Orion/) (big thanks to [CodeMC](https://github.com/CodeMC))
