@@ -125,11 +125,11 @@ publishing {
     repositories {
         mavenLocal()
 
-        if(project.hasProperty('wutRepoUsername') && project.hasProperty('wutRepoPassword')) {
+        if(project.hasProperty('wutee.repository.deploy.username') && project.hasProperty('wutee.repository.deploy.password')) {
             maven {
                 credentials {
-                    username rootProject.properties.wutRepoUsername
-                    password rootProject.properties.wutRepoPassword
+                    username rootProject.properties.get('wutee.repository.deploy.username')
+                    password rootProject.properties.get('wutee.repository.deploy.password')
                 }
 
                 name = 'mikroskeem-repo'
