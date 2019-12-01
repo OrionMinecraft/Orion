@@ -68,7 +68,7 @@ public final class Bootstrap {
     private final static Properties orionProperties = new Properties();
 
     static {
-        Path propertiesPath = Paths.get(System.getProperty("orion.propertiesPath"), "./orion.properties");
+        Path propertiesPath = Paths.get(System.getProperty("orion.propertiesPath", "./orion.properties"));
         if(Files.exists(propertiesPath) && Files.isRegularFile(propertiesPath)) {
             try {
                 orionProperties.load(Files.newBufferedReader(propertiesPath));
