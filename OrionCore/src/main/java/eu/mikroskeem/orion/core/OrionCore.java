@@ -188,6 +188,7 @@ public final class OrionCore {
             /* Note: magical lines to fix logging */
             "net.minecrell.terminalconsole",
             "com.sun.jna",
+            "org.fusesource.jansi",
             "org.jline"
         ));
 
