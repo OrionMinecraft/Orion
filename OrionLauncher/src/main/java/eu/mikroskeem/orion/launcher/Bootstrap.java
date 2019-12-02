@@ -128,6 +128,11 @@ public final class Bootstrap {
     //private final static Boolean DONT_DIE_ON_MOD_LOAD_ERROR = getBoolean("orion.dontDieOnModLoadError");
 
     public static void main(String... args) throws Exception {
+        if (!System.getProperty("java.version", "").startsWith("1.8.0")) {
+            System.out.println("Orion runs only on Java 8 currently, sorry.");
+            System.exit(1);
+        }
+
         ClassLoader cl = ClassLoader.getSystemClassLoader();
         ClassLoaderTools.URLClassLoaderTools uclTool = new ClassLoaderTools.URLClassLoaderTools(cl);
         OkHttpClient httpClient = new OkHttpClient();
