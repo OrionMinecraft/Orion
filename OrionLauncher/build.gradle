@@ -1,7 +1,7 @@
 dependencies {
     compile(project(':OrionCore'))
 
-    compile group: 'org.ow2.asm', name: 'asm-debug-all', version: '5.2'
+    compile group: 'org.ow2.asm', name: 'asm-debug-all', version: asm_version
 }
 
 apply plugin: "net.kyori.blossom"

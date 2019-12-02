@@ -44,8 +44,10 @@ public enum CBVersion {
     /** Minecraft 1.13.1 */
     v1_13_R2(2, "v1_13_R2"),
 
-    UNKNOWN(-1, ""),
-    ;
+    /** Minecraft 1.14 - 1.14.4 */
+    v1_14_R1(3, "v1_14_R1"),
+
+    UNKNOWN(-1, "");
 
     private final int id;
     private final String name;

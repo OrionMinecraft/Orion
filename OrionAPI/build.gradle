@@ -6,6 +6,8 @@ dependencies {
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4j2_version
 
     // Dependencies which will be downloaded
+    downloadDep group: 'commons-io', name: 'commons-io', version: commons_io_version
+    downloadDep group: 'org.ow2.asm', name: 'asm', version: asm_version
     downloadDep group: 'javax.inject', name: 'javax.inject', version: '1'
     downloadDep(group: 'eu.mikroskeem', name: 'legacylauncher', version: legacylauncher_version) {
         exclude module: '*'
