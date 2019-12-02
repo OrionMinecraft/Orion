@@ -73,6 +73,7 @@ public final class Bootstrap {
         if(Files.exists(propertiesPath) && Files.isRegularFile(propertiesPath)) {
             try {
                 orionProperties.load(Files.newBufferedReader(propertiesPath));
+                System.out.println("Loaded Orion properties from " + propertiesPath);
             } catch (IOException e) {
                 throw new RuntimeException("Failed to load properties from " + propertiesPath, e);
             }
