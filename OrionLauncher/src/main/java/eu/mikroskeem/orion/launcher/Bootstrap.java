@@ -74,8 +74,7 @@ public final class Bootstrap {
             try {
                 orionProperties.load(Files.newBufferedReader(propertiesPath));
             } catch (IOException e) {
-                System.out.println("Failed to load properties from " + propertiesPath);
-                e.printStackTrace();
+                throw new RuntimeException("Failed to load properties from " + propertiesPath, e);
             }
         }
     }
