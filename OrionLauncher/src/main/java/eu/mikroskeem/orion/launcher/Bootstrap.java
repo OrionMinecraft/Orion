@@ -55,6 +55,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Executors;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 
@@ -81,8 +82,19 @@ public final class Bootstrap {
 
     @NotNull
     private static String getProperty(@NotNull String key, @NotNull String def) {
-        String value = orionProperties.getProperty(key, System.getProperty(key, def));
-        return value.isEmpty() ? def : value;
+        return getProperty(key, () -> def);
+    }
+
+    @NotNull
+    private static String getProperty(@NotNull String key, @NotNull Supplier<String> def) {
+        String value = System.getProperty(key);
+        if (value == null || value.isEmpty()) {
+            value = orionProperties.getProperty(key);
+        }
+        if (value == null || value.isEmpty()) {
+            value = def.get();
+        }
+        return value;
     }
 
     private static boolean getBoolean(@NotNull String key) {
@@ -92,6 +104,9 @@ public final class Bootstrap {
         } catch (IllegalArgumentException | NullPointerException ignored) {}
         return result;
     }
+
+    /** Minecraft version */
+    private final static String MINECRAFT_VERSION = getProperty("orion.minecraftVersion", "1.14.4");
 
     /** Preload libraries path - used to add libraries to classpath before loading server jar */
     private final static Path PRELOAD_LIBRARIES_PATH = Paths.get(getProperty("orion.preloadLibrariesPath", "./preload_libraries"));
@@ -106,7 +121,7 @@ public final class Bootstrap {
     private final static Path LIBRARIES_PATH = Paths.get(getProperty("orion.librariesPath", "./libraries"));
 
     /** Specifies Paper server jar path */
-    private final static Path PAPER_SERVER_JAR = Paths.get(getProperty("orion.patchedJarPath", "./cache/patched_1.14.4.jar"));
+    private final static Path PAPER_SERVER_JAR = Paths.get(getProperty("orion.patchedJarPath", () -> String.format("./cache/patched_%s.jar", MINECRAFT_VERSION)));
 
     /** Specifies Paperclip jar path */
     private final static Path PAPERCLIP_JAR = Paths.get(getProperty("orion.paperclipJarPath", "./paperclip.jar"));
@@ -122,7 +137,7 @@ public final class Bootstrap {
 
     /** Paperclip download URL */
     private final static String PAPERCLIP_URL = getProperty("orion.paperclipDownloadUrl",
-            "https://papermc.io/api/v1/paper/1.14.4/latest/download");
+            () -> String.format("https://papermc.io/api/v1/paper/%s/latest/download", MINECRAFT_VERSION));
 
     // ** Whether to die on mod loading error or not */
     //private final static Boolean DONT_DIE_ON_MOD_LOAD_ERROR = getBoolean("orion.dontDieOnModLoadError");
