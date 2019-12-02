@@ -33,7 +33,9 @@ import org.jetbrains.annotations.NotNull;
  * Enum representing CraftBukkit relocation version
  *
  * @author Mark Vainomaa
+ * @deprecated Mostly useless API and annoying to maintain
  */
+@Deprecated
 public enum CBVersion {
     /** Minecraft 1.12 */
     v1_12_R1(0, "v1_12_R1"),

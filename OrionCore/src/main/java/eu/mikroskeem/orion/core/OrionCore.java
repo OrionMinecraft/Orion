@@ -103,7 +103,6 @@ public final class OrionCore {
     public final static OrionCore INSTANCE = new OrionCore();
 
     private final AbstractLauncherService launcherService;
-    private final CBVersion cbVersion;
     private OrionAPIImpl orionAPI;
     private Injector baseInjector;
 
@@ -118,13 +117,6 @@ public final class OrionCore {
      */
     private OrionCore() {
         launcherService = BlackboardKey.get(BlackboardKey.LAUNCHER_SERVICE);
-
-        logger.debug("Detecting CraftBukkit version...");
-        if((this.cbVersion = detectCBVersion()) == CBVersion.UNKNOWN) {
-            logger.warn("Failed to detect CraftBukkit version.");
-        } else {
-            logger.debug("Detected CraftBukkit version {} (id {})", cbVersion.getName(), cbVersion.getId());
-        }
 
         logger.debug("Setting up SpongeMixin library...");
         MixinBootstrap.init();
@@ -149,7 +141,7 @@ public final class OrionCore {
     @NotNull
     @Contract(pure = true)
     public CBVersion getCBVersion() {
-        return cbVersion;
+        return CBVersion.UNKNOWN;
     }
 
     /**
@@ -458,20 +450,6 @@ public final class OrionCore {
         });
 
         return new ModContainer<>(modClass, modInfo, injector, modEventBus);
-    }
-
-    /**
-     * Detects CBVersion
-     *
-     * @return Value from {@link CBVersion} enum
-     */
-    @NotNull
-    private CBVersion detectCBVersion() {
-        for (CBVersion version : CBVersion.values()) {
-            if(findClass("net.minecraft.server." + version.getName() + ".DedicatedServer") != null)
-                return version;
-        }
-        return CBVersion.UNKNOWN;
     }
 
     @Nullable
