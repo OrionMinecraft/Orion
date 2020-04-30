@@ -25,11 +25,9 @@
 
 package eu.mikroskeem.orion.launcher;
 
-import eu.mikroskeem.orion.core.launcher.AbstractLauncherService;
+import cpw.mods.modlauncher.Launcher;
 import eu.mikroskeem.orion.core.launcher.BlackboardKey;
-import eu.mikroskeem.orion.core.launcher.legacylauncher.LegacyLauncherService;
 import eu.mikroskeem.orion.core.launcher.legacylauncher.OrionTweakClass;
-import net.minecraft.launchwrapper.Launch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -171,20 +169,13 @@ public final class Bootstrap {
         List<String> arguments = Arrays.asList(args);
         List<String> tweakArgs = new ArrayList<>(arguments);
 
-        if(!DONT_APPEND_TWEAK_CLASS_ARGUMENT) {
-            tweakArgs.add("--tweakClass");
-            tweakArgs.add("eu.mikroskeem.orion.core.launcher.legacylauncher.OrionTweakClass");
+        if (!DONT_APPEND_TWEAK_CLASS_ARGUMENT) {
+            tweakArgs.add("--launchTarget");
+            tweakArgs.add("orion");
         }
 
-        /* Set up LegacyLauncher */
-        log.debug("Setting up LegacyLauncher platform");
-        BlackboardKey.getOr(BlackboardKey.LAUNCHER_SERVICE, () -> {
-            AbstractLauncherService launcherService = new LegacyLauncherService();
-            BlackboardKey.setBlackboard(launcherService.getBlackBoard());
-            return launcherService;
-        });
-
-        /* Populate blackboard */
+        /* Set up ModLauncher */
+        log.debug("Setting up ModLauncher platform");
         BlackboardKey.set(BlackboardKey.ORIGINAL_ARGUMENTS, Collections.unmodifiableList(arguments));
         BlackboardKey.set(BlackboardKey.LAUNCH_TARGET, launchTarget);
         BlackboardKey.set(BlackboardKey.MODS_PATH, MODS_PATH);
@@ -192,7 +183,7 @@ public final class Bootstrap {
         BlackboardKey.set(BlackboardKey.LIBRARIES_PATH, LIBRARIES_PATH);
 
         /* Launch LegacyLauncher */
-        log.info("Starting LegacyLauncher with arguments {}", tweakArgs);
-        Launch.main(tweakArgs.toArray(new String[0]));
+        log.info("Starting ModLauncher with arguments {}", tweakArgs);
+        Launcher.main(tweakArgs.toArray(new String[0]));
     }
 }

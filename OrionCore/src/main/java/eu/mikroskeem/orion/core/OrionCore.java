@@ -38,7 +38,6 @@ import eu.mikroskeem.orion.api.configuration.ObjectConfigurationLoader;
 import eu.mikroskeem.orion.api.events.ModLoadEvent;
 import eu.mikroskeem.orion.api.mod.ModInfo;
 import eu.mikroskeem.orion.core.guice.TypeLiteralGenerator;
-import eu.mikroskeem.orion.core.launcher.AbstractLauncherService;
 import eu.mikroskeem.orion.core.launcher.BlackboardKey;
 import eu.mikroskeem.orion.core.launcher.LauncherService;
 import eu.mikroskeem.orion.core.mod.ModClassVisitor;
@@ -85,7 +84,6 @@ public final class OrionCore {
     /** Static instance */
     public final static OrionCore INSTANCE = new OrionCore();
 
-    private final AbstractLauncherService launcherService;
     private OrionAPIImpl orionAPI;
     private Injector baseInjector;
 
@@ -97,8 +95,6 @@ public final class OrionCore {
      * Private constructor to set up Mixin loader
      */
     private OrionCore() {
-        launcherService = BlackboardKey.get(BlackboardKey.LAUNCHER_SERVICE);
-
         logger.debug("Setting up SpongeMixin library...");
         MixinBootstrap.init();
 
@@ -113,7 +109,9 @@ public final class OrionCore {
      */
     public void setupTransformers() {
         /* Mod provided transformers */
-        transformers.forEach(launcherService::registerTransformer);
+        for (Class<? extends OrionTransformer> transformer : transformers) {
+            // TODO
+        }
     }
 
     /**
