@@ -1,11 +1,12 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
+    java
     id("com.github.johnrengelman.shadow")
 }
 
 dependencies {
-    compile(project(":OrionCore"))
+    implementation(project(":OrionCore"))
 }
 
 val compileJava by tasks.getting(JavaCompile::class) {

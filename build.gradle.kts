@@ -1,5 +1,5 @@
 plugins {
-    java
+    `java-library`
     id("net.minecrell.licenser") version "0.4.1"
     id("com.github.johnrengelman.shadow") version "5.2.0" apply false
 }
@@ -37,9 +37,8 @@ allprojects {
 }
 
 subprojects {
-    apply(plugin = "com.github.johnrengelman.shadow")
     apply(plugin = "net.minecrell.licenser")
-    apply(plugin = "java")
+    apply(plugin = "java-library")
 
     // Licenser task
     license {
