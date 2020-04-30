@@ -26,8 +26,8 @@
 package eu.mikroskeem.orion.api.bytecode;
 
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import com.sun.istack.internal.NotNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Orion bytecode transformer interface

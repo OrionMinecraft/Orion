@@ -28,7 +28,7 @@ package eu.mikroskeem.orion.core.mod;
 import eu.mikroskeem.orion.api.annotations.OrionMod;
 import eu.mikroskeem.orion.api.configuration.DummyConfiguration;
 import eu.mikroskeem.orion.api.mod.ModInfo;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -51,11 +51,12 @@ public final class ModClassVisitor extends ClassVisitor {
     private final static Type ORIONMOD_ANNOTATION = Type.getType(OrionMod.class);
 
     private ModClassVisitor() {
-        super(Opcodes.ASM5);
+        super(Opcodes.ASM8);
     }
 
     /** Mod annotation visitor instance */
-    @Nullable private ModAnnotationVisitor modAnnotationVisitor;
+    @Nullable
+    private ModAnnotationVisitor modAnnotationVisitor;
 
     /** Visitable class name */
     @Nullable private String className;

@@ -25,8 +25,8 @@
 
 package eu.mikroskeem.orion.core.launcher;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.net.URL;
 import java.nio.file.Path;
@@ -61,21 +61,21 @@ public enum BlackboardKey {
     private final boolean mutable;
     @Nullable private final Supplier<?> initializer;
 
-    BlackboardKey(@NotNull String key, @NotNull Class<?> type) {
+    BlackboardKey(@NonNull String key, @NonNull Class<?> type) {
         this.key = key;
         this.type = type;
         this.mutable = true;
         this.initializer = null;
     }
 
-    BlackboardKey(@NotNull String key, @NotNull Class<?> type, boolean mutable) {
+    BlackboardKey(@NonNull String key, @NonNull Class<?> type, boolean mutable) {
         this.key = key;
         this.type = type;
         this.mutable = mutable;
         this.initializer = null;
     }
 
-    BlackboardKey(@NotNull String key, @NotNull Class<?> type, @Nullable Supplier<?> initializer) {
+    BlackboardKey(@NonNull String key, @NonNull Class<?> type, @Nullable Supplier<?> initializer) {
         this.key = key;
         this.type = type;
         this.mutable = true;
@@ -84,23 +84,23 @@ public enum BlackboardKey {
 
     private static Map<String, Object> blackboard = new HashMap<>();
 
-    public static void setBlackboard(@NotNull Map<String, Object> blackboard) {
+    public static void setBlackboard(@NonNull Map<String, Object> blackboard) {
         if(!BlackboardKey.blackboard.isEmpty()) {
             blackboard.putAll(BlackboardKey.blackboard);
         }
         BlackboardKey.blackboard = blackboard;
     }
 
-    @NotNull
+    @NonNull
     @SuppressWarnings("unchecked")
-    public static <T> T get(@NotNull BlackboardKey key) {
+    public static <T> T get(@NonNull BlackboardKey key) {
         if(key.initializer != null)
             return (T) getOr(key, key.initializer);
         return actualGet(key);
     }
 
-    @NotNull
-    public static <T> T getOr(@NotNull BlackboardKey key, @NotNull Supplier<T> def) {
+    @NonNull
+    public static <T> T getOr(@NonNull BlackboardKey key, @NonNull Supplier<T> def) {
         try {
             return actualGet(key);
         } catch (NullPointerException e) {
@@ -110,19 +110,19 @@ public enum BlackboardKey {
         }
     }
 
-    public static <T> void set(@NotNull BlackboardKey key, @NotNull T value) {
+    public static <T> void set(@NonNull BlackboardKey key, @NonNull T value) {
         if(blackboard.containsKey(key.key) && !key.mutable)
             throw new IllegalArgumentException("Key " + key.key + " is not mutable");
         blackboard.put(key.key, requireNonNull(key.type.cast(value), "Value is null"));
     }
 
-    public static void unset(@NotNull BlackboardKey key) {
+    public static void unset(@NonNull BlackboardKey key) {
         if(!key.mutable) throw new IllegalArgumentException("Key " + key.key + " is not mutable");
         blackboard.remove(key.key);
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T actualGet(@NotNull BlackboardKey key) {
+    private static <T> T actualGet(@NonNull BlackboardKey key) {
         Object value = requireNonNull(blackboard.get(key.key), "No value in blackboard with key " + key.key);
         return (T) key.type.cast(value);
     }

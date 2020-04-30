@@ -29,22 +29,12 @@ import eu.mikroskeem.orion.core.launcher.AbstractLauncherService;
 import eu.mikroskeem.orion.core.launcher.BlackboardKey;
 import eu.mikroskeem.orion.core.launcher.legacylauncher.LegacyLauncherService;
 import eu.mikroskeem.orion.core.launcher.legacylauncher.OrionTweakClass;
-import eu.mikroskeem.picomaven.Dependency;
-import eu.mikroskeem.picomaven.DownloaderCallbacks;
-import eu.mikroskeem.picomaven.PicoMaven;
-import eu.mikroskeem.shuriken.common.ToURL;
-import eu.mikroskeem.shuriken.instrumentation.ClassLoaderTools;
 import net.minecraft.launchwrapper.Launch;
-import okhttp3.OkHttpClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -54,7 +44,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -80,13 +69,13 @@ public final class Bootstrap {
         }
     }
 
-    @NotNull
-    private static String getProperty(@NotNull String key, @NotNull String def) {
+    @NonNull
+    private static String getProperty(@NonNull String key, @NonNull String def) {
         return getProperty(key, () -> def);
     }
 
-    @NotNull
-    private static String getProperty(@NotNull String key, @NotNull Supplier<String> def) {
+    @NonNull
+    private static String getProperty(@NonNull String key, @NonNull Supplier<String> def) {
         String value = System.getProperty(key);
         if (value == null || value.isEmpty()) {
             value = orionProperties.getProperty(key);
@@ -97,7 +86,7 @@ public final class Bootstrap {
         return value;
     }
 
-    private static boolean getBoolean(@NotNull String key) {
+    private static boolean getBoolean(@NonNull String key) {
         boolean result = false;
         try {
             result = Boolean.parseBoolean(orionProperties.getProperty(key, System.getProperty(key)));
@@ -143,15 +132,6 @@ public final class Bootstrap {
     //private final static Boolean DONT_DIE_ON_MOD_LOAD_ERROR = getBoolean("orion.dontDieOnModLoadError");
 
     public static void main(String... args) throws Exception {
-        if (!System.getProperty("java.version", "").startsWith("1.8.0")) {
-            System.out.println("Orion runs only on Java 8 currently, sorry.");
-            System.exit(1);
-        }
-
-        ClassLoader cl = ClassLoader.getSystemClassLoader();
-        ClassLoaderTools.URLClassLoaderTools uclTool = new ClassLoaderTools.URLClassLoaderTools(cl);
-        OkHttpClient httpClient = new OkHttpClient();
-
         /* Load preload libraries, if allowed */
         if(PRELOAD_ALLOWED) {
             if(Files.notExists(PRELOAD_LIBRARIES_PATH) || !Files.isDirectory(PRELOAD_LIBRARIES_PATH)) {
@@ -186,65 +166,6 @@ public final class Bootstrap {
 
         /* Logger can be set up now */
         Logger log = LogManager.getLogger("OrionBootstrap");
-        log.info("Orion Launcher version {} (git: {}/{})",
-                VersionInfo.VERSION,
-                VersionInfo.GIT_BRANCH,
-                VersionInfo.GIT_COMMIT_ID
-        );
-
-        /* Maven repositories */
-        List<URI> repositories = Arrays.asList(
-                URI.create("https://repo.maven.apache.org/maven2"),                     /* Central */
-                URI.create("https://repo.wut.ee/repository/mikroskeem-repo"),           /* Own repository */
-                URI.create("https://repo.spongepowered.org/maven"),                     /* SpongePowered repository */
-                URI.create("https://oss.sonatype.org/content/groups/public"),           /* OSS Sonatype */
-                URI.create("http://jcenter.bintray.com")
-        );
-
-        /* Download dependencies */
-        InputStream depsStream = Bootstrap.class.getClassLoader().getResourceAsStream("deps.txt");
-        if(depsStream != null) {
-            List<Dependency> dependencies = new ArrayList<>();
-            try(BufferedReader depsReader = new BufferedReader(new InputStreamReader(depsStream))) {
-                String line;
-                while((line = depsReader.readLine()) != null) {
-                    log.debug("Required dependency: {}", line);
-                    dependencies.add(Dependency.fromGradle(line));
-                }
-            }
-
-            PicoMaven.Builder picoMavenBuilder = new PicoMaven.Builder()
-                    .withOkHttpClient(httpClient)
-                    .withDownloadPath(LIBRARIES_PATH)
-                    .withRepositories(repositories)
-                    .withDependencies(dependencies)
-                    .withExecutorService(Executors.newWorkStealingPool())
-                    .shouldCloseExecutorService(true)
-                    .withDebugLoggerImpl((format, contents) -> log.debug(format.replace("%s", "{}"), contents))
-                    .withDownloaderCallbacks(new DownloaderCallbacks() {
-                        @Override
-                        public void onSuccess(@NotNull Dependency dependency, @NotNull Path dependencyPath) {
-                            log.info("{} download succeeded!", dependency);
-                        }
-
-                        @Override
-                        public void onFailure(@NotNull Dependency dependency, @NotNull Exception exception) {
-                            log.warn("{} download failed! {}", dependency, exception);
-                        }
-                    });
-
-            log.info("Setting up Orion dependencies...");
-            try(PicoMaven picoMaven = picoMavenBuilder.build()) {
-                List<Path> downloadedLibraries = picoMaven.downloadAll();
-                if(downloadedLibraries.size() != dependencies.size())
-                        throw new IllegalStateException("Could not download all dependencies!");
-
-                downloadedLibraries.stream().map(ToURL::to).forEach(uclTool::addURL);
-            }
-            uclTool.resetCache();
-        } else {
-            log.debug("deps.txt resource was not found, assuming no dependencies are needed on runtime.");
-        }
 
         /* Do tricks with command line arguments */
         List<String> arguments = Arrays.asList(args);

@@ -26,7 +26,7 @@
 package eu.mikroskeem.orion.core.launcher;
 
 import eu.mikroskeem.orion.api.bytecode.OrionTransformer;
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +38,7 @@ import java.util.Set;
 public abstract class AbstractLauncherService implements LauncherService {
     private Map<String, Object> fallback$blackboard;
 
-    @NotNull
+    @NonNull
     @Override
     public Map<String, Object> getBlackBoard() {
         if(fallback$blackboard == null) fallback$blackboard = new HashMap<>();
@@ -46,9 +46,9 @@ public abstract class AbstractLauncherService implements LauncherService {
     }
 
     @Override
-    public abstract void registerTransformer(@NotNull Class<? extends OrionTransformer> transformer);
+    public abstract void registerTransformer(@NonNull Class<? extends OrionTransformer> transformer);
 
-    @NotNull
+    @NonNull
     @Override
     public abstract Set<String> getClassLoaderExclusions();
 }

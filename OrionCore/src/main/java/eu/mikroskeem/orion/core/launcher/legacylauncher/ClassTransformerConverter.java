@@ -26,12 +26,11 @@
 package eu.mikroskeem.orion.core.launcher.legacylauncher;
 
 import eu.mikroskeem.orion.api.bytecode.OrionTransformer;
-import eu.mikroskeem.shuriken.instrumentation.ClassLoaderTools;
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraft.launchwrapper.Launch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -39,12 +38,12 @@ import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.ClassNode;
 
-import java.util.Arrays;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static eu.mikroskeem.shuriken.common.streams.ByteArrays.fromInputStream;
 import static java.util.Objects.requireNonNull;
 import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.NEW;
@@ -62,9 +61,9 @@ final class ClassTransformerConverter {
     private final static Type TW_TYPE = Type.getType(TransformerWrapper.class);
     private final static Type DT_TYPE = Type.getType(DummyTransformer.class);
 
-    @NotNull
+    @NonNull
     @SuppressWarnings("unchecked")
-    static <T extends IClassTransformer> Class<T> convert(@NotNull Class<? extends OrionTransformer> transformer) {
+    static <T extends IClassTransformer> Class<T> convert(@NonNull Class<? extends OrionTransformer> transformer) {
         if(IClassTransformer.class.isAssignableFrom(transformer))
             return (Class<T>) transformer; /* no-op */
 
@@ -80,15 +79,13 @@ final class ClassTransformerConverter {
         // Start generating new TransformerWrapper
         ClassReader cr = new ClassReader(TW_DATA);
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
-        ClassNode cn = new ClassNode();
-        cr.accept(cn, 0);
 
-        cn.accept(new WrapperGenerator(cw, TW_TYPE.getInternalName(), newWrapperName.replace('.', '/'), rawTransformerName));
+        cr.accept(new WrapperGenerator(cw, TW_TYPE.getInternalName(), newWrapperName.replace('.', '/'), rawTransformerName), 0);
 
         return requireNonNull((Class<T>) ClassLoaderTools.defineClass(Launch.classLoader, newWrapperName, cw.toByteArray()));
     }
 
-    private static String getNewName(@NotNull Class<?> clazz) {
+    private static String getNewName(@NonNull Class<?> clazz) {
         String name = clazz.getName();
         return ClassTransformerConverter.class.getName()
                 .concat("$")
@@ -180,8 +177,18 @@ final class ClassTransformerConverter {
     }
 
     static {
-         TW_DATA = fromInputStream(TransformerWrapper.class.getResourceAsStream('/' +
-                 TransformerWrapper.class.getName().replace('.', '/').concat(".class")
-         ));
+        String resourceName = '/' + TransformerWrapper.class.getName().replace('.', '/').concat(".class");
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (InputStream is = TransformerWrapper.class.getResourceAsStream(resourceName)) {
+            byte[] buf = new byte[1024];
+            int i;
+            while ((i = is.read(buf)) != -1) {
+                baos.write(buf, 0, i);
+            }
+        } catch (IOException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+
+        TW_DATA = baos.toByteArray();
     }
 }

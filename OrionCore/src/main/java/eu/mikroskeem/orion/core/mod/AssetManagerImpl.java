@@ -28,11 +28,11 @@ package eu.mikroskeem.orion.core.mod;
 import eu.mikroskeem.orion.api.OrionAPI;
 import eu.mikroskeem.orion.api.asset.AssetManager;
 import eu.mikroskeem.orion.api.mod.ModInfo;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Mark Vainomaa
@@ -40,20 +40,20 @@ import java.util.HashMap;
 public final class AssetManagerImpl implements AssetManager.ForMod {
     private final Map<String, ModAssetManager> assetManagers = new HashMap<>();
 
-    @NotNull
+    @NonNull
     @Override
-    public AssetManager forMod(@NotNull ModInfo modInfo) {
+    public AssetManager forMod(@NonNull ModInfo modInfo) {
         return assetManagers.computeIfAbsent(modInfo.getId(), ModAssetManager::new);
     }
 
     @Override
     @Nullable
-    public AssetManager forMod(@NotNull String modId) {
+    public AssetManager forMod(@NonNull String modId) {
         ModInfo modInfo = OrionAPI.getInstance().getMod(modId);
         return modInfo != null ? forMod(modInfo) : null;
     }
 
-    public AssetManager createExplicitly(@NotNull String modId) {
+    public AssetManager createExplicitly(@NonNull String modId) {
         ModAssetManager assetManager = new ModAssetManager(modId);
         assetManagers.put(modId, assetManager);
         return assetManager;

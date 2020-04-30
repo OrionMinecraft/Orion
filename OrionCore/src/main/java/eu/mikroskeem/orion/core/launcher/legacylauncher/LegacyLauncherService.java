@@ -29,7 +29,7 @@ import eu.mikroskeem.orion.api.bytecode.OrionTransformer;
 import eu.mikroskeem.orion.core.launcher.AbstractLauncherService;
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraft.launchwrapper.Launch;
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -39,33 +39,33 @@ import java.util.Set;
 public final class LegacyLauncherService extends AbstractLauncherService {
     private Map<Class<? extends OrionTransformer>, Class<? extends IClassTransformer>> convertedTransformers = new HashMap<>();
 
-    @NotNull
+    @NonNull
     @Override
     public Map<String, Object> getBlackBoard() {
         return Launch.blackboard;
     }
 
     @Override
-    public void registerTransformer(@NotNull Class<? extends OrionTransformer> transformer) {
+    public void registerTransformer(@NonNull Class<? extends OrionTransformer> transformer) {
         Launch.classLoader.registerTransformer(
                 convertedTransformers.computeIfAbsent(transformer, ClassTransformerConverter::convert).getName()
         );
     }
 
-    @NotNull
+    @NonNull
     @Override
     public Set<String> getClassLoaderExclusions() {
         return Launch.classLoader.getClassLoaderExclusions();
     }
 
     @Override
-    @NotNull
+    @NonNull
     public ClassLoader getClassLoader() {
         return Launch.classLoader;
     }
 
     @Override
-    public void addURLToClassLoader(@NotNull URL url) {
+    public void addURLToClassLoader(@NonNull URL url) {
         Launch.classLoader.addURL(url);
     }
 }

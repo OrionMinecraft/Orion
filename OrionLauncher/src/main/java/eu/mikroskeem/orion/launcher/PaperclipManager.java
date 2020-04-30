@@ -25,14 +25,7 @@
 
 package eu.mikroskeem.orion.launcher;
 
-import eu.mikroskeem.shuriken.common.ToURL;
-import eu.mikroskeem.shuriken.instrumentation.ClassLoaderTools;
-import eu.mikroskeem.shuriken.reflect.Reflect;
-import eu.mikroskeem.shuriken.reflect.wrappers.TypeWrapper;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -57,11 +50,9 @@ final class PaperclipManager {
     private final URL paperclipDownloadUrl;
     private final Path paperclipPath;
     private final Path serverPath;
-    private final ClassLoaderTools.URLClassLoaderTools uclTools;
-    private final OkHttpClient client;
 
-    PaperclipManager(@NotNull URL paperclipDownloadUrl, @NotNull Path paperclipPath, @NotNull Path serverPath,
-                     @NotNull ClassLoaderTools.URLClassLoaderTools uclTools, @NotNull OkHttpClient httpClient) {
+    PaperclipManager(@NonNull URL paperclipDownloadUrl, @NonNull Path paperclipPath, @NonNull Path serverPath,
+                     @NonNull ClassLoaderTools.URLClassLoaderTools uclTools, @NonNull OkHttpClient httpClient) {
         this.oldSecurityManager = System.getSecurityManager();
         this.paperclipPath = paperclipPath;
         this.serverPath = serverPath;
@@ -82,7 +73,7 @@ final class PaperclipManager {
     /**
      * Sets up Orion Tweaker
      */
-    @NotNull
+    @NonNull
     String setupServer() {
         if(!isServerAvailable()) throw new IllegalStateException("Paper server jar is not available! Check if '" + serverPath + "' is available.");
 
@@ -157,7 +148,7 @@ final class PaperclipManager {
     /** SecurityManager to catch Paperclip exit */
     class PaperclipExitCatcher extends SecurityManager {
         @Override
-        public void checkPermission(@NotNull Permission perm) {
+        public void checkPermission(@NonNull Permission perm) {
             /* Check only exitVM, as this security manager needs to catch only System.exit(int) */
             if(!perm.getName().startsWith("exitVM"))
                 return;

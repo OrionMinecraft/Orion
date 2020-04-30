@@ -29,9 +29,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.inject.Injector;
 import eu.mikroskeem.orion.api.events.ModConstructEvent;
 import eu.mikroskeem.orion.api.mod.ModInfo;
-import eu.mikroskeem.shuriken.reflect.ClassWrapper;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 
 /**
@@ -40,13 +38,14 @@ import org.jetbrains.annotations.NotNull;
  * @author Mark Vainomaa
  */
 public final class ModContainer<T> {
-    private final ClassWrapper<T> modClass;
+    private final Class<T> modClass;
     private final ModInfo modInfo;
     private final Injector injector;
     private final EventBus eventBus;
+    private T instance;
 
-    public ModContainer(@NotNull ClassWrapper<T> modClass, @NotNull ModInfo modInfo,
-                        @NotNull Injector injector, @NotNull EventBus eventBus) {
+    public ModContainer(@NonNull Class<T> modClass, @NonNull ModInfo modInfo,
+                        @NonNull Injector injector, @NonNull EventBus eventBus) {
         this.modClass = modClass;
         this.modInfo = modInfo;
         this.injector = injector;
@@ -57,9 +56,8 @@ public final class ModContainer<T> {
      * Constructs mod's main class
      */
     public void construct() {
-        if(modClass.getClassInstance() != null) throw new IllegalStateException("Mod is already initialized!");
-        T instance = injector.getInstance(modClass.getWrappedClass());
-        modClass.setClassInstance(instance);
+        if(instance != null) throw new IllegalStateException("Mod is already initialized!");
+        this.instance = injector.getInstance(modClass);
         eventBus.register(instance);
         eventBus.post(new ModConstructEvent());
     }
@@ -69,8 +67,7 @@ public final class ModContainer<T> {
      *
      * @return instance of {@link ModInfo}
      */
-    @NotNull
-    @Contract(pure = true)
+    @NonNull
     public ModInfo getModInfo() {
         return modInfo;
     }
@@ -80,8 +77,7 @@ public final class ModContainer<T> {
      *
      * @return {@link EventBus} of mod
      */
-    @NotNull
-    @Contract(pure = true)
+    @NonNull
     public EventBus getEventBus() {
         return eventBus;
     }

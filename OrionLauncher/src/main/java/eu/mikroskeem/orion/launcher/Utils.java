@@ -25,8 +25,8 @@
 
 package eu.mikroskeem.orion.launcher;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -39,7 +39,7 @@ import java.util.jar.JarInputStream;
  */
 final class Utils {
     @Nullable
-    static String getMainClassFromJar(@NotNull Path jarPath) {
+    static String getMainClassFromJar(@NonNull Path jarPath) {
         try(JarInputStream js = new JarInputStream(Files.newInputStream(jarPath))) {
             return js.getManifest().getMainAttributes().getValue("Main-Class");
         } catch (IOException e) {

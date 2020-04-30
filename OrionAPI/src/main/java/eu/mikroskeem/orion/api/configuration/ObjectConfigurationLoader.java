@@ -26,7 +26,6 @@
 package eu.mikroskeem.orion.api.configuration;
 
 import eu.mikroskeem.orion.api.annotations.ConfigurationBaseNode;
-import eu.mikroskeem.shuriken.common.SneakyThrow;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -35,9 +34,8 @@ import ninja.leaping.configurate.loader.HeaderMode;
 import ninja.leaping.configurate.objectmapping.ObjectMapper;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -54,18 +52,18 @@ import java.util.Objects;
  * @author Mark Vainomaa
  */
 public class ObjectConfigurationLoader<T> {
-    @NotNull private final String baseNodeName;
-    @NotNull private final Class<T> configClass;
+    @NonNull private final String baseNodeName;
+    @NonNull private final Class<T> configClass;
     @Nullable private final String header;
 
     /** Configuration file absolute location */
-    @NotNull private final Path configurationPath;
+    @NonNull private final Path configurationPath;
 
     /** Configuration loader instance */
-    @NotNull private final ConfigurationLoader<CommentedConfigurationNode> loader;
+    @NonNull private final ConfigurationLoader<CommentedConfigurationNode> loader;
 
     /** Object mapper instance for {@code T} */
-    @NotNull private final ObjectMapper<T>.BoundInstance mapper;
+    @NonNull private final ObjectMapper<T>.BoundInstance mapper;
 
     /** Configuration lodaer base node */
     @Nullable private CommentedConfigurationNode baseNode;
@@ -81,8 +79,8 @@ public class ObjectConfigurationLoader<T> {
         return options;
     }
 
-    public ObjectConfigurationLoader(@NotNull Path configurationFile, @NotNull Class<T> configClass,
-                                     @Nullable String baseNodeName, @Nullable String header) {
+    public ObjectConfigurationLoader(@NonNull Path configurationFile, @NonNull Class<T> configClass,
+                                     @Nullable String baseNodeName, @Nullable String header) throws ObjectMappingException {
         this.configurationPath = configurationFile.toAbsolutePath();
         this.configClass = configClass;
         this.header = header;
@@ -126,15 +124,10 @@ public class ObjectConfigurationLoader<T> {
                 .build();
 
         // Build object mapper
-        try {
-            mapper = ObjectMapper.forClass(configClass).bindToNew();
-        } catch (ObjectMappingException e) {
-            SneakyThrow.throwException(e);
-            throw null;
-        }
+        mapper = ObjectMapper.forClass(configClass).bindToNew();
     }
 
-    public ObjectConfigurationLoader(@NotNull Path configurationFile, @NotNull Class<T> configClass) {
+    public ObjectConfigurationLoader(@NonNull Path configurationFile, @NonNull Class<T> configClass) throws ObjectMappingException {
         this(configurationFile, configClass, null, null);
     }
 
@@ -167,7 +160,6 @@ public class ObjectConfigurationLoader<T> {
      *
      * @return Instance of {@code T}
      */
-    @Contract(pure = true)
     public T getConfiguration() {
         return Objects.requireNonNull(configuration);
     }
@@ -177,7 +169,7 @@ public class ObjectConfigurationLoader<T> {
      *
      * @return Wrapped configuration loader instance
      */
-    @NotNull
+    @NonNull
     public ConfigurationLoader<CommentedConfigurationNode> getLoader() {
         return loader;
     }

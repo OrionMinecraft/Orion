@@ -30,7 +30,6 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
-import eu.mikroskeem.orion.api.CBVersion;
 import eu.mikroskeem.orion.api.Orion;
 import eu.mikroskeem.orion.api.OrionAPI;
 import eu.mikroskeem.orion.api.asset.AssetManager;
@@ -38,36 +37,22 @@ import eu.mikroskeem.orion.api.bytecode.OrionTransformer;
 import eu.mikroskeem.orion.api.configuration.ObjectConfigurationLoader;
 import eu.mikroskeem.orion.api.events.ModLoadEvent;
 import eu.mikroskeem.orion.api.mod.ModInfo;
-import eu.mikroskeem.orion.core.extensions.OrionMixinErrorHandler;
-import eu.mikroskeem.orion.core.extensions.OrionTokenProvider;
 import eu.mikroskeem.orion.core.guice.TypeLiteralGenerator;
 import eu.mikroskeem.orion.core.launcher.AbstractLauncherService;
 import eu.mikroskeem.orion.core.launcher.BlackboardKey;
 import eu.mikroskeem.orion.core.launcher.LauncherService;
 import eu.mikroskeem.orion.core.mod.ModClassVisitor;
 import eu.mikroskeem.orion.core.mod.ModContainer;
-import eu.mikroskeem.picomaven.Dependency;
-import eu.mikroskeem.picomaven.DownloaderCallbacks;
-import eu.mikroskeem.picomaven.PicoMaven;
-import eu.mikroskeem.shuriken.common.SneakyThrow;
-import eu.mikroskeem.shuriken.common.ToURL;
-import eu.mikroskeem.shuriken.common.data.Pair;
-import eu.mikroskeem.shuriken.common.streams.ByteArrays;
-import eu.mikroskeem.shuriken.reflect.ClassWrapper;
-import eu.mikroskeem.shuriken.reflect.Reflect;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.launch.MixinBootstrap;
 import org.spongepowered.asm.mixin.MixinEnvironment;
-import org.spongepowered.asm.mixin.Mixins;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -77,9 +62,7 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Executors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -108,8 +91,6 @@ public final class OrionCore {
 
     final List<ModContainer<?>> mods = new ArrayList<>();
     final List<String> mixinConfigurations = new ArrayList<>();
-    final List<URI> modMavenRepositories = new ArrayList<>();
-    final List<Dependency> modLibraries = new ArrayList<>();
     final Set<Class<? extends OrionTransformer>> transformers = new HashSet<>();
 
     /**
@@ -124,33 +105,13 @@ public final class OrionCore {
         logger.debug("Setting Mixin Environment side to SERVER");
         MixinEnvironment.getDefaultEnvironment().setSide(MixinEnvironment.Side.SERVER);
 
-        logger.debug("Setting up Mixin error handler");
-        Mixins.registerErrorHandlerClass(OrionMixinErrorHandler.class.getName());
-
-        logger.debug("Setting up Mixin token provider");
-        MixinEnvironment.getDefaultEnvironment().registerTokenProviderClass(OrionTokenProvider.class.getName());
-
         logger.debug("Mixin library initialization finished!");
-    }
-
-    /**
-     * Gets detected CraftBukkit version
-     *
-     * @return Detected {@link CBVersion}
-     */
-    @NotNull
-    @Contract(pure = true)
-    public CBVersion getCBVersion() {
-        return CBVersion.UNKNOWN;
     }
 
     /**
      * Sets up Orion transformers
      */
     public void setupTransformers() {
-        /* Access transformer */
-        launcherService.registerTransformer(OrionAccessTransformer.class);
-
         /* Mod provided transformers */
         transformers.forEach(launcherService::registerTransformer);
     }
@@ -167,9 +128,6 @@ public final class OrionCore {
         launcherService.getClassLoaderExclusions().addAll(Arrays.asList(
             /* API */
             "eu.mikroskeem.orion.api",
-
-            /* Don't try to transform the access transformer */
-            "eu.mikroskeem.orion.at",
 
             /* Library packages */
             "ninja.leaping.configurate",
@@ -214,7 +172,6 @@ public final class OrionCore {
      * @param modsDirectory Directory where mods should reside
      * @throws IOException If {@link Files#list(Path)} fails
      */
-    @Contract("null, null -> fail")
     public void setupMods(LauncherService launcherService, Path modsDirectory) throws IOException {
         Set<String> modLoadOrder = new HashSet<>();
         Map<String, Pair<ModInfo, Path>> foundMods = new LinkedHashMap<>();
@@ -377,39 +334,6 @@ public final class OrionCore {
             mods.add(mod);
         }
 
-        /* Process mod requested libraries */
-        if(modLibraries.size() > 0) {
-            logger.info("Setting up {} extra libraries requested by installed mods...", modLibraries.size());
-            PicoMaven.Builder picoMavenBuilder = new PicoMaven.Builder()
-                    .withExecutorService(Executors.newWorkStealingPool())
-                    .shouldCloseExecutorService(true)
-                    .withDownloadPath(BlackboardKey.get(BlackboardKey.LIBRARIES_PATH))
-                    .withRepositories(modMavenRepositories)
-                    .withDependencies(modLibraries)
-                    .withDownloaderCallbacks(new DownloaderCallbacks() {
-                        @Override
-                        public void onSuccess(Dependency dependency, Path dependencyPath) {
-                            logger.info("Dependency {} downloaded successfully!", dependency);
-                        }
-
-                        @Override
-                        public void onFailure(Dependency dependency, Exception exception) {
-                            logger.error("Failed to download dependency {}! {}", dependency, exception);
-                        }
-                    });
-
-            try(PicoMaven picoMaven = picoMavenBuilder.build()) {
-                List<Path> downloadedLibraries = picoMaven.downloadAll();
-                if(downloadedLibraries.size() != modLibraries.size())
-                        throw new IllegalStateException("Could not download all libraries!");
-
-                /* Add all libraries to LaunchClassLoader */
-                downloadedLibraries.stream().map(ToURL::to).forEach(launcherService::addURLToClassLoader);
-            } catch (InterruptedException e) {
-                logger.error("Library download interrupted!", e);
-            }
-        }
-
         /* Load mods */
         for(ModContainer<?> mod : mods) {
             mod.getEventBus().post(new ModLoadEvent());
@@ -454,7 +378,7 @@ public final class OrionCore {
     }
 
     @Nullable
-    private Class<?> findClass(@NotNull String className) {
+    private Class<?> findClass(@NonNull String className) {
         try {
             return Class.forName(className, false, this.getClass().getClassLoader());
         } catch (ClassNotFoundException e) {

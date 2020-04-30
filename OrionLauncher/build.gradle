@@ -1,10 +1,6 @@
 dependencies {
     compile(project(':OrionCore'))
-
-    compile group: 'org.ow2.asm', name: 'asm-debug-all', version: '5.2'
 }
-
-apply plugin: "net.kyori.blossom"
 
 compileJava {
     options.compilerArgs += "-proc:none"
@@ -22,47 +18,16 @@ shadowJar {
     dependencies {
         // Tools
         include dependency('org.ow2.asm:asm-debug-all')
-        include dependency('eu.mikroskeem:shuriken.common')
-        include dependency('eu.mikroskeem:shuriken.instrumentation')
-        include dependency('eu.mikroskeem:shuriken.reflect')
-
-        // Dependency downloader
-        include dependency('eu.mikroskeem:picomaven')
-        include dependency('com.squareup.okhttp3:okhttp')
-        include dependency('com.squareup.okio:okio')
-        include dependency('org.apache.maven:maven-repository-metadata')
-        include dependency('org.codehaus.plexus:plexus-utils')
 
         // Orion
         include project(':OrionAPI')
         include project(':OrionCore')
     }
 
-    // PicoMaven & its dependencies
-    relocate 'eu.mikroskeem.picomaven', 'eu.mikroskeem.orion.internal.picomaven'
-    relocate 'org.codehaus.plexus.util', 'eu.mikroskeem.orion.internal.picomaven.plexusutil'
-    relocate 'org.apache.maven.artifact.repository.metadata', 'eu.mikroskeem.orion.internal.picomaven.mavenmetadata'
-    relocate 'okhttp3', 'eu.mikroskeem.orion.internal.picomaven.okhttp3'
-    relocate 'okio', 'eu.mikroskeem.orion.internal.picomaven.okio'
-
-    relocate 'org.objectweb.asm', 'eu.mikroskeem.orion.internal.asm'
-
     // Exclude unneeded files
     exclude 'licenses/**'
     exclude 'publicsuffixes.gz'
     exclude 'META-INF/maven/**'
-
-    // Generate deps.txt
-    from collectDependencies
 }
 
-blossom {
-    def constants = 'src/main/java/eu/mikroskeem/orion/launcher/VersionInfo.java'
-    replaceToken '@version@', version, constants
-    replaceToken '@gitBranch@', rootProject.ext.get("gitBranch"), constants
-    replaceToken '@gitCommitId@', rootProject.ext.get("gitCommitId"), constants
-    replaceToken '@gitRepository@', rootProject.ext.get("gitRepository"), constants
-}
-
-compileJava.dependsOn 'blossomSourceReplacementJava' // TODO: might break, keep an eye on it.
 build.dependsOn shadowJar
