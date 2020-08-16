@@ -32,6 +32,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -130,6 +131,8 @@ public final class Bootstrap {
     //private final static Boolean DONT_DIE_ON_MOD_LOAD_ERROR = getBoolean("orion.dontDieOnModLoadError");
 
     public static void main(String... args) throws Exception {
+        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+
         /* Load preload libraries, if allowed */
         if(PRELOAD_ALLOWED) {
             if(Files.notExists(PRELOAD_LIBRARIES_PATH) || !Files.isDirectory(PRELOAD_LIBRARIES_PATH)) {
@@ -140,15 +143,14 @@ public final class Bootstrap {
                 file.filter(Files::isRegularFile)
                         .filter(f -> f.toString().endsWith(".jar"))
                         .peek(f -> System.out.println("Preloading library: " + f))
-                        .map(ToURL::to)
-                        .forEach(uclTool::addURL);
+                        .forEach(path -> Utils.addURLToClassLoader(classLoader, path));
             }
         }
 
+
         /* Set up Paperclip manager */
-        PaperclipManager paperclipManager = new PaperclipManager(
-                new URL(PAPERCLIP_URL), PAPERCLIP_JAR,
-                PAPER_SERVER_JAR, uclTool, httpClient);
+        PaperclipManager paperclipManager = new PaperclipManager(new URL(PAPERCLIP_URL),
+                PAPERCLIP_JAR, PAPER_SERVER_JAR, classLoader);
 
         /* Set up Paper server */
         if(CHECK_FOR_SERVER_JAR_INSTEAD) {
