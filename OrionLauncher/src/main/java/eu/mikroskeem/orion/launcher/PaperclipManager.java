@@ -27,8 +27,15 @@ package eu.mikroskeem.orion.launcher;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+
+import java.io.BufferedInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
@@ -50,15 +57,15 @@ final class PaperclipManager {
     private final URL paperclipDownloadUrl;
     private final Path paperclipPath;
     private final Path serverPath;
+    private final ClassLoader classLoader;
 
-    PaperclipManager(@NonNull URL paperclipDownloadUrl, @NonNull Path paperclipPath, @NonNull Path serverPath,
-                     @NonNull ClassLoaderTools.URLClassLoaderTools uclTools, @NonNull OkHttpClient httpClient) {
+    PaperclipManager(@NonNull URL paperclipDownloadUrl, @NonNull Path paperclipPath,
+                     @NonNull Path serverPath, ClassLoader classLoader) {
         this.oldSecurityManager = System.getSecurityManager();
         this.paperclipPath = paperclipPath;
         this.serverPath = serverPath;
         this.paperclipDownloadUrl = paperclipDownloadUrl;
-        this.uclTools = uclTools;
-        this.client = httpClient;
+        this.classLoader = classLoader;
     }
 
     /**
@@ -78,7 +85,7 @@ final class PaperclipManager {
         if(!isServerAvailable()) throw new IllegalStateException("Paper server jar is not available! Check if '" + serverPath + "' is available.");
 
         /* Load server jar to system classloader */
-        uclTools.addURL(ToURL.to(serverPath));
+        Utils.addURLToClassLoader(classLoader, serverPath);
 
         /* Return server jar main class */
         return requireNonNull(Utils.getMainClassFromJar(serverPath), "Failed to get server main class!");
@@ -91,17 +98,29 @@ final class PaperclipManager {
         /* Check if paperclip jar is present */
         if(Files.notExists(paperclipPath)) {
             System.out.println("Downloading Paperclip...");
-            Request request = new Request.Builder()
-                    .url(paperclipDownloadUrl)
-                    .get()
-                    .build();
-            try(Response response = client.newCall(request).execute()) {
-                if(response.code() != 200)
+
+            try {
+                HttpURLConnection connection =
+                        (HttpURLConnection) paperclipDownloadUrl.openConnection();
+
+                connection.addRequestProperty("User-Agent", "OrionMinecraft");
+
+                if (connection.getResponseCode() != 200) {
                     throw new IOException(String.format("HTTP request to %s returned %s!%n",
-                            paperclipDownloadUrl, response.cacheControl()));
-                Files.createDirectories(paperclipPath.getParent());
-                //noinspection ConstantConditions
-                Files.copy(response.body().byteStream(), paperclipPath);
+                            paperclipDownloadUrl, connection.getResponseMessage()));
+                }
+
+                try (InputStream input = new BufferedInputStream(connection.getInputStream())) {
+                    try (OutputStream output = new FileOutputStream(paperclipPath.toFile())) {
+                        byte[] buffer = new byte[1024];
+                        int count;
+                        while ((count = input.read(buffer)) != -1) {
+                            output.write(buffer, 0, count);
+                        }
+                    }
+                }
+
+                connection.disconnect();
             } catch (IOException e) {
                 throw new RuntimeException("Failed to download Paperclip, either download it yourself or try again later.", e);
             }
@@ -111,13 +130,19 @@ final class PaperclipManager {
         System.out.println("Executing Paperclip... please wait");
         try {
             System.setSecurityManager(new PaperclipExitCatcher());
-            URLClassLoader ucl = new URLClassLoader(new URL[]{ToURL.to(paperclipPath)});
+            URLClassLoader ucl = new URLClassLoader(new URL[]{paperclipPath.toUri().toURL()});
             String paperclipTargetClass = Objects.requireNonNull(Utils.getMainClassFromJar(paperclipPath), "Failed to get Paperclip Main-Class from its manifest!");
 
             System.setProperty("paperclip.patchonly", "true");
-            Reflect.getClass(paperclipTargetClass, ucl)
-                    .orElseThrow(() -> new RuntimeException("Failed to get class " + paperclipTargetClass))
-                    .invokeMethod("main", void.class, TypeWrapper.of(new String[0]));
+
+            try {
+                Class<?> clazz = Class.forName(paperclipTargetClass, true, ucl);
+
+                Method method = clazz.getDeclaredMethod("main", String[].class);
+                method.invoke(null, new String[0]);
+            } catch (ClassNotFoundException exception) {
+                throw new RuntimeException("Failed to get class " + paperclipTargetClass);
+            }
         } catch (Throwable e) {
             if(!(e instanceof InvocationTargetException)) {
                 throw new RuntimeException(e);
