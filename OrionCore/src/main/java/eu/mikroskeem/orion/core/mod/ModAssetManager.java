@@ -28,8 +28,8 @@ package eu.mikroskeem.orion.core.mod;
 import eu.mikroskeem.orion.api.asset.AssetManager;
 import eu.mikroskeem.orion.core.launcher.BlackboardKey;
 import eu.mikroskeem.orion.core.launcher.LauncherService;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,17 +48,17 @@ final class ModAssetManager implements AssetManager {
 
     private final String modAssetPath;
 
-    ModAssetManager(@NotNull String modId) {
+    ModAssetManager(@NonNull String modId) {
         this.modAssetPath = String.format(PATH_FORMAT, modId);
     }
 
-    @NotNull
-    private String formatAssetPath(@NotNull String assetPath) {
+    @NonNull
+    private String formatAssetPath(@NonNull String assetPath) {
         return Paths.get(modAssetPath, assetPath).toString();
     }
 
-    @NotNull
-    private InputStream getAssetInternal(@NotNull String assetPath) throws IOException {
+    @NonNull
+    private InputStream getAssetInternal(@NonNull String assetPath) throws IOException {
         String theAssetPath = formatAssetPath(assetPath);
 
         ClassLoader loader = BlackboardKey.<LauncherService>get(BlackboardKey.LAUNCHER_SERVICE).getClassLoader();
@@ -71,7 +71,7 @@ final class ModAssetManager implements AssetManager {
 
     @Nullable
     @Override
-    public InputStream getAsset(@NotNull String assetPath) {
+    public InputStream getAsset(@NonNull String assetPath) {
         try {
             return getAssetInternal(assetPath);
         }
@@ -80,12 +80,12 @@ final class ModAssetManager implements AssetManager {
     }
 
     @Override
-    public void copyAsset(@NotNull Path destination, @NotNull String assetPath) throws UncheckedIOException {
+    public void copyAsset(@NonNull Path destination, @NonNull String assetPath) throws UncheckedIOException {
         copyAsset(destination, assetPath, false);
     }
 
     @Override
-    public void copyAsset(@NotNull Path destination, @NotNull String assetPath, boolean overwriteExisting) throws UncheckedIOException {
+    public void copyAsset(@NonNull Path destination, @NonNull String assetPath, boolean overwriteExisting) throws UncheckedIOException {
         try {
             if(Files.exists(destination) && !overwriteExisting)
                 return;

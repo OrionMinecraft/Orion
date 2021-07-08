@@ -31,17 +31,13 @@ import eu.mikroskeem.orion.api.bytecode.OrionTransformer;
 import eu.mikroskeem.orion.api.mod.ModInfo;
 import eu.mikroskeem.orion.core.mod.AssetManagerImpl;
 import eu.mikroskeem.orion.core.mod.ModContainer;
-import eu.mikroskeem.picomaven.Dependency;
-import eu.mikroskeem.shuriken.common.SneakyThrow;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixins;
 
 import java.lang.ref.SoftReference;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
@@ -72,11 +68,6 @@ final class OrionAPIImpl implements Orion {
     }
 
     @Override
-    public void registerAT(URL atUrl) {
-        OrionAccessTransformer.registerAT(atUrl);
-    }
-
-    @Override
     public void registerMixinConfig(String mixinConfigName) {
         if(!MIXIN_NAME_PATTERN.matcher(mixinConfigName).matches())
                 throw new IllegalStateException("Mixin configuration name '" + mixinConfigName + "' does not match pattern '" + MIXIN_NAME_PATTERN + "'");
@@ -88,63 +79,10 @@ final class OrionAPIImpl implements Orion {
         orionCore.mixinConfigurations.add(mixinConfigName);
         Mixins.addConfiguration(mixinConfigName);
     }
-
-    @NotNull
-    @Override
-    public List<URL> getRegisteredMavenRepositories() {
-        if(registeredMavenRepositories == null || registeredMavenRepositories.get() == null) {
-            registeredMavenRepositories = new SoftReference<>(Collections.unmodifiableList(
-                    orionCore.modMavenRepositories.stream().map(u -> {
-                        try {
-                            return u.toURL();
-                        } catch (MalformedURLException e) {
-                            SneakyThrow.throwException(e);
-                            return null;
-                        }
-                    })
-                    .collect(Collectors.toList())
-            ));
-        }
-
-        return Objects.requireNonNull(registeredMavenRepositories.get()); // Should not throw NPE
-    }
+    
 
     @Override
-    public void registerMavenRepository(URL url) {
-        Objects.requireNonNull(url, "Repository URL should not be null");
-        try {
-            orionCore.modMavenRepositories.add(url.toURI());
-
-            if(registeredMavenRepositories != null)
-                registeredMavenRepositories.clear();
-        } catch (URISyntaxException e) {
-            SneakyThrow.throwException(e);
-        }
-    }
-
-    @Override
-    public void registerLibrary(String dependencyString) {
-        orionCore.modLibraries.add(Dependency.fromGradle(dependencyString));
-        if(mods != null)
-            mods.clear();
-    }
-
-    @NotNull
-    @Override
-    public List<String> getRegisteredLibraries() {
-        if(registeredLibraries == null || registeredLibraries.get() == null) {
-            registeredLibraries = new SoftReference<>(Collections.unmodifiableList(
-                    orionCore.modLibraries.stream()
-                            .map(d -> d.getGroupId() + ':' + d.getArtifactId() + ':' + d.getVersion())
-                    .collect(Collectors.toList())
-            ));
-        }
-
-        return Objects.requireNonNull(registeredLibraries.get());
-    }
-
-    @Override
-    @NotNull
+    @NonNull
     public List<ModInfo> getMods() {
         if(mods == null || mods.get() == null) {
             mods = new SoftReference<>(orionCore.mods.stream()
@@ -158,35 +96,34 @@ final class OrionAPIImpl implements Orion {
 
     @Nullable
     @Override
-    public ModInfo getMod(@NotNull String modId) {
+    public ModInfo getMod(@NonNull String modId) {
         return getMods().stream().filter(m -> m.getId().equals(modId)).findFirst().orElse(null);
     }
 
     @Override
-    @NotNull
+    @NonNull
     public List<String> getMixinConfigurations() {
         return Collections.unmodifiableList(orionCore.mixinConfigurations);
     }
 
     @Override
-    public void registerTransformer(@NotNull Class<? extends OrionTransformer> transformer) {
+    public void registerTransformer(@NonNull Class<? extends OrionTransformer> transformer) {
         orionCore.transformers.add(transformer);
     }
 
     @Override
-    public void unregisterTransformer(@NotNull Class<? extends OrionTransformer> transformer) {
+    public void unregisterTransformer(@NonNull Class<? extends OrionTransformer> transformer) {
         orionCore.transformers.remove(transformer);
     }
 
     @Override
-    @NotNull
+    @NonNull
     public Set<Class<? extends OrionTransformer>> getRegisteredTransformers() {
         return Collections.unmodifiableSet(orionCore.transformers);
     }
 
-    @NotNull
     @Override
-    public AssetManager.ForMod getAssetManager() {
+    public AssetManager.@NonNull ForMod getAssetManager() {
         return assetManager;
     }
 }

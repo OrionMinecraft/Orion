@@ -25,7 +25,7 @@
 
 package eu.mikroskeem.orion.api.mod;
 
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.List;
 
@@ -41,7 +41,7 @@ public interface ModInfo {
      *
      * @return Mod id
      */
-    @NotNull
+    @NonNull
     String getId();
 
     /**
@@ -49,7 +49,7 @@ public interface ModInfo {
      *
      * @return Mod main class name
      */
-    @NotNull
+    @NonNull
     String getClassName();
 
     /**
@@ -57,7 +57,7 @@ public interface ModInfo {
      *
      * @return Mod dependency list
      */
-    @NotNull
+    @NonNull
     List<String> getDependencies();
 
     /**
@@ -65,6 +65,6 @@ public interface ModInfo {
      *
      * @return Mod configuration class
      */
-    @NotNull
+    @NonNull
     Class<?> getConfigClass();
 }

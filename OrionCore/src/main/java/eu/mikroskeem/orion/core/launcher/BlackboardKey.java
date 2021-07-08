@@ -25,15 +25,12 @@
 
 package eu.mikroskeem.orion.core.launcher;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import cpw.mods.modlauncher.Launcher;
+import cpw.mods.modlauncher.api.TypesafeMap;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.net.URL;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Supplier;
 
 import static java.util.Objects.requireNonNull;
@@ -43,87 +40,31 @@ import static java.util.Objects.requireNonNull;
  *
  * @author Mark Vainomaa
  */
-public enum BlackboardKey {
-    LAUNCHER_SERVICE("orion.launch.service", AbstractLauncherService.class, false),
+public final class BlackboardKey {
+    private BlackboardKey() {}
 
-    ORIGINAL_ARGUMENTS("orion.launch.arguments", List.class),
-    LAUNCH_TARGET("orion.launch.target", String.class),
-
-    LIBRARIES_PATH("orion.path.libraries", Path.class, false),
-    MODS_PATH("orion.path.mods", Path.class, false),
-    MOD_CONFIGS_PATH("orion.path.modconfigs", Path.class, false),
-
-    AT_URLS("orion.at.urls", List.class, ArrayList<URL>::new)
-    ;
-
-    private final String key;
-    private final Class<?> type;
-    private final boolean mutable;
-    @Nullable private final Supplier<?> initializer;
-
-    BlackboardKey(@NotNull String key, @NotNull Class<?> type) {
-        this.key = key;
-        this.type = type;
-        this.mutable = true;
-        this.initializer = null;
+    private static <T> TypesafeMap.Key<T> create(@NonNull String name, @NonNull Class<T> type) {
+        return TypesafeMap.Key.getOrCreate(() -> Launcher.INSTANCE.blackboard(), name, type).get();
     }
 
-    BlackboardKey(@NotNull String key, @NotNull Class<?> type, boolean mutable) {
-        this.key = key;
-        this.type = type;
-        this.mutable = mutable;
-        this.initializer = null;
-    }
+    public static final TypesafeMap.Key<List> ORIGINAL_ARGUMENTS = create("orion.launch.arguments", List.class);
+    public static final TypesafeMap.Key<String> LAUNCH_TARGET = create("orion.launch.target", String.class);
+    public static final TypesafeMap.Key<Path> LIBRARIES_PATH = create("orion.path.libraries", Path.class);
+    public static final TypesafeMap.Key<Path> MODS_PATH = create("orion.path.mods", Path.class);
+    public static final TypesafeMap.Key<Path> MOD_CONFIGS_PATH = create("orion.path.modconfigs", Path.class);
 
-    BlackboardKey(@NotNull String key, @NotNull Class<?> type, @Nullable Supplier<?> initializer) {
-        this.key = key;
-        this.type = type;
-        this.mutable = true;
-        this.initializer = initializer;
-    }
-
-    private static Map<String, Object> blackboard = new HashMap<>();
-
-    public static void setBlackboard(@NotNull Map<String, Object> blackboard) {
-        if(!BlackboardKey.blackboard.isEmpty()) {
-            blackboard.putAll(BlackboardKey.blackboard);
-        }
-        BlackboardKey.blackboard = blackboard;
-    }
-
-    @NotNull
+    @NonNull
     @SuppressWarnings("unchecked")
-    public static <T> T get(@NotNull BlackboardKey key) {
-        if(key.initializer != null)
-            return (T) getOr(key, key.initializer);
-        return actualGet(key);
+    public static <T> T get(TypesafeMap.@NonNull Key<T> key) {
+        return Launcher.INSTANCE.blackboard().get(key).orElseThrow(() -> new IllegalStateException("Key '" + key.name() + "' is not set"));
     }
 
-    @NotNull
-    public static <T> T getOr(@NotNull BlackboardKey key, @NotNull Supplier<T> def) {
-        try {
-            return actualGet(key);
-        } catch (NullPointerException e) {
-            T value = requireNonNull(def.get(), "Supplier should not return null!");
-            set(key, value);
-            return value;
-        }
+    @NonNull
+    public static <T> T getOr(TypesafeMap.@NonNull Key<T> key, @NonNull Supplier<T> def) {
+        return Launcher.INSTANCE.blackboard().computeIfAbsent(key, (k) -> requireNonNull(def.get(), "Value is null"));
     }
 
-    public static <T> void set(@NotNull BlackboardKey key, @NotNull T value) {
-        if(blackboard.containsKey(key.key) && !key.mutable)
-            throw new IllegalArgumentException("Key " + key.key + " is not mutable");
-        blackboard.put(key.key, requireNonNull(key.type.cast(value), "Value is null"));
-    }
-
-    public static void unset(@NotNull BlackboardKey key) {
-        if(!key.mutable) throw new IllegalArgumentException("Key " + key.key + " is not mutable");
-        blackboard.remove(key.key);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> T actualGet(@NotNull BlackboardKey key) {
-        Object value = requireNonNull(blackboard.get(key.key), "No value in blackboard with key " + key.key);
-        return (T) key.type.cast(value);
+    public static <T> void set(TypesafeMap.@NonNull Key<T> key, @NonNull T value) {
+        getOr(key, () -> value);
     }
 }

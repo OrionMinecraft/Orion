@@ -25,8 +25,7 @@
 
 package eu.mikroskeem.orion.api;
 
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Objects;
 
@@ -45,8 +44,7 @@ public final class OrionAPI {
      *
      * @return {@link Orion} instance
      */
-    @NotNull
-    @Contract(pure = true)
+    @NonNull
     public static Orion getInstance() {
         return instance;
     }
@@ -56,8 +54,7 @@ public final class OrionAPI {
      *
      * @param instance {@link Orion}
      */
-    @Contract("null -> fail")
-    public static void setInstance(@NotNull Orion instance) {
+    public static void setInstance(@NonNull Orion instance) {
         Objects.requireNonNull(instance, "Can not set Orion instance to null!");
         if(OrionAPI.instance != null) throw new IllegalStateException("Orion instance is already set!");
         OrionAPI.instance = instance;

@@ -25,10 +25,12 @@
 
 package eu.mikroskeem.orion.launcher;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.jar.JarInputStream;
@@ -39,10 +41,20 @@ import java.util.jar.JarInputStream;
  */
 final class Utils {
     @Nullable
-    static String getMainClassFromJar(@NotNull Path jarPath) {
+    static String getMainClassFromJar(@NonNull Path jarPath) {
         try(JarInputStream js = new JarInputStream(Files.newInputStream(jarPath))) {
             return js.getManifest().getMainAttributes().getValue("Main-Class");
         } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    static void addURLToClassLoader(@NonNull ClassLoader classLoader, Path path) {
+        try {
+            Method method = ClassLoader.class.getDeclaredMethod("addURL", URL.class);
+            method.setAccessible(true);
+            method.invoke(classLoader, path.toUri().toURL());
+        } catch (Throwable e) {
             throw new RuntimeException(e);
         }
     }

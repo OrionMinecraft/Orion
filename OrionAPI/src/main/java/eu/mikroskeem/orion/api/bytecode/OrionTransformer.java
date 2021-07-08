@@ -25,9 +25,8 @@
 
 package eu.mikroskeem.orion.api.bytecode;
 
-
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Orion bytecode transformer interface
@@ -45,5 +44,5 @@ public interface OrionTransformer {
      * @return Transformed class or null
      */
     @Nullable
-    byte[] transformClass(@Nullable byte[] source, @NotNull String className, @NotNull String remappedClassName);
+    byte[] transformClass(@Nullable byte[] source, @NonNull String className, @NonNull String remappedClassName);
 }

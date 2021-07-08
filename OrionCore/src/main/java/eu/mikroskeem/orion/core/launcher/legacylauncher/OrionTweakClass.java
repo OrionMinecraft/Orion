@@ -31,7 +31,7 @@ import net.minecraft.launchwrapper.ITweaker;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.io.IOException;
 import java.util.List;
@@ -48,7 +48,7 @@ public final class OrionTweakClass implements ITweaker {
     private static final Logger logger = LogManager.getLogger("OrionTweakClass");
 
     @Override
-    public void injectIntoClassLoader(@NotNull LaunchClassLoader classLoader) {
+    public void injectIntoClassLoader(@NonNull LaunchClassLoader classLoader) {
         /* Set up Orion core */
         OrionCore.INSTANCE.setupCore();
 
@@ -63,13 +63,13 @@ public final class OrionTweakClass implements ITweaker {
         OrionCore.INSTANCE.setupTransformers();
     }
 
-    @NotNull
+    @NonNull
     @Override
     public String getLaunchTarget() {
         return BlackboardKey.get(BlackboardKey.LAUNCH_TARGET);
     }
 
-    @NotNull
+    @NonNull
     @Override
     public String[] getLaunchArguments() {
         List<String> arguments = BlackboardKey.get(BlackboardKey.ORIGINAL_ARGUMENTS);
@@ -77,5 +77,5 @@ public final class OrionTweakClass implements ITweaker {
     }
 
     @Override
-    public void acceptOptions(@NotNull List<String> args) {}
+    public void acceptOptions(@NonNull List<String> args) {}
 }

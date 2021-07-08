@@ -28,11 +28,11 @@ package eu.mikroskeem.orion.api;
 import eu.mikroskeem.orion.api.asset.AssetManager;
 import eu.mikroskeem.orion.api.bytecode.OrionTransformer;
 import eu.mikroskeem.orion.api.mod.ModInfo;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.net.URL;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -47,8 +47,12 @@ public interface Orion {
      * Registers access transformer to be applied on server start.
      *
      * @param atUrl Resource {@link URL} of access transformer file (in other words {@link Class#getResource(String)})
+     * @deprecated Deprecated without replacement
      */
-    void registerAT(@NotNull URL atUrl);
+    @Deprecated
+    default void registerAT(@NonNull URL atUrl) {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Registers mixin config.
@@ -57,46 +61,61 @@ public interface Orion {
      *
      * @param mixinConfigName Mixin configuration name in format: <pre>mixins.MOD_ID.WHATEVER.json</pre>
      */
-    void registerMixinConfig(@NotNull String mixinConfigName);
+    void registerMixinConfig(@NonNull String mixinConfigName);
 
     /**
      * Gets list of registered Maven repositories
      *
      * @return {@link List} of Maven repository {@link URL}s
+     * @deprecated Deprecated without replacement
      */
-    @NotNull
-    List<URL> getRegisteredMavenRepositories();
+    @NonNull
+    @Deprecated
+    default List<URL> getRegisteredMavenRepositories() {
+        return Collections.emptyList();
+    }
 
     /**
      * Registers Maven repository where libraries can be downloaded
      *
      * @param url Maven repository url
      * @see Orion#registerLibrary(String)
+     * @deprecated Deprecated without replacement
      */
-    void registerMavenRepository(@NotNull URL url);
+    @Deprecated
+    default void registerMavenRepository(@NonNull URL url) {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Gets list of registered mod libraries
      *
      * @return {@link List} of mod libraries
      * @see Orion#registerLibrary(String)
+     * @deprecated Deprecated without replacement
      */
-    @NotNull
-    List<String> getRegisteredLibraries();
+    @NonNull
+    @Deprecated
+    default List<String> getRegisteredLibraries() {
+        return Collections.emptyList();
+    }
 
     /**
      * Add new library for downloading from Maven repository.
      *
      * @param dependencyString Dependency string, like <pre>groupId:artifactId:version</pre>
+     * @deprecated Deprecated without replacement
      */
-    void registerLibrary(@NotNull String dependencyString);
+    default void registerLibrary(@NonNull String dependencyString) {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Gets unmodifiable list of loaded mods
      *
      * @return Unmodifiable list of loaded mods
      */
-    @NotNull
+    @NonNull
     List<ModInfo> getMods();
 
     /**
@@ -107,14 +126,14 @@ public interface Orion {
      * @return Instance of {@link ModInfo} or null, if mod wasn't found
      */
     @Nullable
-    ModInfo getMod(@NotNull String modId);
+    ModInfo getMod(@NonNull String modId);
 
     /**
      * Gets unmodifiable list of registered Mixin configurations
      *
      * @return Unmodifiable list of registered Mixin configurations
      */
-    @NotNull
+    @NonNull
     List<String> getMixinConfigurations();
 
     /**
@@ -123,7 +142,7 @@ public interface Orion {
      * @since 0.0.3-SNAPSHOT
      * @param transformer New transformer
      */
-    void registerTransformer(@NotNull Class<? extends OrionTransformer> transformer);
+    void registerTransformer(@NonNull Class<? extends OrionTransformer> transformer);
 
     /**
      * Unregisters registered {@link OrionTransformer} class
@@ -131,7 +150,7 @@ public interface Orion {
      * @since 0.0.3-SNAPSHOT
      * @param transformer Registered transformer. Check if transformer is registered with {@link #getRegisteredTransformers()}
      */
-    void unregisterTransformer(@NotNull Class<? extends OrionTransformer> transformer);
+    void unregisterTransformer(@NonNull Class<? extends OrionTransformer> transformer);
 
     /**
      * Gets list of registered Orion bytecode transformers
@@ -139,8 +158,8 @@ public interface Orion {
      * @since 0.0.3-SNAPSHOT
      * @return {@link List} of registered {@link OrionTransformer}s
      */
-    @NotNull
-    Set<Class<? extends OrionTransformer>> getRegisteredTransformers();
+    @NonNull
+    Set<@NonNull Class<? extends OrionTransformer>> getRegisteredTransformers();
 
     /**
      * Gets mod asset manager
@@ -148,6 +167,5 @@ public interface Orion {
      * @since 0.0.4-SNAPSHOT
      * @return Mod asset manager
      */
-    @NotNull
-    AssetManager.ForMod getAssetManager();
+    AssetManager.@NonNull ForMod getAssetManager();
 }

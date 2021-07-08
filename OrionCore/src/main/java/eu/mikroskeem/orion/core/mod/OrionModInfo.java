@@ -28,9 +28,7 @@ package eu.mikroskeem.orion.core.mod;
 import eu.mikroskeem.orion.api.mod.ModInfo;
 import eu.mikroskeem.orion.core.launcher.BlackboardKey;
 import eu.mikroskeem.orion.core.launcher.LauncherService;
-import eu.mikroskeem.shuriken.common.SneakyThrow;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.List;
 import java.util.Objects;
@@ -48,40 +46,34 @@ final class OrionModInfo implements ModInfo {
     private String configClassName;
     private Class<?> configClass = null;
 
-    @NotNull
-    @Contract(pure = true)
+    @NonNull
     public String getId() {
         return id;
     }
 
-    @Contract("null -> fail")
-    void setId(@NotNull String id) {
+    void setId(@NonNull String id) {
         this.id = Objects.requireNonNull(id, "Id cannot be null!");
     }
 
-    @NotNull
-    @Contract(pure = true)
+    @NonNull
     public String getClassName() {
         return className;
     }
 
-    @Contract("null -> fail")
-    void setClassName(@NotNull String className) {
+    void setClassName(@NonNull String className) {
         this.className = Objects.requireNonNull(className, "Class name cannot be null!");
     }
 
-    @NotNull
-    @Contract(pure = true)
-    public List<String> getDependencies() {
+    @NonNull
+    public List<@NonNull String> getDependencies() {
         return dependencies;
     }
 
-    @Contract("null -> fail")
-    void setDependencies(@NotNull List<String> dependencies) {
+    void setDependencies(@NonNull List<@NonNull String> dependencies) {
         this.dependencies = Objects.requireNonNull(dependencies, "Dependencies cannot be null!");
     }
 
-    @NotNull
+    @NonNull
     @Override
     public Class<?> getConfigClass() {
         if(configClass == null) {
@@ -89,13 +81,13 @@ final class OrionModInfo implements ModInfo {
             try {
                 configClass = Class.forName(configClassName, true, loader);
             } catch (ClassNotFoundException e) {
-                SneakyThrow.throwException(new ClassNotFoundException("Failed to find specified configuration class!", e));
+                throw new ClassNotFoundException("Failed to find specified configuration class!", e);
             }
         }
         return configClass;
     }
 
-    void setConfigClass(@NotNull String configClass) {
+    void setConfigClass(@NonNull String configClass) {
         this.configClassName = Objects.requireNonNull(configClass, "Configuration class name cannot be null!");
     }
 

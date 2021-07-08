@@ -26,8 +26,8 @@
 package eu.mikroskeem.orion.api.asset;
 
 import eu.mikroskeem.orion.api.mod.ModInfo;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -46,7 +46,7 @@ public interface AssetManager {
      * @return Instance of {@link InputStream} streaming asset contents or null, if asset couldn't be found
      */
     @Nullable
-    InputStream getAsset(@NotNull String assetPath);
+    InputStream getAsset(@NonNull String assetPath);
 
     /**
      * Copies asset from mod jar to path
@@ -57,7 +57,7 @@ public interface AssetManager {
      * @param assetPath Asset path
      * @throws UncheckedIOException If asset copying fails either because of filesystem or resource finding error
      */
-    void copyAsset(@NotNull Path destination, @NotNull String assetPath) throws UncheckedIOException;
+    void copyAsset(@NonNull Path destination, @NonNull String assetPath) throws UncheckedIOException;
 
     /**
      * Copies asset from mod jar to path
@@ -67,7 +67,7 @@ public interface AssetManager {
      * @param overwriteExisting Whether to overwrite destination file if present
      * @throws UncheckedIOException If asset copying fails either because of filesystem or resource finding error
      */
-    void copyAsset(@NotNull Path destination, @NotNull String assetPath, boolean overwriteExisting) throws UncheckedIOException;
+    void copyAsset(@NonNull Path destination, @NonNull String assetPath, boolean overwriteExisting) throws UncheckedIOException;
 
     /**
      * Mod specific asset manager picker
@@ -79,8 +79,8 @@ public interface AssetManager {
          * @param modInfo Instance of {@link ModInfo}
          * @return Mod specific {@link AssetManager}
          */
-        @NotNull
-        AssetManager forMod(@NotNull ModInfo modInfo);
+        @NonNull
+        AssetManager forMod(@NonNull ModInfo modInfo);
 
         /**
          * Gets asset manager for mod specified with {@code modInfo}
@@ -89,6 +89,6 @@ public interface AssetManager {
          * @return Mod specific {@link AssetManager} or null, if no such mod exists
          */
         @Nullable
-        AssetManager forMod(@NotNull String modId);
+        AssetManager forMod(@NonNull String modId);
     }
 }
